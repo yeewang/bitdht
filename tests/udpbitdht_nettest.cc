@@ -28,6 +28,7 @@
 #include "udp/udpstack.h"
 #include "bitdht/bdstddht.h"
 
+#include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -78,65 +79,65 @@ int main(int argc, char **argv)
 	{
 		switch (c)
 		{
-			case 'r':
-				doRestart = true;
-				break;
-			case 'j':
-				doThreadJoin = true;
-				break;
-			case 'p':
-			{
-				int tmp_port = atoi(optarg);
-				if ((tmp_port > MIN_DEF_PORT) && (tmp_port < MAX_DEF_PORT))
-				{
-					port = tmp_port;
-					std::cerr << "Port: " << port;
-					std::cerr << std::endl;
-				}
-				else
-				{
-					std::cerr << "Invalid Port";
-					std::cerr << std::endl;
-					args(argv[0]);
-					return 1;
-				}
-					
-			}
+		case 'r':
+			doRestart = true;
 			break;
-			case 'b':
-			{
-				bootfile = optarg;
-				std::cerr << "Bootfile: " << bootfile;
-				std::cerr << std::endl;
-			}
+		case 'j':
+			doThreadJoin = true;
 			break;
-			case 'u':
+		case 'p':
+		{
+			int tmp_port = atoi(optarg);
+			if ((tmp_port > MIN_DEF_PORT) && (tmp_port < MAX_DEF_PORT))
 			{
-				setUid = true;
-				uid = optarg;
-				std::cerr << "UID: " << uid;
-				std::cerr << std::endl;
+				port = tmp_port;
+				std::clog << "Port: " << port;
+				std::clog << std::endl;
 			}
-			break;
-			case 'q':
+			else
 			{
-				doRandomQueries = true;
-				noQueries = atoi(optarg);
-				std::cerr << "Doing Random Queries";
-				std::cerr << std::endl;
-			}
-			break;
-
-			default:
-			{
+				std::clog << "Invalid Port";
+				std::clog << std::endl;
 				args(argv[0]);
 				return 1;
 			}
-			break;
+
+		}
+		break;
+		case 'b':
+		{
+			bootfile = optarg;
+			std::clog << "Bootfile: " << bootfile;
+			std::clog << std::endl;
+		}
+		break;
+		case 'u':
+		{
+			setUid = true;
+			uid = optarg;
+			std::clog << "UID: " << uid;
+			std::clog << std::endl;
+		}
+		break;
+		case 'q':
+		{
+			doRandomQueries = true;
+			noQueries = atoi(optarg);
+			std::clog << "Doing Random Queries";
+			std::clog << std::endl;
+		}
+		break;
+
+		default:
+		{
+			args(argv[0]);
+			return 1;
+		}
+		break;
 		}
 	}
 
-				
+
 	bdDhtFunctions *fns = new bdStdDht();
 
 	bdNodeId id;
@@ -158,21 +159,21 @@ int main(int argc, char **argv)
 		}
 	}
 
-	std::cerr << "Using NodeId: ";
-	fns->bdPrintNodeId(std::cerr, &id);
-	std::cerr << std::endl;
+	std::clog << "Using NodeId: ";
+	fns->bdPrintNodeId(std::clog, &id);
+	std::clog << std::endl;
 
 	/* setup the udp port */
-        struct sockaddr_in local;
+	struct sockaddr_in local;
 	memset(&local, 0, sizeof(local));
 	local.sin_family = AF_INET;
 	local.sin_addr.s_addr = 0;
 	local.sin_port = htons(port);
-        UdpStack *udpstack = new UdpStack(local);
+	UdpStack *udpstack = new UdpStack(local);
 
 	/* create bitdht component */
 	std::string dhtVersion = "dbTEST";
-        UdpBitDht *bitdht = new UdpBitDht(udpstack, &id, dhtVersion,  bootfile, fns);
+	UdpBitDht *bitdht = new UdpBitDht(udpstack, &id, dhtVersion,  bootfile, fns);
 
 	/* add in the stack */
 	udpstack->addReceiver(bitdht);
@@ -195,8 +196,8 @@ int main(int argc, char **argv)
 	int count = 0;
 	int running = 1;
 
-	std::cerr << "Starting Dht: ";
-	std::cerr << std::endl;
+	std::clog << "Starting Dht: ";
+	std::clog << std::endl;
 	bitdht->startDht();
 
 
@@ -207,30 +208,42 @@ int main(int argc, char **argv)
 			bdNodeId rndId;
 			bdStdRandomNodeId(&rndId);
 
-			std::cerr << "BitDht Launching Random Search: ";
-			bdStdPrintNodeId(std::cerr, &rndId);
-			std::cerr << std::endl;
+			std::clog << "BitDht Launching Random Search: ";
+			bdStdPrintNodeId(std::clog, &rndId);
+			std::clog << std::endl;
 
 			bitdht->addFindNode(&rndId, mode);
 
 		}
 	}
 
+	{
+
+		bdNodeId rndId;
+		bdStdRandomNodeId(&rndId);
+
+		std::clog << "BitDht Launching Random Search: ";
+		bdStdPrintNodeId(std::clog, &rndId);
+		std::clog << std::endl;
+
+		bitdht->addFindNode(&rndId, mode);
+	}
+
 	while(1)
 	{
 		sleep(60);
 
-		std::cerr << "BitDht State: ";
-		std::cerr << bitdht->stateDht();
-		std::cerr << std::endl;
+		std::clog << "BitDht State: ";
+		std::clog << bitdht->stateDht();
+		std::clog << std::endl;
 
-		std::cerr << "Dht Network Size: ";
-		std::cerr << bitdht->statsNetworkSize();
-		std::cerr << std::endl;
+		std::clog << "Dht Network Size: ";
+		std::clog << bitdht->statsNetworkSize();
+		std::clog << std::endl;
 
-		std::cerr << "BitDht Network Size: ";
-		std::cerr << bitdht->statsBDVersionSize();
-		std::cerr << std::endl;
+		std::clog << "BitDht Network Size: ";
+		std::clog << bitdht->statsBDVersionSize();
+		std::clog << std::endl;
 
 		if (++count == 2)
 		{
@@ -244,8 +257,8 @@ int main(int argc, char **argv)
 			if (count % 2 == 0)
 			{
 
-		std::cerr << "Resetting UdpStack: ";
-		std::cerr << std::endl;
+				std::clog << "Resetting UdpStack: ";
+				std::clog << std::endl;
 
 				udpstack->resetAddress(local);
 			}
@@ -257,16 +270,16 @@ int main(int argc, char **argv)
 				if (running)
 				{
 
-			std::cerr << "Stopping Dht: ";
-			std::cerr << std::endl;
+					std::clog << "Stopping Dht: ";
+					std::clog << std::endl;
 
 					bitdht->stopDht();
 					running = 0;
 				}
 				else
 				{
-			std::cerr << "Starting Dht: ";
-			std::cerr << std::endl;
+					std::clog << "Starting Dht: ";
+					std::clog << std::endl;
 
 					bitdht->startDht();
 					running = 1;

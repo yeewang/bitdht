@@ -66,6 +66,5 @@ virtual int 	ValueCallback(const bdNodeId *id, std::string key, uint32_t status)
 
 };
 
-
 #endif /* BITDHT_HANDLER_H */
 

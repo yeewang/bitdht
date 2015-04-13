@@ -49,8 +49,8 @@ UdpStack::UdpStack(struct sockaddr_in &local)
 
 bool    UdpStack::resetAddress(struct sockaddr_in &local)
 {
-	std::cerr << "UdpStack::resetAddress(" << local << ")";
-	std::cerr << std::endl;
+	std::clog << "UdpStack::resetAddress(" << local << ")";
+	std::clog << std::endl;
 
 	return udpLayer->reset(local);
 }
@@ -62,8 +62,8 @@ int UdpStack::recvPkt(void *data, int size, struct sockaddr_in &from)
 {
 	/* print packet information */
 #ifdef DEBUG_UDP_RECV
-	std::cerr << "UdpStack::recvPkt(" << size << ") from: " << from;
-	std::cerr << std::endl;
+	std::clog << "UdpStack::recvPkt(" << size << ") from: " << from;
+	std::clog << std::endl;
 #endif
 
         bdStackMutex stack(stackMtx);   /********** LOCK MUTEX *********/
@@ -75,8 +75,8 @@ int UdpStack::recvPkt(void *data, int size, struct sockaddr_in &from)
 		if ((*it)->recvPkt(data, size, from))
 		{
 #ifdef DEBUG_UDP_RECV
-			std::cerr << "UdpStack::recvPkt(" << size << ") from: " << from;
-			std::cerr << std::endl;
+			std::clog << "UdpStack::recvPkt(" << size << ") from: " << from;
+			std::clog << std::endl;
 #endif
 			break;
 		}
@@ -88,9 +88,9 @@ int  UdpStack::sendPkt(const void *data, int size, struct sockaddr_in &to, int t
 {
 	/* print packet information */
 #ifdef DEBUG_UDP_RECV
-	std::cerr << "UdpStack::sendPkt(" << size << ") ttl: " << ttl;
-	std::cerr << " to: " << to;
-	std::cerr << std::endl;
+	std::clog << "UdpStack::sendPkt(" << size << ") ttl: " << ttl;
+	std::clog << " to: " << to;
+	std::clog << std::endl;
 #endif
 
 	/* send to udpLayer */
@@ -158,8 +158,8 @@ int UdpStack::addReceiver(UdpReceiver *recv)
 	/* otherwise its already there! */
 
 #ifdef DEBUG_UDP_RECV
-	std::cerr << "UdpStack::addReceiver() Recv already exists!" << std::endl;
-	std::cerr << "UdpStack::addReceiver() ERROR" << std::endl;
+	std::clog << "UdpStack::addReceiver() Recv already exists!" << std::endl;
+	std::clog << "UdpStack::addReceiver() ERROR" << std::endl;
 #endif
 
 	return 0;
@@ -181,8 +181,8 @@ int UdpStack::removeReceiver(UdpReceiver *recv)
 	/* otherwise its not there! */
 
 #ifdef DEBUG_UDP_RECV
-	std::cerr << "UdpStack::removeReceiver() Recv dont exist!" << std::endl;
-	std::cerr << "UdpStack::removeReceiver() ERROR" << std::endl;
+	std::clog << "UdpStack::removeReceiver() Recv dont exist!" << std::endl;
+	std::clog << "UdpStack::removeReceiver() ERROR" << std::endl;
 #endif
 
 	return 0;
@@ -202,9 +202,9 @@ int  UdpSubReceiver::sendPkt(const void *data, int size, struct sockaddr_in &to,
 {
 	/* print packet information */
 #ifdef DEBUG_UDP_RECV
-	std::cerr << "UdpSubReceiver::sendPkt(" << size << ") ttl: " << ttl;
-	std::cerr << " to: " << to;
-	std::cerr << std::endl;
+	std::clog << "UdpSubReceiver::sendPkt(" << size << ") ttl: " << ttl;
+	std::clog << " to: " << to;
+	std::clog << std::endl;
 #endif
 
 	/* send to udpLayer */

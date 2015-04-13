@@ -44,6 +44,7 @@
 
 void bdStdRandomNodeId(bdNodeId *id);
 void bdStdZeroNodeId(bdNodeId *id);
+void bdStdNodeId(bdNodeId *id, const std::string &idStr);
 
 void bdStdRandomId(bdId *id);
 int bdStdDistance(const bdNodeId *a, const bdNodeId *b, bdMetric *r);

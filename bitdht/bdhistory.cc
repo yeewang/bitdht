@@ -94,7 +94,7 @@ void	bdMsgHistoryList::printHistory(std::ostream &out, int mode, time_t start_ts
 
 bool	bdMsgHistoryList::canSend()
 {
-	std::cerr << "bdMsgHistoryList::canSend()";
+	std::clog << "bdMsgHistoryList::canSend()";
 
 	std::multimap<time_t, uint32_t>::reverse_iterator rit;
 
@@ -104,8 +104,8 @@ bool	bdMsgHistoryList::canSend()
 		time_t now = time(NULL);
 		if (now - rit->first > MIN_RESEND_PERIOD)
 		{
-			std::cerr << " OVER RESEND_PERIOD... true";
-			std::cerr << std::endl;
+			std::clog << " OVER RESEND_PERIOD... true";
+			std::clog << std::endl;
 
 			return true;
 		}
@@ -113,21 +113,21 @@ bool	bdMsgHistoryList::canSend()
 
 	if (msgHistory.size() % 2 == 0)
 	{
-		std::cerr << " SIZE: " << msgHistory.size() << " % 2 = 0 ... true";
-		std::cerr << std::endl;
+		std::clog << " SIZE: " << msgHistory.size() << " % 2 = 0 ... true";
+		std::clog << std::endl;
 
 		return true;
 	}
 
-	std::cerr << " false";
-	std::cerr << std::endl;
+	std::clog << " false";
+	std::clog << std::endl;
 
 	return false;
 }
 
 bool	bdMsgHistoryList::validPeer()
 {
-	std::cerr << "bdMsgHistoryList::validPeer()";
+	std::clog << "bdMsgHistoryList::validPeer()";
 
 	std::multimap<time_t, uint32_t>::iterator it;
 
@@ -135,15 +135,15 @@ bool	bdMsgHistoryList::validPeer()
 	{
 		if (MSG_DIRECTION_INCOMING & it->second)
 		{
-			std::cerr << " Incoming Msg... so validPeer";
-			std::cerr << std::endl;
+			std::clog << " Incoming Msg... so validPeer";
+			std::clog << std::endl;
 
 			return true;
 		}
 	}
 
-	std::cerr << " false";
-	std::cerr << std::endl;
+	std::clog << " false";
+	std::clog << std::endl;
 
 	return false;
 }
@@ -158,7 +158,7 @@ void bdHistory::addMsg(const bdId *id, bdToken * /*transId*/, uint32_t msgType, 
 void bdHistory::printMsgs()
 {
 	/* print and clear msgs */
-	std::ostream &out = std::cerr;
+	std::ostream &out = std::clog;
 
 	std::map<bdId, bdMsgHistoryList> ::iterator it;
 	for(it = mHistory.begin(); it != mHistory.end(); it++)

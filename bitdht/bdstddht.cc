@@ -69,6 +69,31 @@ void bdStdZeroNodeId(bdNodeId *id)
 	return;
 }
 
+void bdStdNodeId(bdNodeId *id, const std::string &idStr)
+{
+	uint32_t *a_data = (uint32_t *) id->data;
+    uint32_t i = 0;
+    int offset[] = {1, 0, 3, 2, 5, 4, 7, 6};
+	for(; i < BITDHT_KEY_INTLEN && i < idStr.length() / 8; i++)
+	{
+		a_data[i] = 0;
+		for (uint32_t j = 0; j < 8; j++) {
+			uint32_t c = idStr[i*8 + j];
+			if (c >= '0' && c <= '9') { c -= '0'; }
+			else if (c >= 'A' && c <= 'F') { c -= 'A' - 0x0A; }
+			else if (c >= 'a' && c <= 'f') { c -= 'a' - 0x0A; }
+			else { c = 0x0F; }
+			a_data[i] |= c << offset[j] * 4;
+		}
+	}
+	for(; i < BITDHT_KEY_INTLEN; i++)
+	{
+		a_data[i] = 0;
+	}
+
+	return;
+}
+
 uint32_t bdStdLikelySameNode(const bdId *n1, const bdId *n2)
 {
 	if (*n1 == *n2)

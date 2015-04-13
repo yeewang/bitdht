@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 	/* Do this multiple times */
 	int i, j;
 
-	std::cerr << "Test Mid Peer Intersection....." << std::endl;
+	std::clog << "Test Mid Peer Intersection....." << std::endl;
 	for(i = 0; i < 10; i++)
 	{
 		bdNodeId targetId;
@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 		bdStdRandomNodeId(&targetId);
 		bdStdRandomNodeId(&peerId);
 	
-		std::cerr << "-------------------------------------------------" << std::endl;
+		std::clog << "-------------------------------------------------" << std::endl;
 
 		for(j = 0; j < 10; j++)
 		{
@@ -64,26 +64,26 @@ int main(int argc, char **argv)
 			int TMdist = bdStdBucketDistance(&TMmetric);
 			int PMdist = bdStdBucketDistance(&PMmetric);
 
-			std::cerr << "Target: ";
-			bdStdPrintNodeId(std::cerr,&targetId);
-			std::cerr << " Peer: ";
-			bdStdPrintNodeId(std::cerr,&peerId);
-			std::cerr << std::endl;
+			std::clog << "Target: ";
+			bdStdPrintNodeId(std::clog,&targetId);
+			std::clog << " Peer: ";
+			bdStdPrintNodeId(std::clog,&peerId);
+			std::clog << std::endl;
 
-			std::cerr << "\tTarget ^ Peer: ";
-			bdStdPrintNodeId(std::cerr,&TPmetric);
-			std::cerr << " Bucket: " << TPdist;
-			std::cerr << std::endl;
+			std::clog << "\tTarget ^ Peer: ";
+			bdStdPrintNodeId(std::clog,&TPmetric);
+			std::clog << " Bucket: " << TPdist;
+			std::clog << std::endl;
 
-			std::cerr << "\tTarget ^ Mid: ";
-			bdStdPrintNodeId(std::cerr,&TMmetric);
-			std::cerr << " Bucket: " << TMdist;
-			std::cerr << std::endl;
+			std::clog << "\tTarget ^ Mid: ";
+			bdStdPrintNodeId(std::clog,&TMmetric);
+			std::clog << " Bucket: " << TMdist;
+			std::clog << std::endl;
 
-			std::cerr << "\tPeer ^ Mid: ";
-			bdStdPrintNodeId(std::cerr,&PMmetric);
-			std::cerr << " Bucket: " << PMdist;
-			std::cerr << std::endl;
+			std::clog << "\tPeer ^ Mid: ";
+			bdStdPrintNodeId(std::clog,&PMmetric);
+			std::clog << " Bucket: " << PMdist;
+			std::clog << std::endl;
 
 			/* now save mid to peer... and repeat */
 			peerId = midId;

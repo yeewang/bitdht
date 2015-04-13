@@ -81,11 +81,11 @@ void bdZeroNodeId(bdNodeId *id)
 int operator<(const bdNodeId &a, const bdNodeId &b)
 {
 #if 0
-	std::cerr <<  "operator<(");
-	bdPrintNodeId(std::cerr, &a);
-	std::cerr <<  ",";
-	bdPrintNodeId(std::cerr, &b);
-	std::cerr <<  ")" << std::endl;
+	std::clog <<  "operator<(");
+	bdPrintNodeId(std::clog, &a);
+	std::clog <<  ",";
+	bdPrintNodeId(std::clog, &b);
+	std::clog <<  ")" << std::endl;
 #endif
 	
 	uint8_t *a_data = (uint8_t *) a.data;
@@ -348,12 +348,12 @@ int 	bdSpace::find_nearest_nodes(const bdNodeId *id, int number, std::list<bdId>
 #ifdef DEBUG_BD_SPACE
 	int bucket = mFns->bdBucketDistance(&dist);
 
-	std::cerr << "bdSpace::find_nearest_nodes(NodeId:";
-	mFns->bdPrintNodeId(std::cerr, id);
+	std::clog << "bdSpace::find_nearest_nodes(NodeId:";
+	mFns->bdPrintNodeId(std::clog, id);
 
-	std::cerr << " Number: " << number;
-	std::cerr << " Query Bucket #: " << bucket;
-	std::cerr << std::endl;
+	std::clog << " Number: " << number;
+	std::clog << " Query Bucket #: " << bucket;
+	std::clog << std::endl;
 #endif
 
 	std::vector<bdBucket>::iterator it;
@@ -367,11 +367,11 @@ int 	bdSpace::find_nearest_nodes(const bdNodeId *id, int number, std::list<bdId>
 			closest.insert(std::pair<bdMetric, bdId>(dist, eit->mPeerId));
 
 #if 0
-			std::cerr << "Added NodeId: ";
-			bdPrintNodeId(std::cerr, &(eit->mPeerId.id));
-			std::cerr << " Metric: ";
-			bdPrintNodeId(std::cerr, &(dist));
-			std::cerr << std::endl;
+			std::clog << "Added NodeId: ";
+			bdPrintNodeId(std::clog, &(eit->mPeerId.id));
+			std::clog << " Metric: ";
+			bdPrintNodeId(std::clog, &(dist));
+			std::clog << std::endl;
 #endif
 		}
 	}
@@ -385,45 +385,45 @@ int 	bdSpace::find_nearest_nodes(const bdNodeId *id, int number, std::list<bdId>
 #ifdef DEBUG_BD_SPACE
 		int iBucket = mFns->bdBucketDistance(&(mit->first));
 
-		std::cerr << "Closest " << i << ": ";
-		mFns->bdPrintNodeId(std::cerr, &(mit->second.id));
-		std::cerr << " Bucket:        " << iBucket;
-		std::cerr << std::endl;
+		std::clog << "Closest " << i << ": ";
+		mFns->bdPrintNodeId(std::clog, &(mit->second.id));
+		std::clog << " Bucket:        " << iBucket;
+		std::clog << std::endl;
 #endif
 
 
 #if 0
-		std::cerr << "\tNodeId: ";
-		mFns->bdPrintNodeId(std::cerr, &(mit->second.id));
-		std::cerr << std::endl;
+		std::clog << "\tNodeId: ";
+		mFns->bdPrintNodeId(std::clog, &(mit->second.id));
+		std::clog << std::endl;
 
-		std::cerr << "\tOwn Id: ";
-		mFns->bdPrintNodeId(std::cerr, &(mOwnId));
-		std::cerr << std::endl;
+		std::clog << "\tOwn Id: ";
+		mFns->bdPrintNodeId(std::clog, &(mOwnId));
+		std::clog << std::endl;
 
-		std::cerr << "     Us Metric: ";
-		mFns->bdPrintNodeId(std::cerr, &dist);
-		std::cerr << " Bucket:        " << oBucket;
-		std::cerr << std::endl;
+		std::clog << "     Us Metric: ";
+		mFns->bdPrintNodeId(std::clog, &dist);
+		std::clog << " Bucket:        " << oBucket;
+		std::clog << std::endl;
 
-		std::cerr << "\tFindId: ";
-		mFns->bdPrintNodeId(std::cerr, id);
-		std::cerr << std::endl;
+		std::clog << "\tFindId: ";
+		mFns->bdPrintNodeId(std::clog, id);
+		std::clog << std::endl;
 
-		std::cerr << "     Id Metric: ";
-		mFns->bdPrintNodeId(std::cerr, &(mit->first));
-		std::cerr << " Bucket:        " << iBucket;
-		std::cerr << std::endl;
+		std::clog << "     Id Metric: ";
+		mFns->bdPrintNodeId(std::clog, &(mit->first));
+		std::clog << " Bucket:        " << iBucket;
+		std::clog << std::endl;
 #endif
 
 		nearest.insert(*mit);
 	}
 
 #ifdef DEBUG_BD_SPACE
-	std::cerr << "#Nearest: " << (int) nearest.size();
-	std::cerr << " #Closest: " << (int) closest.size();
-	std::cerr << " #Requested: " << number;
-	std::cerr << std::endl << std::endl;
+	std::clog << "#Nearest: " << (int) nearest.size();
+	std::clog << " #Closest: " << (int) closest.size();
+	std::clog << " #Requested: " << number;
+	std::clog << std::endl << std::endl;
 #endif
 
 	return 1;
@@ -494,7 +494,7 @@ int     bdSpace::add_peer(const bdId *id, uint32_t peerflags)
 
 #ifdef DEBUG_BD_SPACE
 	fprintf(stderr, "peer:");
-	mFns->bdPrintId(std::cerr, id);	
+	mFns->bdPrintId(std::clog, id);	
 	fprintf(stderr, " bucket: %d", bucket);
 	fprintf(stderr, "\n");
 #endif
@@ -523,7 +523,7 @@ int     bdSpace::add_peer(const bdId *id, uint32_t peerflags)
 			buck.entries.push_back(peer);
 
 #ifdef DEBUG_BD_SPACE
-			std::cerr << "Peer already in bucket: moving to back of the list" << std::endl;
+			std::clog << "Peer already in bucket: moving to back of the list" << std::endl;
 #endif
 
 			return 1;
@@ -541,7 +541,7 @@ int     bdSpace::add_peer(const bdId *id, uint32_t peerflags)
 	if (buck.entries.size() < mFns->bdNodesPerBucket())
 	{
 #ifdef DEBUG_BD_SPACE
-		std::cerr << "Bucket not full: allowing add" << std::endl;
+		std::clog << "Bucket not full: allowing add" << std::endl;
 #endif
 		add = true;
 	}
@@ -552,7 +552,7 @@ int     bdSpace::add_peer(const bdId *id, uint32_t peerflags)
 		if (peer.mLastRecvTime - ts >  BITDHT_MAX_RECV_PERIOD)
 		{
 #ifdef DEBUG_BD_SPACE
-			std::cerr << "Dropping Out-of-Date peer in bucket" << std::endl;
+			std::clog << "Dropping Out-of-Date peer in bucket" << std::endl;
 #endif
 			buck.entries.pop_front();
 			add = true;
@@ -572,14 +572,14 @@ int     bdSpace::add_peer(const bdId *id, uint32_t peerflags)
 			}
 
 #ifdef DEBUG_BD_SPACE
-			std::cerr << "Inserting due to Priority: minScore: " << minScore 
+			std::clog << "Inserting due to Priority: minScore: " << minScore 
 				<< " new Peer Score: " << peerscore <<  << std::endl;
 #endif
 		}
 		else
 		{
 #ifdef DEBUG_BD_SPACE
-			std::cerr << "No Out-Of-Date peers in bucket... dropping new entry" << std::endl;
+			std::clog << "No Out-Of-Date peers in bucket... dropping new entry" << std::endl;
 #endif
 		}
 	}
@@ -598,10 +598,10 @@ int     bdSpace::add_peer(const bdId *id, uint32_t peerflags)
 #ifdef DEBUG_BD_SPACE
 #endif
 		/* useful debug */
-		std::cerr << "bdSpace::add_peer() Added Bucket[";
-		std::cerr << bucket << "] Entry: ";
-		mFns->bdPrintId(std::cerr, id);
-		std::cerr << std::endl;
+		std::clog << "bdSpace::add_peer() Added Bucket[";
+		std::clog << bucket << "] Entry: ";
+		mFns->bdPrintId(std::clog, id);
+		std::clog << std::endl;
 	}
 	return add;
 }
@@ -637,9 +637,9 @@ int     bdSpace::printDHT()
 			mFns->bdDistance(&(mOwnId), &(eit->mPeerId.id), &dist);
 
 			fprintf(stderr, " Metric: ");
-			mFns->bdPrintNodeId(std::cerr, &(dist));
+			mFns->bdPrintNodeId(std::clog, &(dist));
 			fprintf(stderr, " Id: ");
-			mFns->bdPrintId(std::cerr, &(eit->mPeerId));
+			mFns->bdPrintId(std::clog, &(eit->mPeerId));
 			fprintf(stderr, " PeerFlags: %08x", eit->mPeerFlags);
 			fprintf(stderr, "\n");
 		}
@@ -835,8 +835,8 @@ uint32_t  bdSpace::calcNetworkSize()
 		NetSize = sum / count;
 	}
 
-	//std::cerr << "bdSpace::calcNetworkSize() : " << NetSize;
-	//std::cerr << std::endl;
+	//std::clog << "bdSpace::calcNetworkSize() : " << NetSize;
+	//std::clog << std::endl;
 
 	return NetSize;
 }
@@ -925,8 +925,8 @@ uint32_t  bdSpace::calcNetworkSizeWithFlag(uint32_t withFlag)
 		NetSize = sum / count;
 	}
 
-	//std::cerr << "bdSpace::calcNetworkSize() : " << NetSize;
-	//std::cerr << std::endl;
+	//std::clog << "bdSpace::calcNetworkSize() : " << NetSize;
+	//std::clog << std::endl;
 
 	return NetSize;
 }

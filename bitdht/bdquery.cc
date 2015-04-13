@@ -135,8 +135,8 @@ int bdQuery::nextQuery(bdId &id, bdNodeId &targetNodeId)
 		{
 #ifdef DEBUG_QUERY 
         		fprintf(stderr, "NextQuery() Found non-sent peer. queryPeer = true : ");
-			mFns->bdPrintId(std::cerr, &(it->second.mPeerId));
-			std::cerr << std::endl;
+			mFns->bdPrintId(std::clog, &(it->second.mPeerId));
+			std::clog << std::endl;
 #endif
 			queryPeer = true;
 		}
@@ -147,8 +147,8 @@ int bdQuery::nextQuery(bdId &id, bdNodeId &targetNodeId)
 		{
 #ifdef DEBUG_QUERY 
         		fprintf(stderr, "NextQuery() Found out-of-date. queryPeer = true : ");
-			mFns->bdPrintId(std::cerr, &(it->second.mPeerId));
-			std::cerr << std::endl;
+			mFns->bdPrintId(std::clog, &(it->second.mPeerId));
+			std::clog << std::endl;
 #endif
 			queryPeer = true;
 		}
@@ -161,8 +161,8 @@ int bdQuery::nextQuery(bdId &id, bdNodeId &targetNodeId)
 		{
 #ifdef DEBUG_QUERY 
         		fprintf(stderr, "NextQuery() Never Received: notFinished = true: ");
-			mFns->bdPrintId(std::cerr, &(it->second.mPeerId));
-			std::cerr << std::endl;
+			mFns->bdPrintId(std::clog, &(it->second.mPeerId));
+			std::clog << std::endl;
 #endif
 			notFinished = true;
 		}
@@ -186,8 +186,8 @@ int bdQuery::nextQuery(bdId &id, bdNodeId &targetNodeId)
 			}
 #ifdef DEBUG_QUERY 
         		fprintf(stderr, "NextQuery() Querying Peer: ");
-			mFns->bdPrintId(std::cerr, &id);
-			std::cerr << std::endl;
+			mFns->bdPrintId(std::clog, &id);
+			std::clog << std::endl;
 #endif
 			return 1;
 		}
@@ -266,7 +266,7 @@ int bdQuery::addPeer(const bdId *id, uint32_t mode)
 
 #ifdef DEBUG_QUERY 
         fprintf(stderr, "bdQuery::addPeer(");
-	mFns->bdPrintId(std::cerr, id);
+	mFns->bdPrintId(std::clog, id);
         fprintf(stderr, ", %u)\n", mode);
 #endif
 
@@ -342,7 +342,7 @@ int bdQuery::addPeer(const bdId *id, uint32_t mode)
 			{
 #ifdef DEBUG_QUERY 
         			fprintf(stderr, "Dropped: ");
-				mFns->bdPrintId(std::cerr, &(it->second.mPeerId));
+				mFns->bdPrintId(std::clog, &(it->second.mPeerId));
         			fprintf(stderr, "\n");
 #endif
 				mClosest.erase(it);
@@ -362,7 +362,7 @@ int bdQuery::addPeer(const bdId *id, uint32_t mode)
 			it--;
 #ifdef DEBUG_QUERY 
 			fprintf(stderr, "Removing Furthest Peer: ");
-			mFns->bdPrintId(std::cerr, &(it->second.mPeerId));
+			mFns->bdPrintId(std::clog, &(it->second.mPeerId));
 			fprintf(stderr, "\n");
 #endif
 
@@ -372,7 +372,7 @@ int bdQuery::addPeer(const bdId *id, uint32_t mode)
 
 #ifdef DEBUG_QUERY 
         fprintf(stderr, "bdQuery::addPeer(): Closer Peer!: ");
-	mFns->bdPrintId(std::cerr, id);
+	mFns->bdPrintId(std::clog, id);
         fprintf(stderr, "\n");
 #endif
 
@@ -408,7 +408,7 @@ int bdQuery::addPotentialPeer(const bdId *id, uint32_t mode)
 
 #ifdef DEBUG_QUERY 
         fprintf(stderr, "bdQuery::addPotentialPeer(");
-	mFns->bdPrintId(std::cerr, id);
+	mFns->bdPrintId(std::clog, id);
         fprintf(stderr, ", %u)\n", mode);
 #endif
 
@@ -517,7 +517,7 @@ int bdQuery::addPotentialPeer(const bdId *id, uint32_t mode)
 			--it;
 #ifdef DEBUG_QUERY 
 			fprintf(stderr, "Removing Furthest Peer: ");
-			mFns->bdPrintId(std::cerr, &(it->second.mPeerId));
+			mFns->bdPrintId(std::clog, &(it->second.mPeerId));
 			fprintf(stderr, "\n");
 #endif
 			mPotentialClosest.erase(it);
@@ -526,7 +526,7 @@ int bdQuery::addPotentialPeer(const bdId *id, uint32_t mode)
 
 #ifdef DEBUG_QUERY 
         fprintf(stderr, "bdQuery::addPotentialPeer(): Closer Peer!: ");
-	mFns->bdPrintId(std::cerr, id);
+	mFns->bdPrintId(std::clog, id);
         fprintf(stderr, "\n");
 #endif
 
@@ -556,7 +556,7 @@ int     bdQuery::printQuery()
 	
 	time_t ts = time(NULL);
 	fprintf(stderr, "Query for: ");
-	mFns->bdPrintNodeId(std::cerr, &mId);
+	mFns->bdPrintNodeId(std::clog, &mId);
 	fprintf(stderr, " Query State: %d", mState);
 	fprintf(stderr, " Query Age %ld secs", ts-mQueryTS);
 	if (mState >= BITDHT_QUERY_FAILURE)
@@ -571,7 +571,7 @@ int     bdQuery::printQuery()
 	for(it = mClosest.begin(); it != mClosest.end(); it++)
 	{
 		fprintf(stderr, "Id:  ");
-		mFns->bdPrintId(std::cerr, &(it->second.mPeerId));
+		mFns->bdPrintId(std::clog, &(it->second.mPeerId));
 		fprintf(stderr, "  Bucket: %d ", mFns->bdBucketDistance(&(it->first)));
 		fprintf(stderr," Found: %ld ago", ts-it->second.mFoundTime);
 		fprintf(stderr," LastSent: %ld ago", ts-it->second.mLastSendTime);
@@ -583,7 +583,7 @@ int     bdQuery::printQuery()
 	for(it = mPotentialClosest.begin(); it != mPotentialClosest.end(); it++)
 	{
 		fprintf(stderr, "Id:  ");
-		mFns->bdPrintId(std::cerr, &(it->second.mPeerId));
+		mFns->bdPrintId(std::clog, &(it->second.mPeerId));
 		fprintf(stderr, "  Bucket: %d ", mFns->bdBucketDistance(&(it->first)));
 		fprintf(stderr," Found: %ld ago", ts-it->second.mFoundTime);
 		fprintf(stderr," LastSent: %ld ago", ts-it->second.mLastSendTime);
@@ -596,7 +596,7 @@ int     bdQuery::printQuery()
 	std::multimap<bdMetric, bdPeer>::iterator it = mClosest.begin(); 
 	if (it != mClosest.end())
 	{
-		mFns->bdPrintId(std::cerr, &(it->second.mPeerId));
+		mFns->bdPrintId(std::clog, &(it->second.mPeerId));
 		fprintf(stderr, "  Bucket: %d ", mFns->bdBucketDistance(&(it->first)));
 		fprintf(stderr," Found: %ld ago", ts-it->second.mFoundTime);
 		fprintf(stderr," LastSent: %ld ago", ts-it->second.mLastSendTime);
@@ -608,7 +608,7 @@ int     bdQuery::printQuery()
 	it = mPotentialClosest.begin(); 
 	if (it != mPotentialClosest.end())
 	{
-		mFns->bdPrintId(std::cerr, &(it->second.mPeerId));
+		mFns->bdPrintId(std::clog, &(it->second.mPeerId));
 		fprintf(stderr, "  Bucket: %d ", mFns->bdBucketDistance(&(it->first)));
 		fprintf(stderr," Found: %ld ago", ts-it->second.mFoundTime);
 		fprintf(stderr," LastSent: %ld ago", ts-it->second.mLastSendTime);

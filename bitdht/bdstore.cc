@@ -36,8 +36,8 @@ bdStore::bdStore(std::string file, bdDhtFunctions *fns)
 	:mFns(fns)
 {
 #ifdef DEBUG_STORE
-	std::cerr << "bdStore::bdStore(" << file << ")";
-	std::cerr << std::endl;
+	std::clog << "bdStore::bdStore(" << file << ")";
+	std::clog << std::endl;
 #endif
 
 	/* read data from file */
@@ -125,9 +125,9 @@ int 	bdStore::getPeer(bdPeer *peer)
 void	bdStore::addStore(bdPeer *peer)
 {
 #ifdef DEBUG_STORE
-	std::cerr << "bdStore::addStore() ";
-	mFns->bdPrintId(std::cerr, &(peer->mPeerId));
-	std::cerr << std::endl;
+	std::clog << "bdStore::addStore() ";
+	mFns->bdPrintId(std::clog, &(peer->mPeerId));
+	std::clog << std::endl;
 #endif
 
 	/* remove old entry */
@@ -141,9 +141,9 @@ void	bdStore::addStore(bdPeer *peer)
 		{
 			removed = true;
 #ifdef DEBUG_STORE
-			std::cerr << "bdStore::addStore() Removed Existing Entry: ";
-			mFns->bdPrintId(std::cerr, &(it->mPeerId));
-			std::cerr << std::endl;
+			std::clog << "bdStore::addStore() Removed Existing Entry: ";
+			mFns->bdPrintId(std::clog, &(it->mPeerId));
+			std::clog << std::endl;
 #endif
 			it = store.erase(it);
 		}
@@ -154,16 +154,16 @@ void	bdStore::addStore(bdPeer *peer)
 	}
 
 #ifdef DEBUG_STORE
-	std::cerr << "bdStore::addStore() Push_back";
-	std::cerr << std::endl;
+	std::clog << "bdStore::addStore() Push_back";
+	std::clog << std::endl;
 #endif
 	store.push_back(*peer);
 
 	while(store.size() > MAX_ENTRIES)
 	{
 #ifdef DEBUG_STORE
-		std::cerr << "bdStore::addStore() pop_front()";
-		std::cerr << std::endl;
+		std::clog << "bdStore::addStore() pop_front()";
+		std::clog << std::endl;
 #endif
 		store.pop_front();
 	}

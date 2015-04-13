@@ -14,7 +14,7 @@ include $(TEST_TOP_DIR)/scripts/checks.mk
 CC = g++
 RM = /bin/rm
 RANLIB = ranlib
-LIBDIR = $(LIB_TOP_DIR)/lib
+LIBDIR = $(LIB_TOP_DIR)
 LIBRS = $(LIBDIR)/libretroshare.a
 
 # Unix: Linux/Cygwin

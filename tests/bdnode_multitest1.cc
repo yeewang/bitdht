@@ -27,6 +27,7 @@
 #include "bitdht/bdnode.h"
 #include "bitdht/bdstddht.h"
 
+#include <unistd.h>
 #include <stdlib.h>
 
 /**********************************************************************************
@@ -55,7 +56,7 @@ int main(int argc, char **argv)
 
 	bdDhtFunctions *fns = new bdStdDht();
 
-	std::cerr << "bdnode_multitest1() Setting up Nodes" << std::endl;
+	std::clog << "bdnode_multitest1() Setting up Nodes" << std::endl;
 	/* setup nodes */
 	for(i = 0; i < n_nodes; i++)
 	{
@@ -65,9 +66,9 @@ int main(int argc, char **argv)
 
 		id.addr.sin_port = htons(i);
 		((uint32_t *) (id.id.data))[0] = i * 16 * 16; /* force this so the sort order is maintained! */
-		std::cerr << "bdnode_multitest1() Id: ";
-		fns->bdPrintId(std::cerr, &id);
-		std::cerr << std::endl;
+		std::clog << "bdnode_multitest1() Id: ";
+		fns->bdPrintId(std::clog, &id);
+		std::clog << std::endl;
 
 		bdNode *node = new bdNode(&(id.id), "bdTEST", "", fns);
 
@@ -78,7 +79,7 @@ int main(int argc, char **argv)
 
 	}
 
-	std::cerr << "bdnode_multitest1() Cross Seeding" << std::endl;
+	std::clog << "bdnode_multitest1() Cross Seeding" << std::endl;
 	/* do a little cross seeding */
 	for(i = 0; i < n_nodes; i++)
 	{
@@ -96,12 +97,12 @@ int main(int argc, char **argv)
 
 	/* ready to run */
 	
-	std::cerr << "bdnode_multitest1() Simulation Time....." << std::endl;
+	std::clog << "bdnode_multitest1() Simulation Time....." << std::endl;
 	i = 0;
 	while(time(NULL) < starttime + sim_time)
 	{
 		i++;
-		std::cerr << "bdnode_multitest1() Iteration: " << i << std::endl;
+		std::clog << "bdnode_multitest1() Iteration: " << i << std::endl;
 
 		for(it = nodes.begin(), j = 0; it != nodes.end(); it++, j++)
 		{
@@ -113,7 +114,7 @@ int main(int argc, char **argv)
 
 			while(it->second->outgoingMsg(&addr, data, &len))
 			{
-				std::cerr << "bdnode_multitest1() Msg from Peer: " << j;
+				std::clog << "bdnode_multitest1() Msg from Peer: " << j;
 
 				/* find the peer */
 				int peeridx = htons(addr.sin_port);
@@ -122,14 +123,14 @@ int main(int argc, char **argv)
 				if (pit != portIdx.end())
 				{
 					nit = nodes.find(pit->second);
-					std::cerr << " For: ";
-					fns->bdPrintId(std::cerr, &(nit->first));
-					std::cerr << std::endl;
+					std::clog << " For: ";
+					fns->bdPrintId(std::clog, &(nit->first));
+					std::clog << std::endl;
 				}
 				else
 				{
-					std::cerr << " For Unknown Destination";
-					std::cerr << std::endl;
+					std::clog << " For Unknown Destination";
+					std::clog << std::endl;
 
 				}
 
@@ -146,17 +147,17 @@ int main(int argc, char **argv)
 		for(it = nodes.begin(), j = 0; it != nodes.end(); it++, j++)
 		{
 			/* tick */
-			std::cerr << "bdnode_multitest1() Ticking peer: " << j << std::endl;
+			std::clog << "bdnode_multitest1() Ticking peer: " << j << std::endl;
 			it->second->iteration();
 		}
 
 		if (i % 5 == 0)
 		{
-			std::cerr << "bdnode_multitest1() Displying States"<< std::endl;
+			std::clog << "bdnode_multitest1() Displying States"<< std::endl;
 			for(it = nodes.begin(), j = 0; it != nodes.end(); it++, j++)
 			{
 				/* tick */
-				std::cerr << "bdnode_multitest1() Peer State: " << j << std::endl;
+				std::clog << "bdnode_multitest1() Peer State: " << j << std::endl;
 				it->second->printState();
 			}
 		}

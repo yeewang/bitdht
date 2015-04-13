@@ -41,16 +41,16 @@
 extern "C" void* bdthread_init(void* p)
 {
 #ifdef DEBUG_THREADS
-	std::cerr << "bdthread_init()";
-	std::cerr << std::endl;
+	std::clog << "bdthread_init()";
+	std::clog << std::endl;
 #endif
 
   bdThread *thread = (bdThread *) p;
   if (!thread)
   {
 #ifdef DEBUG_THREADS
-	std::cerr << "bdthread_init() Error Invalid thread pointer.";
-	std::cerr << std::endl;
+	std::clog << "bdthread_init() Error Invalid thread pointer.";
+	std::clog << std::endl;
 #endif
     return 0;
   }
@@ -65,8 +65,8 @@ pthread_t  createThread(bdThread &thread)
     void  *data = (void *) (&thread);
 
 #ifdef DEBUG_THREADS
-    std::cerr << "createThread() creating a bdThread";
-    std::cerr << std::endl;
+    std::clog << "createThread() creating a bdThread";
+    std::clog << std::endl;
 #endif
 
     thread.mMutex.lock();
@@ -76,14 +76,14 @@ pthread_t  createThread(bdThread &thread)
     }
 
 #ifdef DEBUG_THREADS
-    std::cerr << "createThread() created Thread.mTid: ";
+    std::clog << "createThread() created Thread.mTid: ";
 
 #if defined(_WIN32) || defined(__MINGW32__)
-    std::cerr << "WIN32: Cannot print mTid ";
+    std::clog << "WIN32: Cannot print mTid ";
 #else
-    std::cerr << thread.mTid;
+    std::clog << thread.mTid;
 #endif
-    std::cerr << std::endl;
+    std::clog << std::endl;
 
 #endif
 
@@ -99,8 +99,8 @@ bdThread::bdThread()
 {
 
 #ifdef DEBUG_THREADS
-    	std::cerr << "bdThread::bdThread()";
-    	std::cerr << std::endl;
+    	std::clog << "bdThread::bdThread()";
+    	std::clog << std::endl;
 #endif
 
 #if defined(_WIN32) || defined(__MINGW32__)
@@ -113,15 +113,15 @@ bdThread::bdThread()
 void bdThread::join() /* waits for the the mTid thread to stop */
 {
 #ifdef DEBUG_THREADS
-    	std::cerr << "bdThread::join() Called! Waiting for Thread.mTid: ";
+    	std::clog << "bdThread::join() Called! Waiting for Thread.mTid: ";
 
 #if defined(_WIN32) || defined(__MINGW32__)
-    std::cerr << "WIN32: Cannot print mTid ";
+    std::clog << "WIN32: Cannot print mTid ";
 #else
-    std::cerr << mTid;
+    std::clog << mTid;
 #endif
 
-    std::cerr << std::endl;
+    std::clog << std::endl;
 #endif
 
     mMutex.lock();
@@ -134,17 +134,17 @@ void bdThread::join() /* waits for the the mTid thread to stop */
 		pthread_join(mTid, NULL);
 
 #ifdef DEBUG_THREADS
-    std::cerr << "bdThread::join() Joined Thread.mTid: ";
+    std::clog << "bdThread::join() Joined Thread.mTid: ";
 
 #if defined(_WIN32) || defined(__MINGW32__)
-    std::cerr << "WIN32: Cannot print mTid ";
+    std::clog << "WIN32: Cannot print mTid ";
 #else
-    std::cerr << mTid;
+    std::clog << mTid;
 #endif
 
-    std::cerr << std::endl;
-    std::cerr << "bdThread::join() Setting mTid = 0";
-    std::cerr << std::endl;
+    std::clog << std::endl;
+    std::clog << "bdThread::join() Setting mTid = 0";
+    std::clog << std::endl;
 #endif
 
 #if defined(_WIN32) || defined(__MINGW32__)
@@ -161,8 +161,8 @@ void bdThread::join() /* waits for the the mTid thread to stop */
 void bdThread::stop() 
 {
 #ifdef DEBUG_THREADS
-    	std::cerr << "bdThread::stop() Called!";
-    	std::cerr << std::endl;
+    	std::clog << "bdThread::stop() Called!";
+    	std::clog << std::endl;
 #endif
 
 	pthread_exit(NULL);

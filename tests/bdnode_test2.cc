@@ -28,6 +28,8 @@
 #include "bitdht/bdquery.h"
 #include "bitdht/bdnode.h"
 
+#include <unistd.h>
+
 #define N_PEERS_TO_ADD_INIT 10
 #define N_PEERS_TO_ADD 11
 #define N_PEERS_TO_START 10

@@ -521,13 +521,13 @@ uint32_t beMsgType(be_node *n)
 	uint32_t beY = beMsgGetY(n);
 
 #ifdef DEBUG_MSG_TYPE 
-	std::cerr << "bsMsgType() beY: " << beY << std::endl;
+	std::clog << "bsMsgType() beY: " << beY << std::endl;
 #endif
 
 	if (beY == BE_Y_UNKNOWN)
 	{
 #ifdef DEBUG_MSG_TYPE 
-		std::cerr << "bsMsgType() UNKNOWN MSG TYPE" << std::endl;
+		std::clog << "bsMsgType() UNKNOWN MSG TYPE" << std::endl;
 #endif
 
 		return BITDHT_MSG_TYPE_UNKNOWN;
@@ -536,40 +536,40 @@ uint32_t beMsgType(be_node *n)
 	if (beY == BE_Y_Q) /* query */
 	{
 #ifdef DEBUG_MSG_TYPE 
-		std::cerr << "bsMsgType() QUERY MSG TYPE" << std::endl;
+		std::clog << "bsMsgType() QUERY MSG TYPE" << std::endl;
 #endif
 	        be_node *query = beMsgGetDictNode(n, "q");
 
 		if (beMsgMatchString(query, "ping", 4))
 		{
 #ifdef DEBUG_MSG_TYPE 
-			std::cerr << "bsMsgType() QUERY:ping MSG TYPE" << std::endl;
+			std::clog << "bsMsgType() QUERY:ping MSG TYPE" << std::endl;
 #endif
 			return BITDHT_MSG_TYPE_PING;
 		}
 		else if (beMsgMatchString(query, "find_node", 9))
 		{
 #ifdef DEBUG_MSG_TYPE 
-			std::cerr << "bsMsgType() QUERY:find_node MSG TYPE" << std::endl;
+			std::clog << "bsMsgType() QUERY:find_node MSG TYPE" << std::endl;
 #endif
 			return BITDHT_MSG_TYPE_FIND_NODE;
 		}
 		else if (beMsgMatchString(query, "get_peers", 9))
 		{
 #ifdef DEBUG_MSG_TYPE 
-			std::cerr << "bsMsgType() QUERY:get_peers MSG TYPE" << std::endl;
+			std::clog << "bsMsgType() QUERY:get_peers MSG TYPE" << std::endl;
 #endif
 			return BITDHT_MSG_TYPE_GET_HASH;
 		}
 		else if (beMsgMatchString(query, "announce_peer", 13))
 		{
 #ifdef DEBUG_MSG_TYPE 
-			std::cerr << "bsMsgType() QUERY:announce_peer MSG TYPE" << std::endl;
+			std::clog << "bsMsgType() QUERY:announce_peer MSG TYPE" << std::endl;
 #endif
 			return BITDHT_MSG_TYPE_POST_HASH;
 		}
 #ifdef DEBUG_MSG_TYPE 
-		std::cerr << "bsMsgType() QUERY:UNKNOWN MSG TYPE, dumping dict" << std::endl;
+		std::clog << "bsMsgType() QUERY:UNKNOWN MSG TYPE, dumping dict" << std::endl;
         	/* dump answer */
         	be_dump(n);
 #endif
@@ -579,13 +579,13 @@ uint32_t beMsgType(be_node *n)
 	if (beY != BE_Y_R)
 	{
 #ifdef DEBUG_MSG_TYPE 
-		std::cerr << "bsMsgType() UNKNOWN2 MSG TYPE" << std::endl;
+		std::clog << "bsMsgType() UNKNOWN2 MSG TYPE" << std::endl;
 #endif
 		return BITDHT_MSG_TYPE_UNKNOWN;
 	}
 
 #ifdef DEBUG_MSG_TYPE 
-		std::cerr << "bsMsgType() REPLY MSG TYPE" << std::endl;
+		std::clog << "bsMsgType() REPLY MSG TYPE" << std::endl;
 #endif
 
 	/* otherwise a reply or - invalid 

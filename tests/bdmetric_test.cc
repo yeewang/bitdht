@@ -39,7 +39,7 @@ INITTEST();
 
 int main(int argc, char **argv)
 {
-        std::cerr << "libbitdht: " << argv[0] << std::endl;
+        std::clog << "libbitdht: " << argv[0] << std::endl;
 
 	test_metric_explicit();
 
@@ -49,7 +49,7 @@ int main(int argc, char **argv)
 
 bool test_metric_explicit()
 {
-        std::cerr << "test_metric_explicit:" << std::endl;
+        std::clog << "test_metric_explicit:" << std::endl;
 
 #define NUM_IDS 6
 
@@ -86,7 +86,7 @@ bool test_metric_explicit()
 	for(i = 0; i < NUM_IDS; i++)
 	{
 		fprintf(stderr, "id[%d]:", i+1);
-		bdStdPrintId(std::cerr,&(id[i]));
+		bdStdPrintId(std::clog,&(id[i]));
 		fprintf(stderr, "\n");
 	}
 
@@ -102,7 +102,7 @@ bool test_metric_explicit()
 			bdStdDistance(&(id[i].id), &(id[j].id), &met);
 
 			fprintf(stderr, "%d^%d:", i, j);
-			bdStdPrintNodeId(std::cerr,&met);
+			bdStdPrintNodeId(std::clog,&met);
 			fprintf(stderr, "\n");
 
 			bdist = bdStdBucketDistance(&met);
@@ -128,7 +128,7 @@ bool test_metric_explicit()
 
 bool test_metric_random()
 {
-        std::cerr << "test_metric_random:" << std::endl;
+        std::clog << "test_metric_random:" << std::endl;
 
 	/* create some ids */
 	bdId id1;
@@ -146,27 +146,27 @@ bool test_metric_random()
 	bdStdRandomId(&id6);
 
 	fprintf(stderr, "id1:");
-	bdStdPrintId(std::cerr,&id1);
+	bdStdPrintId(std::clog,&id1);
 	fprintf(stderr, "\n");
 
 	fprintf(stderr, "id2:");
-	bdStdPrintId(std::cerr,&id2);
+	bdStdPrintId(std::clog,&id2);
 	fprintf(stderr, "\n");
 
 	fprintf(stderr, "id3:");
-	bdStdPrintId(std::cerr,&id3);
+	bdStdPrintId(std::clog,&id3);
 	fprintf(stderr, "\n");
 
 	fprintf(stderr, "id4:");
-	bdStdPrintId(std::cerr,&id4);
+	bdStdPrintId(std::clog,&id4);
 	fprintf(stderr, "\n");
 
 	fprintf(stderr, "id5:");
-	bdStdPrintId(std::cerr,&id5);
+	bdStdPrintId(std::clog,&id5);
 	fprintf(stderr, "\n");
 
 	fprintf(stderr, "id6:");
-	bdStdPrintId(std::cerr,&id6);
+	bdStdPrintId(std::clog,&id6);
 	fprintf(stderr, "\n");
 
 	/* now do the sums */
@@ -176,7 +176,7 @@ bool test_metric_random()
 	bdStdDistance(&(id1.id), &(id2.id), &met);
 
 	fprintf(stderr, "1^2:");
-	bdStdPrintNodeId(std::cerr,&met);
+	bdStdPrintNodeId(std::clog,&met);
 	fprintf(stderr, "\n");
 	bdist = bdStdBucketDistance(&met);
 	fprintf(stderr, " bucket: %d\n", bdist);
@@ -185,7 +185,7 @@ bool test_metric_random()
 	bdist = bdStdBucketDistance(&met2);
 
 	fprintf(stderr, "1^3:");
-	bdStdPrintNodeId(std::cerr,&met2);
+	bdStdPrintNodeId(std::clog,&met2);
 	fprintf(stderr, "\n");
 	fprintf(stderr, " bucket: %d\n", bdist);
 
@@ -199,7 +199,7 @@ bool test_metric_random()
 	bdist = bdStdBucketDistance(&met2);
 
 	fprintf(stderr, "1^4:");
-	bdStdPrintNodeId(std::cerr,&met2);
+	bdStdPrintNodeId(std::clog,&met2);
 	fprintf(stderr, "\n");
 	fprintf(stderr, " bucket: %d\n", bdist);
 
@@ -212,7 +212,7 @@ bool test_metric_random()
 	bdist = bdStdBucketDistance(&met);
 
 	fprintf(stderr, "1^5:");
-	bdStdPrintNodeId(std::cerr,&met);
+	bdStdPrintNodeId(std::clog,&met);
 	fprintf(stderr, "\n");
 	fprintf(stderr, " bucket: %d\n", bdist);
 
@@ -220,7 +220,7 @@ bool test_metric_random()
 	bdist = bdStdBucketDistance(&met);
 
 	fprintf(stderr, "1^6:");
-	bdStdPrintNodeId(std::cerr,&met);
+	bdStdPrintNodeId(std::clog,&met);
 	fprintf(stderr, "\n");
 	fprintf(stderr, " bucket: %d\n", bdist);
 
@@ -228,33 +228,33 @@ bool test_metric_random()
 	bdist = bdStdBucketDistance(&met);
 
 	fprintf(stderr, "2^3:");
-	bdStdPrintNodeId(std::cerr,&met);
+	bdStdPrintNodeId(std::clog,&met);
 	fprintf(stderr, "\n");
 	fprintf(stderr, " bucket: %d\n", bdist);
 
 
 	fprintf(stderr, "id1:");
-	bdStdPrintId(std::cerr,&id1);
+	bdStdPrintId(std::clog,&id1);
 	fprintf(stderr, "\n");
 
 	fprintf(stderr, "id2:");
-	bdStdPrintId(std::cerr,&id2);
+	bdStdPrintId(std::clog,&id2);
 	fprintf(stderr, "\n");
 
 	fprintf(stderr, "id3:");
-	bdStdPrintId(std::cerr,&id3);
+	bdStdPrintId(std::clog,&id3);
 	fprintf(stderr, "\n");
 
 	fprintf(stderr, "id4:");
-	bdStdPrintId(std::cerr,&id4);
+	bdStdPrintId(std::clog,&id4);
 	fprintf(stderr, "\n");
 
 	fprintf(stderr, "id5:");
-	bdStdPrintId(std::cerr,&id5);
+	bdStdPrintId(std::clog,&id5);
 	fprintf(stderr, "\n");
 
 	fprintf(stderr, "id6:");
-	bdStdPrintId(std::cerr,&id6);
+	bdStdPrintId(std::clog,&id6);
 	fprintf(stderr, "\n");
 
 

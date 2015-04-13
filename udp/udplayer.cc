@@ -182,37 +182,37 @@ int     UdpLayer::status(std::ostream &out)
 int UdpLayer::reset(struct sockaddr_in &local)
 {
 #ifdef DEBUG_UDP_LAYER
-	std::cerr << "UdpLayer::reset()" << std::endl;
+	std::clog << "UdpLayer::reset()" << std::endl;
 #endif
 
 	/* stop the old thread */
 	{
 		bdStackMutex stack(sockMtx);   /********** LOCK MUTEX *********/
 #ifdef DEBUG_UDP_LAYER
-		std::cerr << "UdpLayer::reset() setting stopThread flag" << std::endl;
+		std::clog << "UdpLayer::reset() setting stopThread flag" << std::endl;
 #endif
 		stopThread = true;
 	}
 #ifdef DEBUG_UDP_LAYER
-	std::cerr << "UdpLayer::reset() joining" << std::endl;
+	std::clog << "UdpLayer::reset() joining" << std::endl;
 #endif
 
 	join(); 
 
 #ifdef DEBUG_UDP_LAYER
-	std::cerr << "UdpLayer::reset() closing socket" << std::endl;
+	std::clog << "UdpLayer::reset() closing socket" << std::endl;
 #endif
 	closeSocket();
 
 #ifdef DEBUG_UDP_LAYER
-	std::cerr << "UdpLayer::reset() resetting variables" << std::endl;
+	std::clog << "UdpLayer::reset() resetting variables" << std::endl;
 #endif
 	laddr = local;
 	errorState = 0;
 	ttl = UDP_DEF_TTL;
 
 #ifdef DEBUG_UDP_LAYER
-	std::cerr << "UdpLayer::reset() opening socket" << std::endl;
+	std::clog << "UdpLayer::reset() opening socket" << std::endl;
 #endif
 	openSocket();
 
@@ -263,7 +263,7 @@ void UdpLayer::recv_loop()
 			if (toStop)
 			{
 #ifdef DEBUG_UDP_LAYER
-				std::cerr << "UdpLayer::recv_loop() stopping thread" << std::endl;
+				std::clog << "UdpLayer::recv_loop() stopping thread" << std::endl;
 #endif
 				stop();
 			}
@@ -280,7 +280,7 @@ void UdpLayer::recv_loop()
 			else if (status < 0) 
 			{
 #ifdef DEBUG_UDP_LAYER
-                                std::cerr << "UdpLayer::recv_loop() Error: " << bdnet_errno() << std::endl;
+                                std::clog << "UdpLayer::recv_loop() Error: " << bdnet_errno() << std::endl;
 #endif
                         }
                 };      
@@ -290,8 +290,8 @@ void UdpLayer::recv_loop()
 		if (0 < receiveUdpPacket(inbuf, &nsize, from))
 		{
 #ifdef DEBUG_UDP_LAYER
-			std::cerr << "UdpLayer::readPkt()  from : " << from << std::endl;
-			std::cerr << printPkt(inbuf, nsize);
+			std::clog << "UdpLayer::readPkt()  from : " << from << std::endl;
+			std::clog << printPkt(inbuf, nsize);
 #endif
 			// send to reciever.
 			recv -> recvPkt(inbuf, nsize, from);
@@ -299,8 +299,8 @@ void UdpLayer::recv_loop()
 		else
 		{
 #ifdef DEBUG_UDP_LAYER
-			std::cerr << "UdpLayer::readPkt() not ready" << from;
-			std::cerr << std::endl;
+			std::clog << "UdpLayer::readPkt() not ready" << from;
+			std::clog << std::endl;
 #endif
 		}
 	}
@@ -318,8 +318,8 @@ int UdpLayer::sendPkt(const void *data, int size, sockaddr_in &to, int ttl)
 
 	/* and send! */
 #ifdef DEBUG_UDP_LAYER
-	std::cerr << "UdpLayer::sendPkt()  to: " << to << std::endl;
-	std::cerr << printPkt((void *) data, size);
+	std::clog << "UdpLayer::sendPkt()  to: " << to << std::endl;
+	std::clog << printPkt((void *) data, size);
 #endif
 	sendUdpPacket(data, size, to);
 	return size;
@@ -333,7 +333,7 @@ int UdpLayer::openSocket()
 	/* make a socket */
        	sockfd = bdnet_socket(PF_INET, SOCK_DGRAM, 0);
 #ifdef DEBUG_UDP_LAYER
-	std::cerr << "UpdStreamer::openSocket()" << std::endl;
+	std::clog << "UpdStreamer::openSocket()" << std::endl;
 #endif
 	/* bind to address */
 
@@ -351,8 +351,8 @@ int UdpLayer::openSocket()
 #endif
 	{
 #ifdef DEBUG_UDP_LAYER
-		std::cerr << "Socket Failed to Bind to : " << laddr << std::endl;
-		std::cerr << "Error: " << bdnet_errno() << std::endl;
+		std::clog << "Socket Failed to Bind to : " << laddr << std::endl;
+		std::clog << "Error: " << bdnet_errno() << std::endl;
 #endif
 		errorState = EADDRINUSE;
 		//exit(1);
@@ -364,7 +364,7 @@ int UdpLayer::openSocket()
 	if (-1 == bdnet_fcntl(sockfd, F_SETFL, O_NONBLOCK))
 	{
 #ifdef DEBUG_UDP_LAYER
-		std::cerr << "Failed to Make Non-Blocking" << std::endl;
+		std::clog << "Failed to Make Non-Blocking" << std::endl;
 #endif
 	}
 
@@ -374,7 +374,7 @@ int UdpLayer::openSocket()
 	if (-1 == setsockopt(sockfd, SOL_SOCKET, SO_BROADCAST, &val, sizeof(int)))
 	{
 #ifdef DEBUG_UDP_LAYER
-		std::cerr << "Failed to Make Socket Broadcast" << std::endl;
+		std::clog << "Failed to Make Socket Broadcast" << std::endl;
 #endif
 	}
 #endif
@@ -382,13 +382,13 @@ int UdpLayer::openSocket()
 	errorState = 0;
 
 #ifdef DEBUG_UDP_LAYER
-	std::cerr << "Socket Bound to : " << laddr << std::endl;
+	std::clog << "Socket Bound to : " << laddr << std::endl;
 #endif
 
 	sockMtx.unlock(); /******** UNLOCK MUTEX *********/
 
 #ifdef DEBUG_UDP_LAYER
-	std::cerr << "Setting TTL to " << UDP_DEF_TTL << std::endl;
+	std::clog << "Setting TTL to " << UDP_DEF_TTL << std::endl;
 #endif
 	setTTL(UDP_DEF_TTL);
 
@@ -413,8 +413,8 @@ int UdpLayer::setTTL(int t)
 	sockMtx.unlock(); /******** UNLOCK MUTEX *********/
 
 #ifdef DEBUG_UDP_LAYER
-	std::cerr << "UdpLayer::setTTL(" << t << ") returned: " << err;
-	std::cerr << std::endl;
+	std::clog << "UdpLayer::setTTL(" << t << ") returned: " << err;
+	std::clog << std::endl;
 #endif
 
 	return err;
@@ -445,7 +445,7 @@ int UdpLayer::okay()
 #ifdef DEBUG_UDP_LAYER
 	if (!nonFatalError)
 	{
-		std::cerr << "UdpLayer::NOT okay(): Error: " << errorState << std::endl;
+		std::clog << "UdpLayer::NOT okay(): Error: " << errorState << std::endl;
 	}
 
 #endif
@@ -456,7 +456,7 @@ int UdpLayer::okay()
 int UdpLayer::tick()
 {
 #ifdef DEBUG_UDP_LAYER
-	std::cerr << "UdpLayer::tick()" << std::endl;
+	std::clog << "UdpLayer::tick()" << std::endl;
 #endif
 	return 1;
 }
@@ -479,9 +479,9 @@ int UdpLayer::receiveUdpPacket(void *data, int *size, struct sockaddr_in &from)
 	if (0 < insize)
 	{
 #ifdef DEBUG_UDP_LAYER
-		std::cerr << "receiveUdpPacket() from: " << fromaddr;
-		std::cerr << " Size: " << insize;
-		std::cerr << std::endl;
+		std::clog << "receiveUdpPacket() from: " << fromaddr;
+		std::clog << " Size: " << insize;
+		std::clog << std::endl;
 #endif
 		*size = insize;
 		from = fromaddr;
@@ -494,8 +494,8 @@ int UdpLayer::sendUdpPacket(const void *data, int size, struct sockaddr_in &to)
 {
 	/* send out */
 #ifdef DEBUG_UDP_LAYER
-	std::cerr << "UdpLayer::sendUdpPacket(): size: " << size;
-	std::cerr << " To: " << to << std::endl;
+	std::clog << "UdpLayer::sendUdpPacket(): size: " << size;
+	std::clog << " To: " << to << std::endl;
 #endif
 	struct sockaddr_in toaddr = to;
 
@@ -530,12 +530,12 @@ int LossyUdpLayer::receiveUdpPacket(void *data, int *size, struct sockaddr_in &f
 	/* but discard */
 		if (0 < UdpLayer::receiveUdpPacket(data, size, from))
 		{
-			std::cerr << "LossyUdpLayer::receiveUdpPacket() Dropping packet!";
-			std::cerr << std::endl;
-			std::cerr << printPkt(data, *size);
-			std::cerr << std::endl;
-			std::cerr << "LossyUdpLayer::receiveUdpPacket() Packet Dropped!";
-			std::cerr << std::endl;
+			std::clog << "LossyUdpLayer::receiveUdpPacket() Dropping packet!";
+			std::clog << std::endl;
+			std::clog << printPkt(data, *size);
+			std::clog << std::endl;
+			std::clog << "LossyUdpLayer::receiveUdpPacket() Packet Dropped!";
+			std::clog << std::endl;
 		}
 	
 		size = 0;
@@ -555,12 +555,12 @@ int LossyUdpLayer::sendUdpPacket(const void *data, int size, struct sockaddr_in 
 	{
 		/* discard */
 	
-		std::cerr << "LossyUdpLayer::sendUdpPacket() Dropping packet!";
-		std::cerr << std::endl;
-		std::cerr << printPkt((void *) data, size);
-		std::cerr << std::endl;
-		std::cerr << "LossyUdpLayer::sendUdpPacket() Packet Dropped!";
-		std::cerr << std::endl;
+		std::clog << "LossyUdpLayer::sendUdpPacket() Dropping packet!";
+		std::clog << std::endl;
+		std::clog << printPkt((void *) data, size);
+		std::clog << std::endl;
+		std::clog << "LossyUdpLayer::sendUdpPacket() Packet Dropped!";
+		std::clog << std::endl;
 	
 		return size;
 	}

@@ -34,9 +34,10 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
-
+#if !defined(_WIN32) && !defined(__MINGW32__)
+#include <unistd.h>
+#endif
 #include <string.h>
-
 #include "util/bdnet.h"
 
 /*
@@ -47,7 +48,7 @@
 
 //#define DEBUG_UDP_BITDHT 1
 
-#define BITDHT_VERSION_IDENTIFER	1
+//#define BITDHT_VERSION_IDENTIFER	1
 /*************************************/
 
 UdpBitDht::UdpBitDht(UdpPublisher *pub, bdNodeId *id, std::string appVersion, std::string bootstrapfile, bdDhtFunctions *fns)
@@ -227,8 +228,8 @@ int UdpBitDht::tick()
 	while((i < MAX_MSG_PER_TICK) && (mBitDhtManager->outgoingMsg(&toAddr, data, &size)))
 	{
 #ifdef DEBUG_UDP_BITDHT 
-		std::cerr << "UdpBitDht::tick() outgoing msg(" << size << ") to " << toAddr;
-		std::cerr << std::endl;
+		std::clog << "UdpBitDht::tick() outgoing msg(" << size << ") to " << toAddr;
+		std::clog << std::endl;
 #endif
 
 		sendPkt(data, size, toAddr, BITDHT_TTL);

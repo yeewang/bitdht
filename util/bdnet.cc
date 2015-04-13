@@ -44,7 +44,7 @@ int bdnet_errno()
 
 int bdnet_init() 
 { 
-	std::cerr << "bdnet_init()" << std::endl;
+	std::clog << "bdnet_init()" << std::endl;
 	bdnet_int_errno = 0;
 
         // Windows Networking Init.
@@ -53,13 +53,13 @@ int bdnet_init()
 
         if (0 != WSAStartup(wVerReq, &wsaData))
         {
-                std::cerr << "Failed to Startup Windows Networking";
-                std::cerr << std::endl;
+                std::clog << "Failed to Startup Windows Networking";
+                std::clog << std::endl;
         }
         else
         {
-                std::cerr << "Started Windows Networking";
-                std::cerr << std::endl;
+                std::clog << "Started Windows Networking";
+                std::clog << std::endl;
         }
 
 	return 0; 
@@ -68,7 +68,7 @@ int bdnet_init()
 /* check if we can modify the TTL on a UDP packet */
 int bdnet_checkTTL(int fd) 
 {
-	std::cerr << "bdnet_checkTTL()" << std::endl;
+	std::clog << "bdnet_checkTTL()" << std::endl;
 	int optlen = 4;
 	char optval[optlen];
 
@@ -78,32 +78,32 @@ int bdnet_checkTTL(int fd)
 	{
 		ret = -1;
 		bdnet_int_errno = bdnet_w2u_errno(WSAGetLastError());
-		std::cerr << "bdnet_checkTTL() Failed!";
-		std::cerr << std::endl;
+		std::clog << "bdnet_checkTTL() Failed!";
+		std::clog << std::endl;
 	}
 	else
 	{
-		std::cerr << "bdnet_checkTTL() :";
-		std::cerr << (int) optval[0] << ":";
-		std::cerr << (int) optval[1] << ":";
-		std::cerr << (int) optval[2] << ":";
-		std::cerr << (int) optval[3] << ": RET: ";
-		std::cerr << ret << ":";
-		std::cerr << std::endl;
+		std::clog << "bdnet_checkTTL() :";
+		std::clog << (int) optval[0] << ":";
+		std::clog << (int) optval[1] << ":";
+		std::clog << (int) optval[2] << ":";
+		std::clog << (int) optval[3] << ": RET: ";
+		std::clog << ret << ":";
+		std::clog << std::endl;
 	}
 	return ret;
 }
 
 int bdnet_close(int fd) 
 { 
-	std::cerr << "bdnet_close()" << std::endl;
+	std::clog << "bdnet_close()" << std::endl;
 	return closesocket(fd); 
 }
 
 int bdnet_socket(int domain, int type, int protocol)
 {
         int osock = socket(domain, type, protocol);
-	std::cerr << "bdnet_socket()" << std::endl;
+	std::clog << "bdnet_socket()" << std::endl;
 
 	if ((unsigned) osock == INVALID_SOCKET)
 	{
@@ -117,7 +117,7 @@ int bdnet_socket(int domain, int type, int protocol)
 
 int bdnet_bind(int  sockfd,  const  struct  sockaddr  *my_addr,  socklen_t addrlen)
 {
-	std::cerr << "bdnet_bind()" << std::endl;
+	std::clog << "bdnet_bind()" << std::endl;
 	int ret = bind(sockfd,my_addr,addrlen);
 	if (ret != 0)
 	{
@@ -135,13 +135,13 @@ int bdnet_fcntl(int fd, int cmd, long arg)
         int ret;
 	
 	unsigned long int on = 1;
-	std::cerr << "bdnet_fcntl()" << std::endl;
+	std::clog << "bdnet_fcntl()" << std::endl;
 
 	/* can only do NONBLOCK at the moment */
 	if ((cmd != F_SETFL) || (arg != O_NONBLOCK))
 	{
-		std::cerr << "bdnet_fcntl() limited to fcntl(fd, F_SETFL, O_NONBLOCK)";
-		std::cerr << std::endl;
+		std::clog << "bdnet_fcntl() limited to fcntl(fd, F_SETFL, O_NONBLOCK)";
+		std::clog << std::endl;
 		bdnet_int_errno =  EOPNOTSUPP;
 		return -1;
 	}
@@ -162,13 +162,13 @@ int bdnet_fcntl(int fd, int cmd, long arg)
 int bdnet_setsockopt(int s, int level, int optname, 
 				const void *optval, socklen_t optlen)
 {
-	std::cerr << "bdnet_setsockopt() val:" << *((int *) optval) << std::endl;
-	std::cerr << "bdnet_setsockopt() len:" << optlen << std::endl;
+	std::clog << "bdnet_setsockopt() val:" << *((int *) optval) << std::endl;
+	std::clog << "bdnet_setsockopt() len:" << optlen << std::endl;
 	if ((level != IPPROTO_IP) || (optname != IP_TTL))
 	{
-		std::cerr << "bdnet_setsockopt() limited to ";
-		std::cerr << "setsockopt(fd, IPPROTO_IP, IP_TTL, ....)";
-		std::cerr << std::endl;
+		std::clog << "bdnet_setsockopt() limited to ";
+		std::clog << "setsockopt(fd, IPPROTO_IP, IP_TTL, ....)";
+		std::clog << std::endl;
 		bdnet_int_errno =  EOPNOTSUPP;
 		return -1;
 	}
@@ -187,7 +187,7 @@ int bdnet_setsockopt(int s, int level, int optname,
 ssize_t bdnet_recvfrom(int s, void *buf, size_t len, int flags,
                               struct sockaddr *from, socklen_t *fromlen)
 {
-	std::cerr << "bdnet_recvfrom()" << std::endl;
+	std::clog << "bdnet_recvfrom()" << std::endl;
 	int ret = recvfrom(s, (char *) buf, len, flags, from, fromlen);
 	if (ret == SOCKET_ERROR)
 	{
@@ -200,7 +200,7 @@ ssize_t bdnet_recvfrom(int s, void *buf, size_t len, int flags,
 ssize_t bdnet_sendto(int s, const void *buf, size_t len, int flags, 
  				const struct sockaddr *to, socklen_t tolen)
 {
-	std::cerr << "bdnet_sendto()" << std::endl;
+	std::clog << "bdnet_sendto()" << std::endl;
 	int ret = sendto(s, (const char *) buf, len, flags, to, tolen);
 	if (ret == SOCKET_ERROR)
 	{
@@ -213,7 +213,7 @@ ssize_t bdnet_sendto(int s, const void *buf, size_t len, int flags,
 int bdnet_w2u_errno(int err)
 {
 	/* switch */
-	std::cerr << "tou_net_w2u_errno(" << err << ")" << std::endl;
+	std::clog << "tou_net_w2u_errno(" << err << ")" << std::endl;
 	switch(err)
 	{
 		case WSAEINPROGRESS:
@@ -244,9 +244,9 @@ int bdnet_w2u_errno(int err)
 		 * but not a real error... translate into EINPROGRESS
 		 */
 		case WSAECONNRESET:
-			std::cerr << "tou_net_w2u_errno(" << err << ")";
-			std::cerr << " = WSAECONNRESET ---> EINPROGRESS";
-	 		std::cerr << std::endl;
+			std::clog << "tou_net_w2u_errno(" << err << ")";
+			std::clog << " = WSAECONNRESET ---> EINPROGRESS";
+	 		std::clog << std::endl;
 			return EINPROGRESS;
 			break;
 		/***
@@ -258,8 +258,8 @@ int bdnet_w2u_errno(int err)
 		 ***/
 		
 		default:
-			std::cerr << "tou_net_w2u_errno(" << err << ") Unknown";
-			std::cerr << std::endl;
+			std::clog << "tou_net_w2u_errno(" << err << ") Unknown";
+			std::clog << std::endl;
 			break;
 	}
 
