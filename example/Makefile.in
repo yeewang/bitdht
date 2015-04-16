@@ -76,6 +76,10 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
+@DEBUG_TRUE@am__append_1 = -g3 -O0 -D BE_DEBUG -D DEBUG_MGR
+@DEBUG_TRUE@am__append_2 = -g3 -O0 -D BE_DEBUG -D DEBUG_MGR
+@DEBUG_FALSE@am__append_3 = -O2
+@DEBUG_FALSE@am__append_4 = -O2
 bin_PROGRAMS = bdexample$(EXEEXT)
 subdir = example
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
@@ -163,7 +167,7 @@ CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
 CXXDEPMODE = @CXXDEPMODE@
-CXXFLAGS = -Wall -g -I.. -DDEBUG_MGR
+CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
@@ -242,6 +246,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+AM_CXXFLAGS = -Wall -I.. $(am__append_2) $(am__append_4)
+AM_CFLAGS = = -Wall -I.. $(am__append_1) $(am__append_3)
 bdexample_SOURCES = bdhandler.cc bdexample.cc
 all: all-am
 

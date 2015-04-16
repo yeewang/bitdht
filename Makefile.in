@@ -76,6 +76,10 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
+@DEBUG_TRUE@am__append_1 = -g3 -O0 -D BE_DEBUG -D DEBUG_MGR
+@DEBUG_TRUE@am__append_2 = -g3 -O0 -D BE_DEBUG -D DEBUG_MGR
+@DEBUG_FALSE@am__append_3 = -O2
+@DEBUG_FALSE@am__append_4 = -O2
 subdir = .
 DIST_COMMON = INSTALL NEWS README AUTHORS ChangeLog \
 	$(srcdir)/Makefile.in $(srcdir)/Makefile.am \
@@ -230,10 +234,7 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
-LIBS = \
-	-I /sources/opensource/log4cpp/include \
-	-l/sources/opensource/log4cpp/src/.lib/liblog2cpp.a
-
+LIBS = ../log2cpp/src/.libs/liblog4cpp.a
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
@@ -295,9 +296,9 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_CPPFLAGS = -g -Wall -D BE_DEBUG -lpthread -D DEBUG_MGR \
-	-I/sources/opensource/log4cpp/include
-
+AM_CFLAGS = -Wall -lpthread $(am__append_1) $(am__append_3)
+AM_CXXFLAGS = -Wall -lpthread -I../log4cpp/include $(am__append_2) \
+	$(am__append_4)
 noinst_LIBRARIES = libbitdht.a
 libbitdht_a_SOURCES = bitdht/bencode.c \
 		bitdht/bdobj.cc \

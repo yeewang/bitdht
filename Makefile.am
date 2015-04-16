@@ -1,10 +1,16 @@
 
-LIBS = \
-	-I /sources/opensource/log4cpp/include \
-	-l/sources/opensource/log4cpp/src/.lib/liblog2cpp.a
+LIBS = ../log2cpp/src/.libs/liblog4cpp.a
 	
-AM_CPPFLAGS= -g -Wall -D BE_DEBUG -lpthread -D DEBUG_MGR \
-	-I/sources/opensource/log4cpp/include
+AM_CFLAGS = -Wall -lpthread 
+AM_CXXFLAGS = -Wall  -lpthread -I../log4cpp/include
+
+if DEBUG
+AM_CFLAGS += -g3 -O0 -D BE_DEBUG -D DEBUG_MGR
+AM_CXXFLAGS += -g3 -O0 -D BE_DEBUG -D DEBUG_MGR
+else
+AM_CFLAGS += -O2
+AM_CXXFLAGS += -O2
+endif
 
 noinst_LIBRARIES = libbitdht.a
 

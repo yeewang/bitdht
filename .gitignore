@@ -9,7 +9,6 @@ Makefile
 /config.h
 /config.h.in~
 /config.status
-/configure
 /configure.scan
 /example/bdexample
 /example/ld.exe.stackdump
