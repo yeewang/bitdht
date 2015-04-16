@@ -56,14 +56,14 @@
 
 
 bdNodeManager::bdNodeManager(bdNodeId *id, std::string dhtVersion, std::string bootfile, bdDhtFunctions *fns)
-	:bdNode(id, dhtVersion, bootfile, fns)
+:bdNode(id, dhtVersion, bootfile, fns)
 {
 	mMode = BITDHT_MGR_STATE_OFF;
 	mFns = fns;
 	mModeTS = 0 ;
 
-        mNetworkSize = 0;
-        mBdNetworkSize = 0;
+	mNetworkSize = 0;
+	mBdNetworkSize = 0;
 
 	/* setup a query for self */
 #ifdef DEBUG_MGR
@@ -108,7 +108,7 @@ int	bdNodeManager::startDht()
 	return 1;
 }
 
- /* STOPPED, STARTING, ACTIVE, FAILED */
+/* STOPPED, STARTING, ACTIVE, FAILED */
 int 	bdNodeManager::stateDht()
 {
 	return mMode;
@@ -116,13 +116,13 @@ int 	bdNodeManager::stateDht()
 
 uint32_t bdNodeManager::statsNetworkSize()
 {
-        return mNetworkSize;
+	return mNetworkSize;
 }
 
 /* same version as us! */
 uint32_t bdNodeManager::statsBDVersionSize()
 {
-        return mBdNetworkSize;
+	return mBdNetworkSize;
 }
 
 
@@ -159,11 +159,11 @@ void bdNodeManager::addFindNode(bdNodeId *id, uint32_t qflags)
 	std::clog << "bdNodeManager::addFindNode() Added QueryPeer as READY....";
 	std::clog << std::endl;
 #endif
-	//addQuery(id, qflags | BITDHT_QFLAGS_DISGUISE); 
+	//addQuery(id, qflags | BITDHT_QFLAGS_DISGUISE);
 	return;
 }
 
-	/* finds a queued query, and starts it */
+/* finds a queued query, and starts it */
 void bdNodeManager::startQueries()
 {
 #ifdef DEBUG_MGR
@@ -223,144 +223,144 @@ void bdNodeManager::iteration()
 	time_t modeAge = now - mModeTS;
 	switch(mMode)
 	{
-		case BITDHT_MGR_STATE_OFF:
-			{
+	case BITDHT_MGR_STATE_OFF:
+	{
 #ifdef DEBUG_MGR
-				std::clog << "bdNodeManager::iteration(): OFF";
-				std::clog << std::endl;
+		std::clog << "bdNodeManager::iteration(): OFF";
+		std::clog << std::endl;
 #endif
-			}
-			break;
+	}
+	break;
 
-		case BITDHT_MGR_STATE_STARTUP:
-			/* 10 seconds startup .... then switch to ACTIVE */
+	case BITDHT_MGR_STATE_STARTUP:
+		/* 10 seconds startup .... then switch to ACTIVE */
 
-			if (modeAge > MAX_STARTUP_TIME)
-			{
+		if (modeAge > MAX_STARTUP_TIME)
+		{
 #ifdef DEBUG_MGR
-				std::clog << "bdNodeManager::iteration(): STARTUP -> REFRESH";
-				std::clog << std::endl;
+			std::clog << "bdNodeManager::iteration(): STARTUP -> REFRESH";
+			std::clog << std::endl;
 #endif
-				bdNodeId id;
-				getOwnId(&id);
-				addQuery(&id, BITDHT_QFLAGS_DO_IDLE | BITDHT_QFLAGS_DISGUISE); 
-				
-				mMode = BITDHT_MGR_STATE_FINDSELF;
-				mModeTS = now;
-			}
-			break;
+			bdNodeId id;
+			getOwnId(&id);
+			addQuery(&id, BITDHT_QFLAGS_DO_IDLE | BITDHT_QFLAGS_DISGUISE);
 
-		case BITDHT_MGR_STATE_FINDSELF:
-			/* 60 seconds further startup .... then switch to ACTIVE 
-			 * if we reach TRANSITION_OP_SPACE_SIZE before this time, transition immediately...
-			 * if, after 60 secs, we haven't reached MIN_OP_SPACE_SIZE, restart....
-			 */
-			
+			mMode = BITDHT_MGR_STATE_FINDSELF;
+			mModeTS = now;
+		}
+		break;
+
+	case BITDHT_MGR_STATE_FINDSELF:
+		/* 60 seconds further startup .... then switch to ACTIVE
+		 * if we reach TRANSITION_OP_SPACE_SIZE before this time, transition immediately...
+		 * if, after 60 secs, we haven't reached MIN_OP_SPACE_SIZE, restart....
+		 */
+
 #define MAX_FINDSELF_TIME		60
 #define TRANSITION_OP_SPACE_SIZE	100 /* 1 query / sec, should take 12-15 secs */
 #define MIN_OP_SPACE_SIZE		20 
 
-			{
-				uint32_t nodeSpaceSize = mNodeSpace.calcSpaceSize();
+	{
+		uint32_t nodeSpaceSize = mNodeSpace.calcSpaceSize();
 
 #ifdef DEBUG_MGR
 #endif
-				std::clog << "bdNodeManager::iteration() Finding Oneself: ";
-				std::clog << "NodeSpace Size:" << nodeSpaceSize;
-				std::clog << std::endl;
+		std::clog << "bdNodeManager::iteration() Finding Oneself: ";
+		std::clog << "NodeSpace Size:" << nodeSpaceSize;
+		std::clog << std::endl;
 
-				if (nodeSpaceSize > TRANSITION_OP_SPACE_SIZE)
-				{
-					mMode = BITDHT_MGR_STATE_REFRESH;
-					mModeTS = now;
-				}
+		if (nodeSpaceSize > TRANSITION_OP_SPACE_SIZE)
+		{
+			mMode = BITDHT_MGR_STATE_REFRESH;
+			mModeTS = now;
+		}
 
-				if (modeAge > MAX_FINDSELF_TIME) 
-				{
-					if (nodeSpaceSize > MIN_OP_SPACE_SIZE)
-					{
-						mMode = BITDHT_MGR_STATE_REFRESH;
-						mModeTS = now;
-					}
-					else
-					{
-						mMode = BITDHT_MGR_STATE_FAILED;
-						mModeTS = now;
-					}
-				}
-			}
-			
-			break;
-
-		case BITDHT_MGR_STATE_ACTIVE:
-			if (modeAge > MAX_REFRESH_TIME)
+		if (modeAge > MAX_FINDSELF_TIME)
+		{
+			if (nodeSpaceSize > MIN_OP_SPACE_SIZE)
 			{
-#ifdef DEBUG_MGR
-				std::clog << "bdNodeManager::iteration(): ACTIVE -> REFRESH";
-				std::clog << std::endl;
-#endif
 				mMode = BITDHT_MGR_STATE_REFRESH;
 				mModeTS = now;
 			}
-
-			break;
-
-		case BITDHT_MGR_STATE_REFRESH:
+			else
 			{
-#ifdef DEBUG_MGR
-				std::clog << "bdNodeManager::iteration(): REFRESH -> ACTIVE";
-				std::clog << std::endl;
-#endif
-				/* select random ids, and perform searchs to refresh space */
-				mMode = BITDHT_MGR_STATE_ACTIVE;
+				mMode = BITDHT_MGR_STATE_FAILED;
 				mModeTS = now;
-
-#ifdef DEBUG_MGR
-				std::clog << "bdNodeManager::iteration(): Starting Query";
-				std::clog << std::endl;
-#endif
-
-				startQueries();
-
-#ifdef DEBUG_MGR
-				std::clog << "bdNodeManager::iteration(): Updating Stores";
-				std::clog << std::endl;
-#endif
-
-				updateStore();
-
-#ifdef DEBUG_MGR
-				std::clog << "bdNodeManager::iteration(): REFRESH ";
-				std::clog << std::endl;
-#endif
-
-
-				status();
 			}
-			break;
+		}
+	}
 
-		case BITDHT_MGR_STATE_QUIET:
-			{
+	break;
+
+	case BITDHT_MGR_STATE_ACTIVE:
+		if (modeAge > MAX_REFRESH_TIME)
+		{
 #ifdef DEBUG_MGR
-				std::clog << "bdNodeManager::iteration(): QUIET";
-				std::clog << std::endl;
+			std::clog << "bdNodeManager::iteration(): ACTIVE -> REFRESH";
+			std::clog << std::endl;
+#endif
+			mMode = BITDHT_MGR_STATE_REFRESH;
+			mModeTS = now;
+		}
+
+		break;
+
+	case BITDHT_MGR_STATE_REFRESH:
+	{
+#ifdef DEBUG_MGR
+		std::clog << "bdNodeManager::iteration(): REFRESH -> ACTIVE";
+		std::clog << std::endl;
+#endif
+		/* select random ids, and perform searchs to refresh space */
+		mMode = BITDHT_MGR_STATE_ACTIVE;
+		mModeTS = now;
+
+#ifdef DEBUG_MGR
+		std::clog << "bdNodeManager::iteration(): Starting Query";
+		std::clog << std::endl;
+#endif
+
+		startQueries();
+
+#ifdef DEBUG_MGR
+		std::clog << "bdNodeManager::iteration(): Updating Stores";
+		std::clog << std::endl;
+#endif
+
+		updateStore();
+
+#ifdef DEBUG_MGR
+		std::clog << "bdNodeManager::iteration(): REFRESH ";
+		std::clog << std::endl;
 #endif
 
 
-			}
-			break;
+		status();
+	}
+	break;
 
-		default:
-		case BITDHT_MGR_STATE_FAILED:
-			{
-				std::clog << "bdNodeManager::iteration(): FAILED ==> STARTUP";
-				std::clog << std::endl;
+	case BITDHT_MGR_STATE_QUIET:
+	{
+#ifdef DEBUG_MGR
+		std::clog << "bdNodeManager::iteration(): QUIET";
+		std::clog << std::endl;
+#endif
+
+
+	}
+	break;
+
+	default:
+	case BITDHT_MGR_STATE_FAILED:
+	{
+		std::clog << "bdNodeManager::iteration(): FAILED ==> STARTUP";
+		std::clog << std::endl;
 #ifdef DEBUG_MGR
 #endif
-				stopDht();
-				startDht();
-			}
-			break;
+		stopDht();
+		startDht();
+	}
+	break;
 	}
 
 	if (mMode == BITDHT_MGR_STATE_OFF)
@@ -385,7 +385,7 @@ int bdNodeManager::status()
 	/* update the network numbers */
 	mNetworkSize = mNodeSpace.calcNetworkSize();
 	mBdNetworkSize = mNodeSpace.calcNetworkSizeWithFlag(
-					BITDHT_PEER_STATUS_DHT_APPL);
+			BITDHT_PEER_STATUS_DHT_APPL);
 
 #ifdef DEBUG_MGR
 	std::clog << "BitDHT NetworkSize: " << mNetworkSize << std::endl;
@@ -404,11 +404,11 @@ int bdNodeManager::checkStatus()
 #endif
 
 	/* check queries */
-        std::map<bdNodeId, bdQueryStatus>::iterator it;
-        std::map<bdNodeId, bdQueryStatus> queryStatus;
+	std::map<bdNodeId, bdQueryStatus>::iterator it;
+	std::map<bdNodeId, bdQueryStatus> queryStatus;
 
 
-        QueryStatus(queryStatus);
+	QueryStatus(queryStatus);
 
 	for(it = queryStatus.begin(); it != queryStatus.end(); it++)
 	{
@@ -420,73 +420,73 @@ int bdNodeManager::checkStatus()
 
 		switch(it->second.mStatus)
 		{
-			default:
-			case BITDHT_QUERY_QUERYING:
-				{
+		default:
+		case BITDHT_QUERY_QUERYING:
+		{
 #ifdef DEBUG_MGR
-					std::clog << "bdNodeManager::checkStatus() Query in Progress id: ";
-					mFns->bdPrintNodeId(std::clog, &(it->first));
-					std::clog << std::endl;
+			std::clog << "bdNodeManager::checkStatus() Query in Progress id: ";
+			mFns->bdPrintNodeId(std::clog, &(it->first));
+			std::clog << std::endl;
 #endif
-				}
-				break;
+		}
+		break;
 
-			case BITDHT_QUERY_FAILURE:
-				{
+		case BITDHT_QUERY_FAILURE:
+		{
 #ifdef DEBUG_MGR
-					std::clog << "bdNodeManager::checkStatus() Query Failed: id: ";
-					mFns->bdPrintNodeId(std::clog, &(it->first));
-					std::clog << std::endl;
+			std::clog << "bdNodeManager::checkStatus() Query Failed: id: ";
+			mFns->bdPrintNodeId(std::clog, &(it->first));
+			std::clog << std::endl;
 #endif
-					// BAD.
-					doRemove = true;
-					doCallback = true;
-					callbackStatus = BITDHT_MGR_QUERY_FAILURE;
-				}
-				break;
+			// BAD.
+			doRemove = true;
+			doCallback = true;
+			callbackStatus = BITDHT_MGR_QUERY_FAILURE;
+		}
+		break;
 
-			case BITDHT_QUERY_FOUND_CLOSEST:
-				{
+		case BITDHT_QUERY_FOUND_CLOSEST:
+		{
 #ifdef DEBUG_MGR
-					std::clog << "bdNodeManager::checkStatus() Found Closest: id: ";
-					mFns->bdPrintNodeId(std::clog, &(it->first));
-					std::clog << std::endl;
-#endif
-
-					doRemove = true;
-					doCallback = true;
-					callbackStatus = BITDHT_MGR_QUERY_PEER_OFFLINE;
-				}
-				break;
-
-			case BITDHT_QUERY_PEER_UNREACHABLE:
-				{
-#ifdef DEBUG_MGR
-					std::clog << "bdNodeManager::checkStatus() the Peer Online but Unreachable: id: ";
-					mFns->bdPrintNodeId(std::clog, &(it->first));
-					std::clog << std::endl;
+			std::clog << "bdNodeManager::checkStatus() Found Closest: id: ";
+			mFns->bdPrintNodeId(std::clog, &(it->first));
+			std::clog << std::endl;
 #endif
 
-					doRemove = true;
-					doCallback = true;
-					callbackStatus = BITDHT_MGR_QUERY_PEER_UNREACHABLE;
-				}
-				break;
+			doRemove = true;
+			doCallback = true;
+			callbackStatus = BITDHT_MGR_QUERY_PEER_OFFLINE;
+		}
+		break;
 
-			case BITDHT_QUERY_SUCCESS:
-				{
+		case BITDHT_QUERY_PEER_UNREACHABLE:
+		{
 #ifdef DEBUG_MGR
-					std::clog << "bdNodeManager::checkStatus() Found Query: id: ";
-					mFns->bdPrintNodeId(std::clog, &(it->first));
-					std::clog << std::endl;
+			std::clog << "bdNodeManager::checkStatus() the Peer Online but Unreachable: id: ";
+			mFns->bdPrintNodeId(std::clog, &(it->first));
+			std::clog << std::endl;
 #endif
-					//foundId = 
-					doRemove = true;
-					doCallback = true;
-					doSaveAddress = true;
-					callbackStatus = BITDHT_MGR_QUERY_PEER_ONLINE;
-				}
-				break;
+
+			doRemove = true;
+			doCallback = true;
+			callbackStatus = BITDHT_MGR_QUERY_PEER_UNREACHABLE;
+		}
+		break;
+
+		case BITDHT_QUERY_SUCCESS:
+		{
+#ifdef DEBUG_MGR
+			std::clog << "bdNodeManager::checkStatus() Found Query: id: ";
+			mFns->bdPrintNodeId(std::clog, &(it->first));
+			std::clog << std::endl;
+#endif
+			//foundId =
+			doRemove = true;
+			doCallback = true;
+			doSaveAddress = true;
+			callbackStatus = BITDHT_MGR_QUERY_PEER_ONLINE;
+		}
+		break;
 		}
 
 		/* remove done queries */
@@ -501,9 +501,9 @@ int bdNodeManager::checkStatus()
 		if (doRemove) 
 		{
 #ifdef DEBUG_MGR
-		std::clog << "bdNodeManager::checkStatus() Removing query: id: ";
-		mFns->bdPrintNodeId(std::clog, &(it->first));
-		std::clog << std::endl;
+			std::clog << "bdNodeManager::checkStatus() Removing query: id: ";
+			mFns->bdPrintNodeId(std::clog, &(it->first));
+			std::clog << std::endl;
 #endif
 			clearQuery(&(it->first));
 		}
@@ -568,9 +568,9 @@ int bdNodeManager::checkStatus()
 		if (doPing)
 		{
 #ifdef DEBUG_MGR
-		std::clog << "bdNodeManager::checkStatus() Starting Ping (TODO): id: ";
-		mFns->bdPrintNodeId(std::clog, &(it->first));
-		std::clog << std::endl;
+			std::clog << "bdNodeManager::checkStatus() Starting Ping (TODO): id: ";
+			mFns->bdPrintNodeId(std::clog, &(it->first));
+			std::clog << std::endl;
 #endif
 			/* add first matching peer */
 			//addPeerPing(foundId);
@@ -580,9 +580,9 @@ int bdNodeManager::checkStatus()
 		if (doCallback)
 		{
 #ifdef DEBUG_MGR
-		std::clog << "bdNodeManager::checkStatus() Doing Callback: id: ";
-		mFns->bdPrintNodeId(std::clog, &(it->first));
-		std::clog << std::endl;
+			std::clog << "bdNodeManager::checkStatus() Doing Callback: id: ";
+			mFns->bdPrintNodeId(std::clog, &(it->first));
+			std::clog << std::endl;
 #endif
 			doPeerCallback(&(it->first), callbackStatus);
 		}
@@ -595,41 +595,41 @@ bdNodeManager::checkPingStatus()
 {
 
 	/* check queries */
-        std::map<bdNodeId, bdPingStatus>::iterator it;
-        std::map<bdNodeId, bdPingStatus> pingStatus;
+	std::map<bdNodeId, bdPingStatus>::iterator it;
+	std::map<bdNodeId, bdPingStatus> pingStatus;
 
-        PingStatus(pingStatus);
+	PingStatus(pingStatus);
 
 	for(it = pingStatus.begin(); it != pingStatus.end(); it++)
 	{
 		switch(it->second.mStatus)
 		{
-			case BITDHT_QUERY_QUERYING:
-				{
+		case BITDHT_QUERY_QUERYING:
+		{
 
-				}
-				break;
+		}
+		break;
 
-			case BITDHT_QUERY_FAILURE:
-				{
-					// BAD.
+		case BITDHT_QUERY_FAILURE:
+		{
+			// BAD.
+			doRemove = true;
+		}
+		break;
+
+		case BITDHT_QUERY_FOUND_CLOSEST:
+		{
+
+			doRemove = true;
+		}
+		break;
+
+		case BITDHT_QUERY_SUCCESS:
+		{
+			foundId =
 					doRemove = true;
-				}
-				break;
-
-			case BITDHT_QUERY_FOUND_CLOSEST:
-				{
-					
-					doRemove = true;
-				}
-				break;
-
-			case BITDHT_QUERY_SUCCESS:
-				{
-					foundId = 
-					doRemove = true;
-				}
-				break;
+		}
+		break;
 		}
 
 		/* remove done queries */
@@ -680,9 +680,9 @@ int bdNodeManager::SearchOutOfDate()
 
 
 
-        /***** Functions to Call down to bdNodeManager ****/
-        /* Request DHT Peer Lookup */
-        /* Request Keyword Lookup */
+/***** Functions to Call down to bdNodeManager ****/
+/* Request DHT Peer Lookup */
+/* Request Keyword Lookup */
 
 void bdNodeManager::findDhtValue(bdNodeId * /*id*/, std::string /*key*/, uint32_t /*mode*/)
 {
@@ -693,7 +693,7 @@ void bdNodeManager::findDhtValue(bdNodeId * /*id*/, std::string /*key*/, uint32_
 }
 
 
-        /***** Get Results Details *****/
+/***** Get Results Details *****/
 int bdNodeManager::getDhtPeerAddress(const bdNodeId *id, struct sockaddr_in &from)
 {
 #ifdef DEBUG_MGR
@@ -748,21 +748,21 @@ int bdNodeManager::getDhtValue(const bdNodeId *id, std::string key, std::string 
 
 
 
-        /***** Add / Remove Callback Clients *****/
+/***** Add / Remove Callback Clients *****/
 void bdNodeManager::addCallback(BitDhtCallback *cb)
 {
 #ifdef DEBUG_MGR
 	std::clog << "bdNodeManager::addCallback()";
 	std::clog << std::endl;
 #endif
-        /* search list */
-        std::list<BitDhtCallback *>::iterator it;
-        it = std::find(mCallbacks.begin(), mCallbacks.end(), cb);
-        if (it == mCallbacks.end())
-        {
-                /* add it */
-                mCallbacks.push_back(cb);
-        }
+	/* search list */
+	std::list<BitDhtCallback *>::iterator it;
+	it = std::find(mCallbacks.begin(), mCallbacks.end(), cb);
+	if (it == mCallbacks.end())
+	{
+		/* add it */
+		mCallbacks.push_back(cb);
+	}
 }
 
 void bdNodeManager::removeCallback(BitDhtCallback *cb)
@@ -771,15 +771,15 @@ void bdNodeManager::removeCallback(BitDhtCallback *cb)
 	std::clog << "bdNodeManager::removeCallback()";
 	std::clog << std::endl;
 #endif
-        /* search list */
-        std::list<BitDhtCallback *>::iterator it;
-        it = std::find(mCallbacks.begin(), mCallbacks.end(), cb);
-        if (it == mCallbacks.end())
-        {
-                /* not found! */
-                return;
-        }
-        it = mCallbacks.erase(it);
+	/* search list */
+	std::list<BitDhtCallback *>::iterator it;
+	it = std::find(mCallbacks.begin(), mCallbacks.end(), cb);
+	if (it == mCallbacks.end())
+	{
+		/* not found! */
+		return;
+	}
+	it = mCallbacks.erase(it);
 }
 
 
@@ -794,7 +794,7 @@ void bdNodeManager::addPeer(const bdId *id, uint32_t peerflags)
 	// call parent.
 	bdNode::addPeer(id, peerflags);
 
-        return;
+	return;
 }
 
 
@@ -804,17 +804,17 @@ void bdNodeManager::doNodeCallback(const bdId *id, uint32_t peerflags)
 #ifdef DEBUG_MGR
 	std::clog << "bdNodeManager::doNodeCallback() ";
 	mFns->bdPrintId(std::clog, id);
-	std::clog << "peerflags: " << peerflags;
+	std::clog << " peerflags: " << peerflags;
 	std::clog << std::endl;
 #endif
 
-        /* search list */
-        std::list<BitDhtCallback *>::iterator it;
-        for(it = mCallbacks.begin(); it != mCallbacks.end(); it++)
-        {
-                (*it)->dhtNodeCallback(id, peerflags);
-        }
-        return;
+	/* search list */
+	std::list<BitDhtCallback *>::iterator it;
+	for(it = mCallbacks.begin(); it != mCallbacks.end(); it++)
+	{
+		(*it)->dhtNodeCallback(id, peerflags);
+	}
+	return;
 }
 
 void bdNodeManager::doPeerCallback(const bdNodeId *id, uint32_t status)
@@ -827,13 +827,13 @@ void bdNodeManager::doPeerCallback(const bdNodeId *id, uint32_t status)
 	std::clog << std::endl;
 #endif
 
-        /* search list */
-        std::list<BitDhtCallback *>::iterator it;
-        for(it = mCallbacks.begin(); it != mCallbacks.end(); it++)
-        {
-                (*it)->dhtPeerCallback(id, status);
-        }
-        return;
+	/* search list */
+	std::list<BitDhtCallback *>::iterator it;
+	for(it = mCallbacks.begin(); it != mCallbacks.end(); it++)
+	{
+		(*it)->dhtPeerCallback(id, status);
+	}
+	return;
 }
 
 void bdNodeManager::doValueCallback(const bdNodeId *id, std::string /*key*/, uint32_t status)
@@ -843,23 +843,23 @@ void bdNodeManager::doValueCallback(const bdNodeId *id, std::string /*key*/, uin
 
 #ifdef DEBUG_MGR
 #endif
-        /* search list */
-        std::list<BitDhtCallback *>::iterator it;
-        for(it = mCallbacks.begin(); it != mCallbacks.end(); it++)
-        {
-                (*it)->dhtPeerCallback(id, status);
-        }
-        return;
+	/* search list */
+	std::list<BitDhtCallback *>::iterator it;
+	for(it = mCallbacks.begin(); it != mCallbacks.end(); it++)
+	{
+		(*it)->dhtPeerCallback(id, status);
+	}
+	return;
 }
 
-        /******************* Internals *************************/
+/******************* Internals *************************/
 int     bdNodeManager::isBitDhtPacket(char *data, int size, struct sockaddr_in & from)
 
 {
 #ifdef DEBUG_MGR_PKT
 	std::clog << "bdNodeManager::isBitDhtPacket() *******************************";
-        std::clog << " from " << inet_ntoa(from.sin_addr);
-        std::clog << ":" << ntohs(from.sin_port);
+	std::clog << " from " << inet_ntoa(from.sin_addr);
+	std::clog << ":" << ntohs(from.sin_port);
 	std::clog << std::endl;
 	{
 		/* print the fucker... only way to catch bad ones */
@@ -873,8 +873,8 @@ int     bdNodeManager::isBitDhtPacket(char *data, int size, struct sockaddr_in &
 			else
 			{
 				out << "[";
-		                out << std::setw(2) << std::setfill('0') 
-					<< std::hex << (uint32_t) data[i];
+				out << std::setw(2) << std::setfill('0')
+				<< std::hex << (uint32_t) data[i];
 				out << "]";
 			}
 			if ((i % 16 == 0) && (i != 0))
@@ -891,17 +891,17 @@ int     bdNodeManager::isBitDhtPacket(char *data, int size, struct sockaddr_in &
 #endif
 
 	/* try to parse it! */
-        /* convert to a be_node */
-        be_node *node = be_decoden(data, size);
-        if (!node)
-        {
-                /* invalid decode */
+	/* convert to a be_node */
+	be_node *node = be_decoden(data, size);
+	if (!node)
+	{
+		/* invalid decode */
 #ifdef DEBUG_MGR
-                std::clog << "bdNodeManager::isBitDhtPacket() be_decode failed. dropping";
+		std::clog << "bdNodeManager::isBitDhtPacket() be_decode failed. dropping";
 		std::clog << std::endl;
 		std::clog << "bdNodeManager::BadPacket ******************************";
-        	std::clog << " from " << inet_ntoa(from.sin_addr);
-        	std::clog << ":" << ntohs(from.sin_port);
+		std::clog << " from " << inet_ntoa(from.sin_addr);
+		std::clog << ":" << ntohs(from.sin_port);
 		std::clog << std::endl;
 		{
 			/* print the fucker... only way to catch bad ones */
@@ -915,8 +915,8 @@ int     bdNodeManager::isBitDhtPacket(char *data, int size, struct sockaddr_in &
 				else
 				{
 					out << "[";
-			                out << std::setw(2) << std::setfill('0') 
-						<< std::hex << (uint32_t) data[i];
+					out << std::setw(2) << std::setfill('0')
+					<< std::hex << (uint32_t) data[i];
 					out << "]";
 				}
 				if ((i % 16 == 0) && (i != 0))
@@ -932,8 +932,8 @@ int     bdNodeManager::isBitDhtPacket(char *data, int size, struct sockaddr_in &
 		return 0;
 	}
 
-        /* find message type */
-        uint32_t beType = beMsgType(node);	
+	/* find message type */
+	uint32_t beType = beMsgType(node);
 	int ans = (beType != BITDHT_MSG_TYPE_UNKNOWN);
 	be_free(node);
 
@@ -948,7 +948,7 @@ int     bdNodeManager::isBitDhtPacket(char *data, int size, struct sockaddr_in &
 		std::clog << "bdNodeManager::isBitDhtPacket() NO: Unknown Type";
 		std::clog << std::endl;
 	}
-	
+
 #endif
 	return ans;
 }
@@ -975,5 +975,3 @@ int bdDebugCallback::dhtValueCallback(const bdNodeId *id, std::string key, uint3
 
 	return 1;
 }
-
-

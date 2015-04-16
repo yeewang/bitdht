@@ -629,8 +629,3 @@ bdRemoteQuery::bdRemoteQuery(bdId *id, bdNodeId *query, bdToken *transId, uint32
 {
 	mQueryTS = time(NULL);
 }
-
-
-
-
-

@@ -109,8 +109,8 @@ am_libbitdht_a_OBJECTS = bitdht/bencode.$(OBJEXT) \
 	bitdht/bdnode.$(OBJEXT) bitdht/bdmanager.$(OBJEXT) \
 	bitdht/bdstddht.$(OBJEXT) bitdht/bdhistory.$(OBJEXT) \
 	util/bdnet.$(OBJEXT) util/bdthreads.$(OBJEXT) \
-	udp/udplayer.$(OBJEXT) udp/udpstack.$(OBJEXT) \
-	udp/udpbitdht.$(OBJEXT)
+	util/bdlog.$(OBJEXT) udp/udplayer.$(OBJEXT) \
+	udp/udpstack.$(OBJEXT) udp/udpbitdht.$(OBJEXT)
 libbitdht_a_OBJECTS = $(am_libbitdht_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -208,9 +208,9 @@ AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
-CFLAGS = @CFLAGS@ -g -Wall -D BE_DEBUG -D DEBUG_MGR
+CFLAGS = @CFLAGS@
 CPP = @CPP@
-CPPFLAGS = @CPPFLAGS@ -g -Wall -D BE_DEBUG -lpthread -D DEBUG_MGR
+CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
 CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
@@ -228,9 +228,12 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
-LDFLAGS = @LDFLAGS@ -g -Wall -D BE_DEBUG -lpthread -D DEBUG_MGR
+LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
-LIBS = @LIBS@
+LIBS = \
+	-I /sources/opensource/log4cpp/include \
+	-l/sources/opensource/log4cpp/src/.lib/liblog2cpp.a
+
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
@@ -292,6 +295,9 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+AM_CPPFLAGS = -g -Wall -D BE_DEBUG -lpthread -D DEBUG_MGR \
+	-I/sources/opensource/log4cpp/include
+
 noinst_LIBRARIES = libbitdht.a
 libbitdht_a_SOURCES = bitdht/bencode.c \
 		bitdht/bdobj.cc \
@@ -306,6 +312,7 @@ libbitdht_a_SOURCES = bitdht/bencode.c \
 		bitdht/bdhistory.cc \
 		util/bdnet.cc \
 		util/bdthreads.cc \
+		util/bdlog.cc \
 		udp/udplayer.cc \
 		udp/udpstack.cc \
 		udp/udpbitdht.cc 
@@ -405,6 +412,8 @@ util/bdnet.$(OBJEXT): util/$(am__dirstamp) \
 	util/$(DEPDIR)/$(am__dirstamp)
 util/bdthreads.$(OBJEXT): util/$(am__dirstamp) \
 	util/$(DEPDIR)/$(am__dirstamp)
+util/bdlog.$(OBJEXT): util/$(am__dirstamp) \
+	util/$(DEPDIR)/$(am__dirstamp)
 udp/$(am__dirstamp):
 	@$(MKDIR_P) udp
 	@: > udp/$(am__dirstamp)
@@ -446,6 +455,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@udp/$(DEPDIR)/udpbitdht.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@udp/$(DEPDIR)/udplayer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@udp/$(DEPDIR)/udpstack.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/bdlog.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/bdnet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/bdthreads.Po@am__quote@
 

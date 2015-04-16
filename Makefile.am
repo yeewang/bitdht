@@ -1,7 +1,10 @@
 
-CPPFLAGS += -g -Wall -D BE_DEBUG -lpthread -D DEBUG_MGR
-LDFLAGS += -g -Wall -D BE_DEBUG -lpthread -D DEBUG_MGR
-CFLAGS += -g -Wall -D BE_DEBUG -D DEBUG_MGR
+LIBS = \
+	-I /sources/opensource/log4cpp/include \
+	-l/sources/opensource/log4cpp/src/.lib/liblog2cpp.a
+	
+AM_CPPFLAGS= -g -Wall -D BE_DEBUG -lpthread -D DEBUG_MGR \
+	-I/sources/opensource/log4cpp/include
 
 noinst_LIBRARIES = libbitdht.a
 
@@ -18,7 +21,7 @@ libbitdht_a_SOURCES = bitdht/bencode.c \
 		bitdht/bdhistory.cc \
 		util/bdnet.cc \
 		util/bdthreads.cc \
+		util/bdlog.cc \
 		udp/udplayer.cc \
 		udp/udpstack.cc \
 		udp/udpbitdht.cc 
-		

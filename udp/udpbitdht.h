@@ -45,13 +45,13 @@
 
 // class BitDhtCallback defined in bdiface.h 
 
-	
+
 class UdpBitDht: public UdpSubReceiver, public bdThread, public BitDhtInterface
 {
-	public:
+public:
 
 	UdpBitDht(UdpPublisher *pub, bdNodeId *id, std::string dhtVersion, std::string bootstrapfile, bdDhtFunctions *fns);
-virtual ~UdpBitDht();
+	virtual ~UdpBitDht();
 
 
 	/*********** External Interface to the World (BitDhtInterface) ************/
@@ -59,40 +59,40 @@ virtual ~UdpBitDht();
 	/***** Functions to Call down to bdNodeManager ****/
 	/* Request DHT Peer Lookup */
 	/* Request Keyword Lookup */
-virtual	void addFindNode(bdNodeId *id, uint32_t mode);
-virtual	void removeFindNode(bdNodeId *id);
-virtual	void findDhtValue(bdNodeId *id, std::string key, uint32_t mode);
+	virtual	void addFindNode(bdNodeId *id, uint32_t mode);
+	virtual	void removeFindNode(bdNodeId *id);
+	virtual	void findDhtValue(bdNodeId *id, std::string key, uint32_t mode);
 
 	/***** Add / Remove Callback Clients *****/
-virtual	void addCallback(BitDhtCallback *cb);
-virtual	void removeCallback(BitDhtCallback *cb);
+	virtual	void addCallback(BitDhtCallback *cb);
+	virtual	void removeCallback(BitDhtCallback *cb);
 
-        /***** Get Results Details *****/
-virtual int getDhtPeerAddress(const bdNodeId *id, struct sockaddr_in &from);
-virtual int getDhtValue(const bdNodeId *id, std::string key, std::string &value);
+	/***** Get Results Details *****/
+	virtual int getDhtPeerAddress(const bdNodeId *id, struct sockaddr_in &from);
+	virtual int getDhtValue(const bdNodeId *id, std::string key, std::string &value);
 
-        /* stats and Dht state */
-virtual int startDht();
-virtual int stopDht();
-virtual int stateDht(); 
-virtual uint32_t statsNetworkSize();
-virtual uint32_t statsBDVersionSize(); 
+	/* stats and Dht state */
+	virtual int startDht();
+	virtual int stopDht();
+	virtual int stateDht();
+	virtual uint32_t statsNetworkSize();
+	virtual uint32_t statsBDVersionSize();
 
 	/******************* Internals *************************/
 	/***** Iteration / Loop Management *****/
 
 	/*** Overloaded from UdpSubReceiver ***/
-virtual int recvPkt(void *data, int size, struct sockaddr_in &from);
-virtual int status(std::ostream &out);
+	virtual int recvPkt(void *data, int size, struct sockaddr_in &from);
+	virtual int status(std::ostream &out);
 
 
 	/*** Overloaded from iThread ***/
-virtual void run();
+	virtual void run();
 
 	/**** do whats to be done ***/
 	int tick();
 
-	private:
+private:
 
 	bdMutex dhtMtx; /* for all class data (below) */
 	bdNodeManager *mBitDhtManager;

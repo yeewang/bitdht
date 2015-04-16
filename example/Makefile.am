@@ -1,5 +1,5 @@
 
-CXXFLAGS = -Wall -g -I.. -DDEBUG_MGR
+AM_CXXFLAGS = -Wall -g -I.. -DDEBUG_MGR
 
 LIBS = -L.. -lbitdht -lpthread
 

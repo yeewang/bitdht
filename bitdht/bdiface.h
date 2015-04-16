@@ -44,9 +44,6 @@
 #define BITDHT_KEY_INTLEN 5
 #define BITDHT_KEY_BITLEN 160
 
-
-
-
 #define BITDHT_MAX_PKTSIZE 1024
 
 #define BITDHT_TTL 64
@@ -56,21 +53,21 @@
 
 class bdNodeId
 {
-        public:
-        unsigned char data[BITDHT_KEY_LEN];
+public:
+	unsigned char data[BITDHT_KEY_LEN];
 };
 
 class bdMetric: public bdNodeId {};
 
 class bdId
 {
-        public:
+public:
 
-        bdId();
-        bdId(bdNodeId in_id, struct sockaddr_in in_addr);
+	bdId();
+	bdId(bdNodeId in_id, struct sockaddr_in in_addr);
 
-        struct sockaddr_in addr;
-        bdNodeId id;
+	struct sockaddr_in addr;
+	bdNodeId id;
 };
 
 #define BITDHT_LIKELY_SAME_NO			0x00000000
@@ -82,30 +79,26 @@ class bdId
 
 class bdDhtFunctions
 {
-	public:
+public:
 
-//	bdDhtFunctions();
+	//	bdDhtFunctions();
 	/* setup variables */
-virtual uint16_t bdNumBuckets() = 0;
-virtual uint16_t bdNodesPerBucket() = 0; /* used for query + bdspace */
-virtual uint16_t bdBucketBitSize() = 0;
+	virtual uint16_t bdNumBuckets() = 0;
+	virtual uint16_t bdNodesPerBucket() = 0; /* used for query + bdspace */
+	virtual uint16_t bdBucketBitSize() = 0;
 
-virtual int bdDistance(const bdNodeId *n1, const bdNodeId *n2, bdMetric *metric) = 0;
-virtual int bdBucketDistance(const bdNodeId *n1, const bdNodeId *n2) = 0;
-virtual int bdBucketDistance(const bdMetric *metric) = 0;
+	virtual int bdDistance(const bdNodeId *n1, const bdNodeId *n2, bdMetric *metric) = 0;
+	virtual int bdBucketDistance(const bdNodeId *n1, const bdNodeId *n2) = 0;
+	virtual int bdBucketDistance(const bdMetric *metric) = 0;
 
-virtual uint32_t bdLikelySameNode(const bdId *id1, const bdId *id2) = 0;
+	virtual uint32_t bdLikelySameNode(const bdId *id1, const bdId *id2) = 0;
 
-virtual void bdRandomMidId(const bdNodeId *target, const bdNodeId *other, bdNodeId *mid) = 0;
+	virtual void bdRandomMidId(const bdNodeId *target, const bdNodeId *other, bdNodeId *mid) = 0;
 
-virtual void bdPrintId(std::ostream &out, const bdId *a) = 0;
-virtual void bdPrintNodeId(std::ostream &out, const bdNodeId *a) = 0;
+	virtual void bdPrintId(std::ostream &out, const bdId *a) = 0;
+	virtual void bdPrintNodeId(std::ostream &out, const bdNodeId *a) = 0;
 
 };
-
-
-
-
 
 /* peer flags
  * order is important!
@@ -120,19 +113,19 @@ virtual void bdPrintNodeId(std::ostream &out, const bdNodeId *a) = 0;
  */
 
 #define 	BITDHT_PEER_STATUS_MASK_RECVD		0x000000ff
-#define 	BITDHT_PEER_STATUS_MASK_DHT		0x0000ff00
+#define 	BITDHT_PEER_STATUS_MASK_DHT			0x0000ff00
 
 #define 	BITDHT_PEER_STATUS_RECV_PONG		0x00000001
 #define 	BITDHT_PEER_STATUS_RECV_NODES		0x00000002
 #define 	BITDHT_PEER_STATUS_RECV_HASHES		0x00000004
 
 #define 	BITDHT_PEER_STATUS_DHT_ENGINE		0x00000100
-#define 	BITDHT_PEER_STATUS_DHT_APPL		0x00000200
+#define 	BITDHT_PEER_STATUS_DHT_APPL			0x00000200
 #define 	BITDHT_PEER_STATUS_DHT_VERSION		0x00000400
 
 
 /* Status options */
-#define BITDHT_QUERY_READY		1
+#define BITDHT_QUERY_READY				1
 #define BITDHT_QUERY_QUERYING           2
 #define BITDHT_QUERY_FAILURE            3
 #define BITDHT_QUERY_FOUND_CLOSEST      4
@@ -140,49 +133,48 @@ virtual void bdPrintNodeId(std::ostream &out, const bdNodeId *a) = 0;
 #define BITDHT_QUERY_SUCCESS            6
 
 /* Query Flags */
-#define BITDHT_QFLAGS_NONE		0
+#define BITDHT_QFLAGS_NONE			0
 #define BITDHT_QFLAGS_DISGUISE		1
 #define BITDHT_QFLAGS_DO_IDLE		2
 #define BITDHT_QFLAGS_INTERNAL		4  // means it runs through startup.
 
 class BitDhtCallback
 {
-	public:
-//        ~BitDhtCallback();
+public:
+	//        ~BitDhtCallback();
 
-		// dummy cos not needed for standard dht behaviour;
-virtual int dhtNodeCallback(const bdId *  /*id*/, uint32_t /*peerflags*/)  { return 0; } 
+	// dummy cos not needed for standard dht behaviour;
+	virtual int dhtNodeCallback(const bdId *  /*id*/, uint32_t /*peerflags*/)  { return 0; }
 
-		// must be implemented.
-virtual int dhtPeerCallback(const bdNodeId *id, uint32_t status) = 0;
-virtual int dhtValueCallback(const bdNodeId *id, std::string key, uint32_t status) = 0;
+	// must be implemented.
+	virtual int dhtPeerCallback(const bdNodeId *id, uint32_t status) = 0;
+	virtual int dhtValueCallback(const bdNodeId *id, std::string key, uint32_t status) = 0;
 };
 
 
 class BitDhtInterface
 {
-	public:
+public:
 
-        /***** Request Lookup (DHT Peer & Keyword) *****/
-virtual void addFindNode(bdNodeId *id, uint32_t mode) = 0;
-virtual void removeFindNode(bdNodeId *id) = 0;
-virtual void findDhtValue(bdNodeId *id, std::string key, uint32_t mode) = 0;
+	/***** Request Lookup (DHT Peer & Keyword) *****/
+	virtual void addFindNode(bdNodeId *id, uint32_t mode) = 0;
+	virtual void removeFindNode(bdNodeId *id) = 0;
+	virtual void findDhtValue(bdNodeId *id, std::string key, uint32_t mode) = 0;
 
-        /***** Add / Remove Callback Clients *****/
-virtual void addCallback(BitDhtCallback *cb) = 0;
-virtual void removeCallback(BitDhtCallback *cb) = 0;
+	/***** Add / Remove Callback Clients *****/
+	virtual void addCallback(BitDhtCallback *cb) = 0;
+	virtual void removeCallback(BitDhtCallback *cb) = 0;
 
 	/***** Get Results Details *****/
-virtual int getDhtPeerAddress(const bdNodeId *id, struct sockaddr_in &from) = 0;
-virtual int getDhtValue(const bdNodeId *id, std::string key, std::string &value) = 0;
+	virtual int getDhtPeerAddress(const bdNodeId *id, struct sockaddr_in &from) = 0;
+	virtual int getDhtValue(const bdNodeId *id, std::string key, std::string &value) = 0;
 
-        /* stats and Dht state */
-virtual int startDht() = 0;
-virtual int stopDht() = 0;
-virtual int stateDht() = 0; /* STOPPED, STARTING, ACTIVE, FAILED */
-virtual uint32_t statsNetworkSize() = 0;
-virtual uint32_t statsBDVersionSize() = 0; /* same version as us! */
+	/* stats and Dht state */
+	virtual int startDht() = 0;
+	virtual int stopDht() = 0;
+	virtual int stateDht() = 0; /* STOPPED, STARTING, ACTIVE, FAILED */
+	virtual uint32_t statsNetworkSize() = 0;
+	virtual uint32_t statsBDVersionSize() = 0; /* same version as us! */
 };
 
 #endif
-

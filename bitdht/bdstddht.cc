@@ -37,7 +37,7 @@
 
 /**
  * #define BITDHT_DEBUG 1
-**/
+ **/
 
 void bdStdRandomId(bdId *id)
 {
@@ -51,6 +51,8 @@ void bdStdRandomId(bdId *id)
 
 void bdStdRandomNodeId(bdNodeId *id)
 {
+	srand (time(NULL));
+
 	uint32_t *a_data = (uint32_t *) id->data;
 	for(int i = 0; i < BITDHT_KEY_INTLEN; i++)
 	{
@@ -72,8 +74,8 @@ void bdStdZeroNodeId(bdNodeId *id)
 void bdStdNodeId(bdNodeId *id, const std::string &idStr)
 {
 	uint32_t *a_data = (uint32_t *) id->data;
-    uint32_t i = 0;
-    int offset[] = {1, 0, 3, 2, 5, 4, 7, 6};
+	uint32_t i = 0;
+	int offset[] = {1, 0, 3, 2, 5, 4, 7, 6};
 	for(; i < BITDHT_KEY_INTLEN && i < idStr.length() / 8; i++)
 	{
 		a_data[i] = 0;
@@ -120,7 +122,7 @@ int bdStdDistance(const bdNodeId *a, const bdNodeId *b, bdMetric *r)
 void bdStdRandomMidId(const bdNodeId *target, const bdNodeId *other, bdNodeId *midId)
 {
 	bdMetric dist;
-	
+
 	/* get distance between a & c */
 	bdStdDistance(target, other, &dist);
 
@@ -144,19 +146,19 @@ void bdStdRandomMidId(const bdNodeId *target, const bdNodeId *other, bdNodeId *m
 std::string bdStdConvertToPrintable(std::string input)
 {
 	std::ostringstream out;
-        for(uint32_t i = 0; i < input.length(); i++)
-        {
-                /* sensible chars */
-                if ((input[i] > 31) && (input[i] < 127))
-                {
-                        out << input[i];
-                }
-                else
-                {
+	for(uint32_t i = 0; i < input.length(); i++)
+	{
+		/* sensible chars */
+		if ((input[i] > 31) && (input[i] < 127))
+		{
+			out << input[i];
+		}
+		else
+		{
 			out << "[0x" << std::hex << (uint32_t) input[i] << "]";
 			out << std::dec;
-                }
-        }
+		}
+	}
 	return out.str();
 }
 
@@ -215,7 +217,7 @@ bdStdDht::bdStdDht()
 {
 	return;
 }
-        /* setup variables */
+/* setup variables */
 uint16_t bdStdDht::bdNumBuckets()
 {
 
@@ -235,39 +237,36 @@ int bdStdDht::bdDistance(const bdNodeId *n1, const bdNodeId *n2, class bdMetric 
 {
 	return bdStdDistance(n1, n2, metric);
 }
-	
+
 int bdStdDht::bdBucketDistance(const bdNodeId *n1, const bdNodeId *n2)
 {
 	return bdStdBucketDistance(n1, n2);
 }
-	
+
 int bdStdDht::bdBucketDistance(const bdMetric *metric)
 {
 	return bdStdBucketDistance(metric);
 }
-	
+
 
 uint32_t bdStdDht::bdLikelySameNode(const bdId *id1, const bdId *id2)
 {
 	return bdStdLikelySameNode(id1, id2);
 }
-	
+
 
 void bdStdDht::bdRandomMidId(const bdNodeId *target, const bdNodeId *other, bdNodeId *mid)
 {
 	return bdStdRandomMidId(target, other, mid);
 }
-	
+
 
 void bdStdDht::bdPrintId(std::ostream &out, const bdId *a)
 {
 	return bdStdPrintId(out, a);
 }
-	
+
 void bdStdDht::bdPrintNodeId(std::ostream &out, const bdNodeId *a)
 {
 	return bdStdPrintNodeId(out, a);
 }
-	
-
-
