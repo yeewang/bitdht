@@ -26,6 +26,7 @@
 
 #include "bitdht/bdstore.h"
 #include "util/bdnet.h"
+#include "util/bdlog.h"
 
 #include <stdio.h>
 #include <iostream>
@@ -60,7 +61,7 @@ int bdStore::reloadFromStore()
 	FILE *fd = fopen(mStoreFile.c_str(), "r");
 	if (!fd)
 	{
-		fprintf(stderr, "Failed to Open File: %s ... No Peers\n", mStoreFile.c_str());
+		syslog(LOG_INFO, "Failed to Open File: %s ... No Peers\n", mStoreFile.c_str());
 		return 0;
 	}
 		
@@ -85,7 +86,7 @@ int bdStore::reloadFromStore()
 				peer.mLastRecvTime = 0;
 				store.push_back(peer);
 #ifdef DEBUG_STORE
-				fprintf(stderr, "Read: %s %d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
+				syslog(LOG_INFO, "Read: %s %d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 #endif
 			}
 		}
@@ -94,7 +95,7 @@ int bdStore::reloadFromStore()
 	fclose(fd);
 
 #ifdef DEBUG_STORE
-	fprintf(stderr, "Read %ld Peers\n", (long) store.size());
+	syslog(LOG_INFO, "Read %ld Peers\n", (long) store.size());
 #endif
 
 	return 1;
@@ -104,7 +105,7 @@ int bdStore::reloadFromStore()
 int 	bdStore::getPeer(bdPeer *peer)
 {
 #ifdef DEBUG_STORE
-	fprintf(stderr, "bdStore::getPeer() %ld Peers left\n", (long) store.size());
+	syslog(LOG_INFO, "bdStore::getPeer() %ld Peers left\n", (long) store.size());
 #endif
 
 	std::list<bdPeer>::iterator it;
@@ -173,14 +174,14 @@ void	bdStore::writeStore(std::string file)
 {
 	/* write out store */
 #ifdef DEBUG_STORE
-	fprintf(stderr, "bdStore::writeStore(%s) =  %d entries\n", file.c_str(), store.size());
+	syslog(LOG_INFO, "bdStore::writeStore(%s) =  %d entries\n", file.c_str(), store.size());
 #endif
 
 	if (store.size() < 0.9 * MAX_ENTRIES)
 	{
 		/* don't save yet! */
 #ifdef DEBUG_STORE
-		fprintf(stderr, "bdStore::writeStore() Delaying until more entries\n");
+		syslog(LOG_INFO, "bdStore::writeStore() Delaying until more entries\n");
 #endif
 		return;
 	}
@@ -192,7 +193,7 @@ void	bdStore::writeStore(std::string file)
 	{
 #ifdef DEBUG_STORE
 #endif
-		fprintf(stderr, "bdStore::writeStore() FAILED to Open File\n");
+		syslog(LOG_INFO, "bdStore::writeStore() FAILED to Open File\n");
 		return;
 	}
 	
@@ -201,7 +202,7 @@ void	bdStore::writeStore(std::string file)
 	{
 		fprintf(fd, "%s %d\n", inet_ntoa(it->mPeerId.addr.sin_addr), ntohs(it->mPeerId.addr.sin_port));
 #ifdef DEBUG_STORE
-		fprintf(stderr, "Storing Peer Address: %s %d\n", inet_ntoa(it->mPeerId.addr.sin_addr), ntohs(it->mPeerId.addr.sin_port));
+		syslog(LOG_INFO, "Storing Peer Address: %s %d\n", inet_ntoa(it->mPeerId.addr.sin_addr), ntohs(it->mPeerId.addr.sin_port));
 #endif
 
 	}

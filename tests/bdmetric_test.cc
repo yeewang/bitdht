@@ -85,9 +85,9 @@ bool test_metric_explicit()
 		
 	for(i = 0; i < NUM_IDS; i++)
 	{
-		fprintf(stderr, "id[%d]:", i+1);
+		syslog(LOG_INFO, "id[%d]:", i+1);
 		bdStdPrintId(std::clog,&(id[i]));
-		fprintf(stderr, "\n");
+		syslog(LOG_INFO, "\n");
 	}
 
 	/* now do the sums */
@@ -101,12 +101,12 @@ bool test_metric_explicit()
 		{
 			bdStdDistance(&(id[i].id), &(id[j].id), &met);
 
-			fprintf(stderr, "%d^%d:", i, j);
+			syslog(LOG_INFO, "%d^%d:", i, j);
 			bdStdPrintNodeId(std::clog,&met);
-			fprintf(stderr, "\n");
+			syslog(LOG_INFO, "\n");
 
 			bdist = bdStdBucketDistance(&met);
-			fprintf(stderr, " bucket: %d\n", bdist);
+			syslog(LOG_INFO, " bucket: %d\n", bdist);
 		}
 	}
 
@@ -114,7 +114,7 @@ bool test_metric_explicit()
 	int c1 = met < met2;
 	int c2 = met2 < met;
 
-	fprintf(stderr, "1^2<1^3? : %d  1^3<1^2?: %d\n", c1, c2);
+	syslog(LOG_INFO, "1^2<1^3? : %d  1^3<1^2?: %d\n", c1, c2);
 #endif
 
 
@@ -145,29 +145,29 @@ bool test_metric_random()
 	bdStdRandomId(&id5);
 	bdStdRandomId(&id6);
 
-	fprintf(stderr, "id1:");
+	syslog(LOG_INFO, "id1:");
 	bdStdPrintId(std::clog,&id1);
-	fprintf(stderr, "\n");
+	syslog(LOG_INFO, "\n");
 
-	fprintf(stderr, "id2:");
+	syslog(LOG_INFO, "id2:");
 	bdStdPrintId(std::clog,&id2);
-	fprintf(stderr, "\n");
+	syslog(LOG_INFO, "\n");
 
-	fprintf(stderr, "id3:");
+	syslog(LOG_INFO, "id3:");
 	bdStdPrintId(std::clog,&id3);
-	fprintf(stderr, "\n");
+	syslog(LOG_INFO, "\n");
 
-	fprintf(stderr, "id4:");
+	syslog(LOG_INFO, "id4:");
 	bdStdPrintId(std::clog,&id4);
-	fprintf(stderr, "\n");
+	syslog(LOG_INFO, "\n");
 
-	fprintf(stderr, "id5:");
+	syslog(LOG_INFO, "id5:");
 	bdStdPrintId(std::clog,&id5);
-	fprintf(stderr, "\n");
+	syslog(LOG_INFO, "\n");
 
-	fprintf(stderr, "id6:");
+	syslog(LOG_INFO, "id6:");
 	bdStdPrintId(std::clog,&id6);
-	fprintf(stderr, "\n");
+	syslog(LOG_INFO, "\n");
 
 	/* now do the sums */
 	bdMetric met;
@@ -175,87 +175,87 @@ bool test_metric_random()
 	int bdist = 0;
 	bdStdDistance(&(id1.id), &(id2.id), &met);
 
-	fprintf(stderr, "1^2:");
+	syslog(LOG_INFO, "1^2:");
 	bdStdPrintNodeId(std::clog,&met);
-	fprintf(stderr, "\n");
+	syslog(LOG_INFO, "\n");
 	bdist = bdStdBucketDistance(&met);
-	fprintf(stderr, " bucket: %d\n", bdist);
+	syslog(LOG_INFO, " bucket: %d\n", bdist);
 
 	bdStdDistance(&(id1.id), &(id3.id), &met2);
 	bdist = bdStdBucketDistance(&met2);
 
-	fprintf(stderr, "1^3:");
+	syslog(LOG_INFO, "1^3:");
 	bdStdPrintNodeId(std::clog,&met2);
-	fprintf(stderr, "\n");
-	fprintf(stderr, " bucket: %d\n", bdist);
+	syslog(LOG_INFO, "\n");
+	syslog(LOG_INFO, " bucket: %d\n", bdist);
 
 	int c1 = met < met2;
 	int c2 = met2 < met;
 
-	fprintf(stderr, "1^2<1^3? : %d  1^3<1^2?: %d\n", c1, c2);
+	syslog(LOG_INFO, "1^2<1^3? : %d  1^3<1^2?: %d\n", c1, c2);
 
 
 	bdStdDistance(&(id1.id), &(id4.id), &met2);
 	bdist = bdStdBucketDistance(&met2);
 
-	fprintf(stderr, "1^4:");
+	syslog(LOG_INFO, "1^4:");
 	bdStdPrintNodeId(std::clog,&met2);
-	fprintf(stderr, "\n");
-	fprintf(stderr, " bucket: %d\n", bdist);
+	syslog(LOG_INFO, "\n");
+	syslog(LOG_INFO, " bucket: %d\n", bdist);
 
 	c1 = met < met2;
 	c2 = met2 < met;
 
-	fprintf(stderr, "1^2<1^4? : %d  1^4<1^2?: %d\n", c1, c2);
+	syslog(LOG_INFO, "1^2<1^4? : %d  1^4<1^2?: %d\n", c1, c2);
 
 	bdStdDistance(&(id1.id), &(id5.id), &met);
 	bdist = bdStdBucketDistance(&met);
 
-	fprintf(stderr, "1^5:");
+	syslog(LOG_INFO, "1^5:");
 	bdStdPrintNodeId(std::clog,&met);
-	fprintf(stderr, "\n");
-	fprintf(stderr, " bucket: %d\n", bdist);
+	syslog(LOG_INFO, "\n");
+	syslog(LOG_INFO, " bucket: %d\n", bdist);
 
 	bdStdDistance(&(id1.id), &(id6.id), &met);
 	bdist = bdStdBucketDistance(&met);
 
-	fprintf(stderr, "1^6:");
+	syslog(LOG_INFO, "1^6:");
 	bdStdPrintNodeId(std::clog,&met);
-	fprintf(stderr, "\n");
-	fprintf(stderr, " bucket: %d\n", bdist);
+	syslog(LOG_INFO, "\n");
+	syslog(LOG_INFO, " bucket: %d\n", bdist);
 
 	bdStdDistance(&(id2.id), &(id3.id), &met);
 	bdist = bdStdBucketDistance(&met);
 
-	fprintf(stderr, "2^3:");
+	syslog(LOG_INFO, "2^3:");
 	bdStdPrintNodeId(std::clog,&met);
-	fprintf(stderr, "\n");
-	fprintf(stderr, " bucket: %d\n", bdist);
+	syslog(LOG_INFO, "\n");
+	syslog(LOG_INFO, " bucket: %d\n", bdist);
 
 
-	fprintf(stderr, "id1:");
+	syslog(LOG_INFO, "id1:");
 	bdStdPrintId(std::clog,&id1);
-	fprintf(stderr, "\n");
+	syslog(LOG_INFO, "\n");
 
-	fprintf(stderr, "id2:");
+	syslog(LOG_INFO, "id2:");
 	bdStdPrintId(std::clog,&id2);
-	fprintf(stderr, "\n");
+	syslog(LOG_INFO, "\n");
 
-	fprintf(stderr, "id3:");
+	syslog(LOG_INFO, "id3:");
 	bdStdPrintId(std::clog,&id3);
-	fprintf(stderr, "\n");
+	syslog(LOG_INFO, "\n");
 
-	fprintf(stderr, "id4:");
+	syslog(LOG_INFO, "id4:");
 	bdStdPrintId(std::clog,&id4);
-	fprintf(stderr, "\n");
+	syslog(LOG_INFO, "\n");
 
-	fprintf(stderr, "id5:");
+	syslog(LOG_INFO, "id5:");
 	bdStdPrintId(std::clog,&id5);
-	fprintf(stderr, "\n");
+	syslog(LOG_INFO, "\n");
 
-	fprintf(stderr, "id6:");
+	syslog(LOG_INFO, "id6:");
 	bdStdPrintId(std::clog,&id6);
-	fprintf(stderr, "\n");
+	syslog(LOG_INFO, "\n");
 
 
 	return 1;

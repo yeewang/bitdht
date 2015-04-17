@@ -96,6 +96,13 @@ void UdpBitDht::removeFindNode(bdNodeId *id)
 	mBitDhtManager->removeFindNode(id);
 }
 
+void UdpBitDht::removeAllFindNode()
+{
+	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
+
+	mBitDhtManager->removeAllFindNode();
+}
+
 void UdpBitDht::findDhtValue(bdNodeId *id, std::string key, uint32_t mode)
 {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/

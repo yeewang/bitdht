@@ -105,7 +105,7 @@ class bdNode
 	// peer flags defined in bdiface.h
 	virtual void addPeer(const bdId *id, uint32_t peerflags);
 
-	void printState();
+	void printState(std::ostream &debug);
 	void checkPotentialPeer(bdId *id);
 	void addPotentialPeer(bdId *id);
 

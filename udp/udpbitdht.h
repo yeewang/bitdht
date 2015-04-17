@@ -61,6 +61,7 @@ public:
 	/* Request Keyword Lookup */
 	virtual	void addFindNode(bdNodeId *id, uint32_t mode);
 	virtual	void removeFindNode(bdNodeId *id);
+	virtual void removeAllFindNode();
 	virtual	void findDhtValue(bdNodeId *id, std::string key, uint32_t mode);
 
 	/***** Add / Remove Callback Clients *****/

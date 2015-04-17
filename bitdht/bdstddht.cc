@@ -169,10 +169,8 @@ void bdStdPrintNodeId(std::ostream &out, const bdNodeId *a)
 		out << std::setw(2) << std::setfill('0') << std::hex << (uint32_t) (a->data)[i];
 	}
 	out << std::dec;
-
 	return;
 }
-
 
 void bdStdPrintId(std::ostream &out, const bdId *a)
 {
@@ -201,7 +199,7 @@ int bdStdBucketDistance(const bdMetric *m)
 		unsigned char comp = (1 << bbit);
 
 #ifdef BITDHT_DEBUG
-		fprintf(stderr, "bdStdBucketDistance: bit:%d  byte:%d bbit:%d comp:%x, data:%x\n", bit, byte, bbit, comp, m->data[byte]);
+		syslog(LOG_INFO, "bdStdBucketDistance: bit:%d  byte:%d bbit:%d comp:%x, data:%x\n", bit, byte, bbit, comp, m->data[byte]);
 #endif
 
 		if (comp & m->data[byte])

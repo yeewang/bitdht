@@ -29,6 +29,7 @@
 #include "bitdht/bdmsgs.h"
 
 #include "util/bdnet.h"
+#include "util/bdlog.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -117,11 +118,11 @@ void bdNode::updateStore()
 	mStore.writeStore();
 }
 
-void bdNode::printState()
+void bdNode::printState(std::ostream &debug)
 {
-	std::clog << "bdNode::printState() for Peer: ";
-	mFns->bdPrintNodeId(std::clog, &mOwnId);
-	std::clog << std::endl;
+	debug << "bdNode::printState() for Peer: ";
+	mFns->bdPrintNodeId(debug, &mOwnId);
+	debug << std::endl;
 
 	mNodeSpace.printDHT();
 
@@ -144,9 +145,9 @@ void bdNode::printQueries()
 	std::list<bdQuery *>::iterator it;
 	for(it = mLocalQueries.begin(); it != mLocalQueries.end(); it++, i++)
 	{
-		fprintf(stderr, "Query #%d:\n", i);
+		syslog(LOG_INFO, "Query #%d:\n", i);
 		(*it)->printQuery();
-		fprintf(stderr, "\n");
+		syslog(LOG_INFO, "\n");
 	}
 }
 
@@ -511,9 +512,9 @@ void bdNode::addPeer(const bdId *id, uint32_t peerflags)
 {
 
 #ifdef DEBUG_NODE_ACTIONS 
-	fprintf(stderr, "bdNode::addPeer(");
+	syslog(LOG_INFO, "bdNode::addPeer(");
 	mFns->bdPrintId(std::clog, id);
-	fprintf(stderr, ")\n");
+	syslog(LOG_INFO, ")\n");
 #endif
 
 	/* iterate through queries */
@@ -544,7 +545,7 @@ void bdNode::PeerResponse(const bdId *id, const bdNodeId *target, uint32_t peerf
 	mFns->bdPrintId(std::clog, id);
 	std::clog << ", target: ";
 	mFns->bdPrintNodeId(std::clog, target);
-	fprintf(stderr, ")\n");
+	syslog(LOG_INFO, ")\n");
 #endif
 
 	/* iterate through queries */
@@ -1019,7 +1020,7 @@ void bdNode::msgout_reply_post(bdId *id, bdToken *transId)
 
 void    bdNode::sendPkt(char *msg, int len, struct sockaddr_in addr)
 {
-	//fprintf(stderr, "bdNode::sendPkt(%d) to %s:%d\n", 
+	//syslog(LOG_INFO, "bdNode::sendPkt(%d) to %s:%d\n", 
 	//		len, inet_ntoa(addr.sin_addr), htons(addr.sin_port));
 
 	bdNodeNetMsg *bdmsg = new bdNodeNetMsg(msg, len, &addr);
@@ -1725,8 +1726,8 @@ void bdNode::msgin_reply_post(bdId *id, bdToken *transId)
 void bdNode::genNewToken(bdToken *token)
 {
 #ifdef DEBUG_NODE_ACTIONS 
-	fprintf(stderr, "bdNode::genNewToken()");
-	fprintf(stderr, ")\n");
+	syslog(LOG_INFO, "bdNode::genNewToken()");
+	syslog(LOG_INFO, ")\n");
 #endif
 
 	std::ostringstream out;
@@ -1749,8 +1750,8 @@ void bdNode::genNewTransId(bdToken *token)
 {
 	/* generate message, send to udp */
 #ifdef DEBUG_NODE_ACTIONS 
-	fprintf(stderr, "bdNode::genNewTransId()");
-	fprintf(stderr, ")\n");
+	syslog(LOG_INFO, "bdNode::genNewTransId()");
+	syslog(LOG_INFO, ")\n");
 #endif
 
 	std::ostringstream out;

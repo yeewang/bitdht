@@ -5,29 +5,76 @@
  *      Author: Yi
  */
 
-#include <log4cpp/Category.hh>
-#include <log4cpp/Appender.hh>
-#include <log4cpp/FileAppender.hh>
-#include <log4cpp/OstreamAppender.hh>
-#include <log4cpp/Layout.hh>
-#include <log4cpp/BasicLayout.hh>
-#include <log4cpp/Priority.hh>
 #include "bdlog.h"
 
-log4cpp::Category &bdlog =log4cpp::Category::getRoot();
+#include <syslog.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include "bdlog.h"
 
-void bdlog_init()
+
+BDLog::BDLog(std::string ident, int facility) {
+	facility_ = facility;
+	priority_ = LOG_DEBUG;
+	strncpy(ident_, ident.c_str(), sizeof(ident_));
+	ident_[sizeof(ident_)-1] = '\0';
+
+	openlog(ident_, LOG_PID, facility_);
+}
+
+BDLog::~BDLog()
 {
-	log4cpp::Appender *appender1 = new log4cpp::OstreamAppender("console", &std::cout);
-	appender1->setLayout(new log4cpp::BasicLayout());
+	closelog();
+}
 
-	log4cpp::Appender *appender2 = new log4cpp::FileAppender("default", "program.log");
-	appender2->setLayout(new log4cpp::BasicLayout());
+BDLog * BDLog::instance()
+{
+	static BDLog *log = NULL;
+	if (log == NULL) {
+		log = new BDLog("Tandem", LOG_LOCAL0);
+		std::clog.rdbuf(log);
+	}
+	return log;
+}
 
-	log4cpp::Category& root = log4cpp::Category::getRoot();
-	root.setPriority(log4cpp::Priority::WARN);
-	root.addAppender(appender1);
+int BDLog::sync() {
+	if (buffer_.length()) {
+		syslog(priority_, "%s", buffer_.c_str());
+		buffer_.erase();
+		priority_ = LOG_DEBUG; // default to debug for each message
+	}
+	return 0;
+}
 
-	log4cpp::Category& sub1 = log4cpp::Category::getInstance(std::string("sub1"));
-	sub1.addAppender(appender2);
+int BDLog::overflow(int c) {
+	if (c != EOF) {
+		buffer_ += static_cast<char>(c);
+	} else {
+		sync();
+	}
+	return c;
+}
+
+std::ostream& operator<< (std::ostream& os, const LogPriority& log_priority) {
+	static_cast<BDLog *>(os.rdbuf())->priority_ = (int)log_priority;
+	return os;
+}
+
+template<typename... Args>
+void BDLog::info(Args... args)
+{
+	syslog(LOG_INFO, args...);
+}
+
+template<typename... Args>
+void BDLog::debug(Args... args)
+{
+	syslog(LOG_DEBUG, args...);
+}
+
+template<typename... Args>
+void BDLog::error(Args... args)
+{
+	syslog(LOG_ERR, args...);
 }

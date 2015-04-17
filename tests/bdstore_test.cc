@@ -35,7 +35,7 @@ int main(int argc, char **argv)
 	/* load store */
 	if (argc < 2)
 	{
-		fprintf(stderr, "Missing Store File\n");
+		syslog(LOG_INFO, "Missing Store File\n");
 		exit(1);
 	}
 

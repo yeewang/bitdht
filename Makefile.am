@@ -2,7 +2,7 @@
 LIBS = ../log2cpp/src/.libs/liblog4cpp.a
 	
 AM_CFLAGS = -Wall -lpthread 
-AM_CXXFLAGS = -Wall  -lpthread -I../log4cpp/include
+AM_CXXFLAGS = -Wall  -lpthread -I../log4cpp/include -std=c++11
 
 if DEBUG
 AM_CFLAGS += -g3 -O0 -D BE_DEBUG -D DEBUG_MGR

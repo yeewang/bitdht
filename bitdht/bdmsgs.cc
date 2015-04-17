@@ -54,7 +54,7 @@ bencoded = d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:y1:qe
 int bitdht_create_ping_msg(bdToken *tid, bdNodeId *id, char *msg, int avail)
 {
 #ifdef DEBUG_MSGS 
-	fprintf(stderr, "bitdht_create_ping_msg()\n");
+	syslog(LOG_INFO, "bitdht_create_ping_msg()\n");
 #endif
 
 	be_node *dict = be_create_dict();
@@ -96,7 +96,7 @@ int bitdht_response_ping_msg(bdToken *tid, bdNodeId *id, bdToken *vid,
 					char *msg, int avail)
 {
 #ifdef DEBUG_MSGS 
-	fprintf(stderr, "bitdht_response_ping_msg()\n");
+	syslog(LOG_INFO, "bitdht_response_ping_msg()\n");
 #endif
 
         be_node *dict = be_create_dict();
@@ -138,7 +138,7 @@ int bitdht_find_node_msg(bdToken *tid, bdNodeId *id, bdNodeId *target,
 					char *msg, int avail)
 {
 #ifdef DEBUG_MSGS 
-	fprintf(stderr, "bitdht_find_node_msg()\n");
+	syslog(LOG_INFO, "bitdht_find_node_msg()\n");
 #endif
 
         be_node *dict = be_create_dict();
@@ -181,7 +181,7 @@ int bitdht_resp_node_msg(bdToken *tid, bdNodeId *id, std::list<bdId> &nodes,
 					char *msg, int avail)
 {
 #ifdef DEBUG_MSGS 
-	fprintf(stderr, "bitdht_resp_node_msg()\n");
+	syslog(LOG_INFO, "bitdht_resp_node_msg()\n");
 #endif
 
         be_node *dict = be_create_dict();
@@ -210,7 +210,7 @@ int bitdht_resp_node_msg(bdToken *tid, bdNodeId *id, std::list<bdId> &nodes,
 	be_free(dict);
 
 #ifdef DEBUG_MSG_DUMP
-	fprintf(stderr, "bitdht_resp_node_msg() len = %d / %d\n", blen, avail);
+	syslog(LOG_INFO, "bitdht_resp_node_msg() len = %d / %d\n", blen, avail);
 #endif
 
 	return blen;
@@ -226,7 +226,7 @@ int bitdht_get_peers_msg(bdToken *tid, bdNodeId *id, bdNodeId *info_hash,
 					char *msg, int avail)
 {
 #ifdef DEBUG_MSGS 
-	fprintf(stderr, "bitdht_get_peers_msg()\n");
+	syslog(LOG_INFO, "bitdht_get_peers_msg()\n");
 #endif
 
         be_node *dict = be_create_dict();
@@ -269,7 +269,7 @@ int bitdht_peers_reply_hash_msg(bdToken *tid, bdNodeId *id,
 					char *msg, int avail)
 {
 #ifdef DEBUG_MSGS 
-	fprintf(stderr, "bitdht_peers_reply_hash_msg()\n");
+	syslog(LOG_INFO, "bitdht_peers_reply_hash_msg()\n");
 #endif
 
         be_node *dict = be_create_dict();
@@ -315,7 +315,7 @@ int bitdht_peers_reply_closest_msg(bdToken *tid, bdNodeId *id,
 					char *msg, int avail)
 {
 #ifdef DEBUG_MSGS 
-	fprintf(stderr, "bitdht_peers_reply_closest_msg()\n");
+	syslog(LOG_INFO, "bitdht_peers_reply_closest_msg()\n");
 #endif
 
         be_node *dict = be_create_dict();
@@ -361,7 +361,7 @@ bencoded = d1:ad2:id20:abcdefghij01234567899:info_hash20:mnopqrstuvwxyz1234564:p
 int bitdht_announce_peers_msg(bdToken *tid, bdNodeId *id, bdNodeId *info_hash, uint32_t port, bdToken *token, char *msg, int avail)
 {
 #ifdef DEBUG_MSGS 
-	fprintf(stderr, "bitdht_announce_peers_msg()\n");
+	syslog(LOG_INFO, "bitdht_announce_peers_msg()\n");
 #endif
 
 	be_node *dict = be_create_dict();
@@ -414,7 +414,7 @@ int bitdht_reply_announce_msg(bdToken *tid, bdNodeId *id,
 					char *msg, int avail)
 {
 #ifdef DEBUG_MSGS 
-	fprintf(stderr, "bitdht_response_ping_msg()\n");
+	syslog(LOG_INFO, "bitdht_response_ping_msg()\n");
 #endif
 
         be_node *dict = be_create_dict();

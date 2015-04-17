@@ -2,6 +2,9 @@
 
 #include "bitdht/bdhistory.h"
 #include "bitdht/bdstddht.h"
+#include "util/bdlog.h"
+
+#include <sstream>
 
 #define MIN_RESEND_PERIOD  60
 
@@ -158,7 +161,7 @@ void bdHistory::addMsg(const bdId *id, bdToken * /*transId*/, uint32_t msgType, 
 void bdHistory::printMsgs()
 {
 	/* print and clear msgs */
-	std::ostream &out = std::clog;
+	std::ostringstream out;
 
 	std::map<bdId, bdMsgHistoryList> ::iterator it;
 	for(it = mHistory.begin(); it != mHistory.end(); it++)
@@ -171,6 +174,10 @@ void bdHistory::printMsgs()
 			out << std::endl;
 
 			it->second.printHistory(out, 0, 0, time(NULL));
+
+			out << std::endl;
+
+			syslog(LOG_INFO, out.str().c_str(), "");
 		}
 	}
 }

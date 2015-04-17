@@ -26,6 +26,7 @@
 
 #include "bitdht/bdpeer.h"
 #include "util/bdnet.h"
+#include "util/bdlog.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -94,18 +95,18 @@ int operator<(const bdNodeId &a, const bdNodeId &b)
 	{
 		if (*a_data < *b_data)
 		{
-			//fprintf(stderr, "Return 1, at i = %d\n", i);
+			//syslog(LOG_INFO, "Return 1, at i = %d\n", i);
 			return 1;
 		}
 		else if (*a_data > *b_data)
 		{
-			//fprintf(stderr, "Return 0, at i = %d\n", i);
+			//syslog(LOG_INFO, "Return 0, at i = %d\n", i);
 			return 0;
 		}
 		a_data++;
 		b_data++;
 	}
-	//fprintf(stderr, "Return 0, at i = KEYLEN\n");
+	//syslog(LOG_INFO, "Return 0, at i = KEYLEN\n");
 	return 0;
 }
 
@@ -296,7 +297,7 @@ int bdBucketDistance(const bdMetric *m)
 		unsigned char comp = (1 << bbit);
 
 #ifdef BITDHT_DEBUG
-		fprintf(stderr, "bdBucketDistance: bit:%d  byte:%d bbit:%d comp:%x, data:%x\n", bit, byte, bbit, comp, m->data[byte]);
+		syslog(LOG_INFO, "bdBucketDistance: bit:%d  byte:%d bbit:%d comp:%x, data:%x\n", bit, byte, bbit, comp, m->data[byte]);
 #endif
 
 		if (comp & m->data[byte])
@@ -484,7 +485,7 @@ int     bdSpace::add_peer(const bdId *id, uint32_t peerflags)
 	time_t ts = time(NULL);
 	
 #ifdef DEBUG_BD_SPACE
-	fprintf(stderr, "bdSpace::add_peer()\n");
+	syslog(LOG_INFO, "bdSpace::add_peer()\n");
 #endif
 
 	/* calculate metric */
@@ -493,10 +494,10 @@ int     bdSpace::add_peer(const bdId *id, uint32_t peerflags)
 	int bucket = mFns->bdBucketDistance(&met);
 
 #ifdef DEBUG_BD_SPACE
-	fprintf(stderr, "peer:");
+	syslog(LOG_INFO, "peer:");
 	mFns->bdPrintId(std::clog, id);	
-	fprintf(stderr, " bucket: %d", bucket);
-	fprintf(stderr, "\n");
+	syslog(LOG_INFO, " bucket: %d", bucket);
+	syslog(LOG_INFO, "\n");
 #endif
 
 	/* select correct bucket */
@@ -598,10 +599,14 @@ int     bdSpace::add_peer(const bdId *id, uint32_t peerflags)
 #ifdef DEBUG_BD_SPACE
 #endif
 		/* useful debug */
-		std::clog << "bdSpace::add_peer() Added Bucket[";
-		std::clog << bucket << "] Entry: ";
-		mFns->bdPrintId(std::clog, id);
-		std::clog << std::endl;
+		std::ostringstream ss;
+
+		ss << "bdSpace::add_peer() Added Bucket[";
+		ss << bucket << "] Entry: ";
+		mFns->bdPrintId(ss, id);
+		ss << std::endl;
+
+		syslog(LOG_INFO, ss.str().c_str(), "");
 	}
 	return add;
 }
@@ -623,12 +628,12 @@ int     bdSpace::printDHT()
 	int i = 0;
 
 #ifdef BITDHT_DEBUG
-	fprintf(stderr, "bdSpace::printDHT()\n");
+	syslog(LOG_INFO, "bdSpace::printDHT()\n");
 	for(it = buckets.begin(); it != buckets.end(); it++, i++)
 	{
 		if (it->entries.size() > 0)
 		{
-			fprintf(stderr, "Bucket %d ----------------------------\n", i);
+			syslog(LOG_INFO, "Bucket %d ----------------------------\n", i);
 		}
 
 		for(eit = it->entries.begin(); eit != it->entries.end(); eit++) 
@@ -636,19 +641,19 @@ int     bdSpace::printDHT()
 			bdMetric dist;
 			mFns->bdDistance(&(mOwnId), &(eit->mPeerId.id), &dist);
 
-			fprintf(stderr, " Metric: ");
+			syslog(LOG_INFO, " Metric: ");
 			mFns->bdPrintNodeId(std::clog, &(dist));
-			fprintf(stderr, " Id: ");
+			syslog(LOG_INFO, " Id: ");
 			mFns->bdPrintId(std::clog, &(eit->mPeerId));
-			fprintf(stderr, " PeerFlags: %08x", eit->mPeerFlags);
-			fprintf(stderr, "\n");
+			syslog(LOG_INFO, " PeerFlags: %08x", eit->mPeerFlags);
+			syslog(LOG_INFO, "\n");
 		}
 	}
 #endif
 
-	fprintf(stderr, "--------------------------------------\n");
-	fprintf(stderr, "DHT Table Summary --------------------\n");
-	fprintf(stderr, "--------------------------------------\n");
+	syslog(LOG_INFO, "--------------------------------------\n");
+	syslog(LOG_INFO, "DHT Table Summary --------------------\n");
+	syslog(LOG_INFO, "--------------------------------------\n");
 
 	/* little summary */
 	unsigned long long sum = 0;
@@ -693,10 +698,10 @@ int     bdSpace::printDHT()
 		if (doPrint)
 		{
 			if (size)
-				fprintf(stderr, "Bucket %d: %d peers: ", i, size);
+				syslog(LOG_INFO, "Bucket %d: %d peers: ", i, size);
 #ifdef BITDHT_DEBUG
 			else
-				fprintf(stderr, "Bucket %d: %d peers: ", i, size);
+				syslog(LOG_INFO, "Bucket %d: %d peers: ", i, size);
 #endif
 		}
 		if (toBig)
@@ -704,13 +709,13 @@ int     bdSpace::printDHT()
 			if (size)
 			{
 				if (doPrint)
-					fprintf(stderr, "Estimated NetSize >> %llu\n", no_nets);
+					syslog(LOG_INFO, "Estimated NetSize >> %llu\n", no_nets);
 			}
 			else
 			{
 #ifdef BITDHT_DEBUG
 				if (doPrint)
-					fprintf(stderr, " Bucket = Net / >> %llu\n", no_nets);
+					syslog(LOG_INFO, " Bucket = Net / >> %llu\n", no_nets);
 #endif
 			}
 		}
@@ -720,14 +725,14 @@ int     bdSpace::printDHT()
 			if (size)
 			{	
 				if (doPrint)
-					fprintf(stderr, "Estimated NetSize = %llu\n", no_peers);
+					syslog(LOG_INFO, "Estimated NetSize = %llu\n", no_peers);
 			}
 			else
 			{
 
 #ifdef BITDHT_DEBUG
 				if (doPrint)
-					fprintf(stderr, " Bucket = Net / %llu\n", no_nets);
+					syslog(LOG_INFO, " Bucket = Net / %llu\n", no_nets);
 #endif
 
 			}
@@ -744,7 +749,7 @@ int     bdSpace::printDHT()
 				sum += no_peers;
 				count++;	
 #ifdef BITDHT_DEBUG
-				fprintf(stderr, "Est: %d: %llu => %llu / %d\n", 
+				syslog(LOG_INFO, "Est: %d: %llu => %llu / %d\n", 
 					i, no_peers, sum, count);
 #endif
 			}
@@ -753,11 +758,11 @@ int     bdSpace::printDHT()
 	}
 	if (count == 0)
 	{
-		fprintf(stderr, "Zero Network Size (count = 0)\n");
+		syslog(LOG_INFO, "Zero Network Size (count = 0)\n");
 	}
 	else
 	{
-		fprintf(stderr, "Estimated Network Size = (%llu / %d) = %llu\n", sum, count, sum / count);
+		syslog(LOG_INFO, "Estimated Network Size = (%llu / %d) = %llu\n", sum, count, sum / count);
 	}
 
 	return 1;

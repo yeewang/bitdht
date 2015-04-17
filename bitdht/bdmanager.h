@@ -60,7 +60,7 @@
 
 class bdQueryPeer
 {
-	public:
+public:
 	bdId mId;
 	uint32_t mStatus;
 	uint32_t mQFlags;
@@ -93,60 +93,61 @@ class bdQueryPeer
 
 class bdNodeManager: public bdNode, public BitDhtInterface
 {
-	public:
-        bdNodeManager(bdNodeId *id, std::string dhtVersion, std::string bootfile, bdDhtFunctions *fns);
+public:
+	bdNodeManager(bdNodeId *id, std::string dhtVersion, std::string bootfile, bdDhtFunctions *fns);
 
 
-void 	iteration();
+	void iteration();
 
-        /***** Functions to Call down to bdNodeManager ****/
-        /* Request DHT Peer Lookup */
-        /* Request Keyword Lookup */
-virtual void addFindNode(bdNodeId *id, uint32_t mode);
-virtual void removeFindNode(bdNodeId *id);
-virtual void findDhtValue(bdNodeId *id, std::string key, uint32_t mode);
+	/***** Functions to Call down to bdNodeManager ****/
+	/* Request DHT Peer Lookup */
+	/* Request Keyword Lookup */
+	virtual void addFindNode(bdNodeId *id, uint32_t mode);
+	virtual void removeFindNode(bdNodeId *id);
+	virtual void removeAllFindNode();
+	virtual void findDhtValue(bdNodeId *id, std::string key, uint32_t mode);
 
-        /***** Add / Remove Callback Clients *****/
-virtual void addCallback(BitDhtCallback *cb);
-virtual void removeCallback(BitDhtCallback *cb);
+	/***** Add / Remove Callback Clients *****/
+	virtual void addCallback(BitDhtCallback *cb);
+	virtual void removeCallback(BitDhtCallback *cb);
 
-        /***** Get Results Details *****/
-virtual int getDhtPeerAddress(const bdNodeId *id, struct sockaddr_in &from);
-virtual int getDhtValue(const bdNodeId *id, std::string key, std::string &value);
+	/***** Get Results Details *****/
+	virtual int getDhtPeerAddress(const bdNodeId *id, struct sockaddr_in &from);
+	virtual int getDhtValue(const bdNodeId *id, std::string key, std::string &value);
 
 	/* stats and Dht state */
-virtual int startDht();
-virtual int stopDht();
-virtual int stateDht(); /* STOPPED, STARTING, ACTIVE, FAILED */
-virtual uint32_t statsNetworkSize();
-virtual uint32_t statsBDVersionSize(); /* same version as us! */
-        /******************* Internals *************************/
+	virtual int startDht();
+	virtual int stopDht();
+	virtual int stateDht(); /* STOPPED, STARTING, ACTIVE, FAILED */
+	virtual uint32_t statsNetworkSize();
+	virtual uint32_t statsBDVersionSize(); /* same version as us! */
+	/******************* Internals *************************/
 
 	// Overloaded from bdnode for external node callback.
-virtual void addPeer(const bdId *id, uint32_t peerflags);
+	virtual void addPeer(const bdId *id, uint32_t peerflags);
 
 
-int 	isBitDhtPacket(char *data, int size, struct sockaddr_in &from);
-	private:
+	int 	isBitDhtPacket(char *data, int size, struct sockaddr_in &from);
+private:
 
 
-void 	doNodeCallback(const bdId *id, uint32_t peerflags);
-void 	doPeerCallback(const bdNodeId *id, uint32_t status);
-void 	doValueCallback(const bdNodeId *id, std::string key, uint32_t status);
+	void 	doNodeCallback(const bdId *id, uint32_t peerflags);
+	void 	doPeerCallback(const bdNodeId *id, uint32_t status);
+	void 	doValueCallback(const bdNodeId *id, std::string key, uint32_t status);
 
-int	status();
-int	checkStatus();
-int 	checkPingStatus();
-int 	SearchOutOfDate();
-void	startQueries();
+	int	status(std::ostream&);
+	int	checkStatus(std::ostream &debug);
+	int 	checkPingStatus();
+	int 	SearchOutOfDate();
+	void	startQueries();
 
 	std::map<bdNodeId, bdQueryPeer>	mActivePeers;
-        std::list<BitDhtCallback *> mCallbacks;
+	std::list<BitDhtCallback *> mCallbacks;
 
 	uint32_t mMode;
 	time_t   mModeTS;
 
-        bdDhtFunctions *mFns;
+	bdDhtFunctions *mFns;
 
 	uint32_t mNetworkSize;
 	uint32_t mBdNetworkSize;
@@ -159,10 +160,10 @@ void	startQueries();
 
 class bdDebugCallback: public BitDhtCallback
 {
-        public:
-        ~bdDebugCallback();
-virtual int dhtPeerCallback(const bdNodeId *id, uint32_t status);
-virtual int dhtValueCallback(const bdNodeId *id, std::string key, uint32_t status);
+public:
+	~bdDebugCallback();
+	virtual int dhtPeerCallback(const bdNodeId *id, uint32_t status);
+	virtual int dhtValueCallback(const bdNodeId *id, std::string key, uint32_t status);
 
 };
 

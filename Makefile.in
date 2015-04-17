@@ -297,8 +297,8 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CFLAGS = -Wall -lpthread $(am__append_1) $(am__append_3)
-AM_CXXFLAGS = -Wall -lpthread -I../log4cpp/include $(am__append_2) \
-	$(am__append_4)
+AM_CXXFLAGS = -Wall -lpthread -I../log4cpp/include -std=c++11 \
+	$(am__append_2) $(am__append_4)
 noinst_LIBRARIES = libbitdht.a
 libbitdht_a_SOURCES = bitdht/bencode.c \
 		bitdht/bdobj.cc \

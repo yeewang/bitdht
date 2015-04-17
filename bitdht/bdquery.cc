@@ -27,6 +27,7 @@
 
 #include "bitdht/bdquery.h"
 #include "util/bdnet.h"
+#include "util/bdlog.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -110,7 +111,7 @@ int bdQuery::nextQuery(bdId &id, bdNodeId &targetNodeId)
 	if ((mState != BITDHT_QUERY_QUERYING) && !(mQueryFlags & BITDHT_QFLAGS_DO_IDLE))
 	{
 #ifdef DEBUG_QUERY 
-        	fprintf(stderr, "NextQuery() Query is done\n");
+        	syslog(LOG_INFO, "NextQuery() Query is done\n");
 #endif
 		return 0;
 	}
@@ -134,7 +135,7 @@ int bdQuery::nextQuery(bdId &id, bdNodeId &targetNodeId)
 		if (it->second.mLastSendTime == 0)
 		{
 #ifdef DEBUG_QUERY 
-        		fprintf(stderr, "NextQuery() Found non-sent peer. queryPeer = true : ");
+        		syslog(LOG_INFO, "NextQuery() Found non-sent peer. queryPeer = true : ");
 			mFns->bdPrintId(std::clog, &(it->second.mPeerId));
 			std::clog << std::endl;
 #endif
@@ -146,7 +147,7 @@ int bdQuery::nextQuery(bdId &id, bdNodeId &targetNodeId)
 			(now - it->second.mLastSendTime > mQueryIdlePeerRetryPeriod))
 		{
 #ifdef DEBUG_QUERY 
-        		fprintf(stderr, "NextQuery() Found out-of-date. queryPeer = true : ");
+        		syslog(LOG_INFO, "NextQuery() Found out-of-date. queryPeer = true : ");
 			mFns->bdPrintId(std::clog, &(it->second.mPeerId));
 			std::clog << std::endl;
 #endif
@@ -160,7 +161,7 @@ int bdQuery::nextQuery(bdId &id, bdNodeId &targetNodeId)
 		if (it->second.mLastRecvTime == 0)
 		{
 #ifdef DEBUG_QUERY 
-        		fprintf(stderr, "NextQuery() Never Received: notFinished = true: ");
+        		syslog(LOG_INFO, "NextQuery() Never Received: notFinished = true: ");
 			mFns->bdPrintId(std::clog, &(it->second.mPeerId));
 			std::clog << std::endl;
 #endif
@@ -185,7 +186,7 @@ int bdQuery::nextQuery(bdId &id, bdNodeId &targetNodeId)
 				targetNodeId = mId;
 			}
 #ifdef DEBUG_QUERY 
-        		fprintf(stderr, "NextQuery() Querying Peer: ");
+        		syslog(LOG_INFO, "NextQuery() Querying Peer: ");
 			mFns->bdPrintId(std::clog, &id);
 			std::clog << std::endl;
 #endif
@@ -202,7 +203,7 @@ int bdQuery::nextQuery(bdId &id, bdNodeId &targetNodeId)
 	if (age < BITDHT_MIN_QUERY_AGE)
 	{
 #ifdef DEBUG_QUERY 
-       		fprintf(stderr, "NextQuery() under Min Time: Query not finished / No Query\n");
+       		syslog(LOG_INFO, "NextQuery() under Min Time: Query not finished / No Query\n");
 #endif
 		return 0;
 	}
@@ -210,21 +211,21 @@ int bdQuery::nextQuery(bdId &id, bdNodeId &targetNodeId)
 	if (age > BITDHT_MAX_QUERY_AGE)
 	{
 #ifdef DEBUG_QUERY 
-       		fprintf(stderr, "NextQuery() under Min Time: Query not finished / No Query\n");
+       		syslog(LOG_INFO, "NextQuery() under Min Time: Query not finished / No Query\n");
 #endif
 		/* fall through and stop */
 	}
 	else if ((mClosest.size() < mFns->bdNodesPerBucket()) || (notFinished))
 	{
 #ifdef DEBUG_QUERY 
-       		fprintf(stderr, "NextQuery() notFinished | !size(): Query not finished / No Query\n");
+       		syslog(LOG_INFO, "NextQuery() notFinished | !size(): Query not finished / No Query\n");
 #endif
 		/* not full yet... */
 		return 0;
 	}
 
 #ifdef DEBUG_QUERY 
-	fprintf(stderr, "NextQuery() Finished\n");
+	syslog(LOG_INFO, "NextQuery() Finished\n");
 #endif
 
 	/* if we get here - query finished */
@@ -265,9 +266,9 @@ int bdQuery::addPeer(const bdId *id, uint32_t mode)
 	mFns->bdDistance(&mId, &(id->id), &dist);
 
 #ifdef DEBUG_QUERY 
-        fprintf(stderr, "bdQuery::addPeer(");
+        syslog(LOG_INFO, "bdQuery::addPeer(");
 	mFns->bdPrintId(std::clog, id);
-        fprintf(stderr, ", %u)\n", mode);
+        syslog(LOG_INFO, ", %u)\n", mode);
 #endif
 
 	std::multimap<bdMetric, bdPeer>::iterator it, sit, eit;
@@ -289,13 +290,13 @@ int bdQuery::addPeer(const bdId *id, uint32_t mode)
 	}
 		// Counts where we are.
 #ifdef DEBUG_QUERY 
-        fprintf(stderr, "Searching.... %di = %d - %d peers closer than this one\n", i, actualCloser, toDrop);
+        syslog(LOG_INFO, "Searching.... %di = %d - %d peers closer than this one\n", i, actualCloser, toDrop);
 #endif
 
 	if (i > mFns->bdNodesPerBucket() - 1)
 	{
 #ifdef DEBUG_QUERY 
-        	fprintf(stderr, "Distance to far... dropping\n");
+        	syslog(LOG_INFO, "Distance to far... dropping\n");
 #endif
 		/* drop it */
 		return 0;
@@ -307,13 +308,13 @@ int bdQuery::addPeer(const bdId *id, uint32_t mode)
 		if (it->second.mPeerId == *id)
 		{
 #ifdef DEBUG_QUERY 
-        		fprintf(stderr, "Peer Already here!\n");
+        		syslog(LOG_INFO, "Peer Already here!\n");
 #endif
 			if (mode & BITDHT_PEER_STATUS_RECV_NODES)
 			{
 				/* only update recvTime if sendTime > checkTime.... (then its our query) */
 #ifdef DEBUG_QUERY 
-				fprintf(stderr, "Updating LastRecvTime\n");
+				syslog(LOG_INFO, "Updating LastRecvTime\n");
 #endif
 				it->second.mLastRecvTime = ts;
 			}
@@ -322,14 +323,14 @@ int bdQuery::addPeer(const bdId *id, uint32_t mode)
 	}
 
 #ifdef DEBUG_QUERY 
-        fprintf(stderr, "Peer not in Query\n");
+        syslog(LOG_INFO, "Peer not in Query\n");
 #endif
 	/* firstly drop unresponded (bit ugly - but hard structure to extract from) */
 	int j;
 	for(j = 0; j < toDrop; j++)
 	{
 #ifdef DEBUG_QUERY 
-        	fprintf(stderr, "Dropping Peer that dont reply\n");
+        	syslog(LOG_INFO, "Dropping Peer that dont reply\n");
 #endif
 		bool removed = false;
 		for(it = mClosest.begin(); it != mClosest.end(); ++it)
@@ -341,9 +342,9 @@ int bdQuery::addPeer(const bdId *id, uint32_t mode)
 			if ((hasSent) && (!hasReply) && (sendts > EXPECTED_REPLY))
 			{
 #ifdef DEBUG_QUERY 
-        			fprintf(stderr, "Dropped: ");
+        			syslog(LOG_INFO, "Dropped: ");
 				mFns->bdPrintId(std::clog, &(it->second.mPeerId));
-        			fprintf(stderr, "\n");
+        			syslog(LOG_INFO, "\n");
 #endif
 				mClosest.erase(it);
 				removed = true;
@@ -361,9 +362,9 @@ int bdQuery::addPeer(const bdId *id, uint32_t mode)
 		{
 			it--;
 #ifdef DEBUG_QUERY 
-			fprintf(stderr, "Removing Furthest Peer: ");
+			syslog(LOG_INFO, "Removing Furthest Peer: ");
 			mFns->bdPrintId(std::clog, &(it->second.mPeerId));
-			fprintf(stderr, "\n");
+			syslog(LOG_INFO, "\n");
 #endif
 
 			mClosest.erase(it);
@@ -371,9 +372,9 @@ int bdQuery::addPeer(const bdId *id, uint32_t mode)
 	}
 
 #ifdef DEBUG_QUERY 
-        fprintf(stderr, "bdQuery::addPeer(): Closer Peer!: ");
+        syslog(LOG_INFO, "bdQuery::addPeer(): Closer Peer!: ");
 	mFns->bdPrintId(std::clog, id);
-        fprintf(stderr, "\n");
+        syslog(LOG_INFO, "\n");
 #endif
 
 	/* add it in */
@@ -407,9 +408,9 @@ int bdQuery::addPotentialPeer(const bdId *id, uint32_t mode)
 	mFns->bdDistance(&mId, &(id->id), &dist);
 
 #ifdef DEBUG_QUERY 
-        fprintf(stderr, "bdQuery::addPotentialPeer(");
+        syslog(LOG_INFO, "bdQuery::addPotentialPeer(");
 	mFns->bdPrintId(std::clog, id);
-        fprintf(stderr, ", %u)\n", mode);
+        syslog(LOG_INFO, ", %u)\n", mode);
 #endif
 
 	/* first we check if this is a worthy potential peer....
@@ -429,7 +430,7 @@ int bdQuery::addPotentialPeer(const bdId *id, uint32_t mode)
 			/* already there */
 			retval = 0;
 #ifdef DEBUG_QUERY 
-			fprintf(stderr, "Peer already in mClosest\n");
+			syslog(LOG_INFO, "Peer already in mClosest\n");
 #endif
 		}
 		//empty loop.
@@ -439,7 +440,7 @@ int bdQuery::addPotentialPeer(const bdId *id, uint32_t mode)
 	if ((sit == mClosest.end()) && (mClosest.size() >= mFns->bdNodesPerBucket()))
 	{
 #ifdef DEBUG_QUERY 
-		fprintf(stderr, "Peer to far away for Potential\n");
+		syslog(LOG_INFO, "Peer to far away for Potential\n");
 #endif
 		retval = 0; /* too far way */
 	}
@@ -448,7 +449,7 @@ int bdQuery::addPotentialPeer(const bdId *id, uint32_t mode)
 	if (!retval)
 	{
 #ifdef DEBUG_QUERY 
-		fprintf(stderr, "Flagging as Not a Potential Peer!\n");
+		syslog(LOG_INFO, "Flagging as Not a Potential Peer!\n");
 #endif
 		return retval;
 	}
@@ -468,8 +469,8 @@ int bdQuery::addPotentialPeer(const bdId *id, uint32_t mode)
 	if (i > mFns->bdNodesPerBucket() - 1)
 	{
 #ifdef DEBUG_QUERY 
-        	fprintf(stderr, "Distance to far... dropping\n");
-        	fprintf(stderr, "Flagging as Potential Peer!\n");
+        	syslog(LOG_INFO, "Distance to far... dropping\n");
+        	syslog(LOG_INFO, "Flagging as Potential Peer!\n");
 #endif
 		/* outside the list - so we won't add to mPotentialClosest 
 		 * but inside mClosest still - so should still try it 
@@ -484,17 +485,17 @@ int bdQuery::addPotentialPeer(const bdId *id, uint32_t mode)
 		{
 			/* this means its already been pinged */
 #ifdef DEBUG_QUERY 
-        		fprintf(stderr, "Peer Already here in mPotentialClosest!\n");
+        		syslog(LOG_INFO, "Peer Already here in mPotentialClosest!\n");
 #endif
 			if (mode & BITDHT_PEER_STATUS_RECV_NODES)
 			{
 #ifdef DEBUG_QUERY 
-        			fprintf(stderr, "Updating LastRecvTime\n");
+        			syslog(LOG_INFO, "Updating LastRecvTime\n");
 #endif
 				it->second.mLastRecvTime = ts;
 			}
 #ifdef DEBUG_QUERY 
-        		fprintf(stderr, "Flagging as Not a Potential Peer!\n");
+        		syslog(LOG_INFO, "Flagging as Not a Potential Peer!\n");
 #endif
 			retval = 0;
 			return retval;
@@ -502,7 +503,7 @@ int bdQuery::addPotentialPeer(const bdId *id, uint32_t mode)
 	}
 
 #ifdef DEBUG_QUERY 
-        fprintf(stderr, "Peer not in Query\n");
+        syslog(LOG_INFO, "Peer not in Query\n");
 #endif
 
 
@@ -516,18 +517,18 @@ int bdQuery::addPotentialPeer(const bdId *id, uint32_t mode)
 		{
 			--it;
 #ifdef DEBUG_QUERY 
-			fprintf(stderr, "Removing Furthest Peer: ");
+			syslog(LOG_INFO, "Removing Furthest Peer: ");
 			mFns->bdPrintId(std::clog, &(it->second.mPeerId));
-			fprintf(stderr, "\n");
+			syslog(LOG_INFO, "\n");
 #endif
 			mPotentialClosest.erase(it);
 		}
 	}
 
 #ifdef DEBUG_QUERY 
-        fprintf(stderr, "bdQuery::addPotentialPeer(): Closer Peer!: ");
+        syslog(LOG_INFO, "bdQuery::addPotentialPeer(): Closer Peer!: ");
 	mFns->bdPrintId(std::clog, id);
-        fprintf(stderr, "\n");
+        syslog(LOG_INFO, "\n");
 #endif
 
 	/* add it in */
@@ -539,7 +540,7 @@ int bdQuery::addPotentialPeer(const bdId *id, uint32_t mode)
 	mPotentialClosest.insert(std::pair<bdMetric, bdPeer>(dist, peer));
 
 #ifdef DEBUG_QUERY 
-	fprintf(stderr, "Flagging as Potential Peer!\n");
+	syslog(LOG_INFO, "Flagging as Potential Peer!\n");
 #endif
 	retval = 1;
 	return retval;
@@ -548,73 +549,73 @@ int bdQuery::addPotentialPeer(const bdId *id, uint32_t mode)
 /* print query.
  */
 
-int     bdQuery::printQuery()
+int bdQuery::printQuery()
 {
 #ifdef DEBUG_QUERY 
-	fprintf(stderr, "bdQuery::printQuery()\n");
+	syslog(LOG_INFO, "bdQuery::printQuery()\n");
 #endif
 	
 	time_t ts = time(NULL);
-	fprintf(stderr, "Query for: ");
+	syslog(LOG_INFO, "Query for: ");
 	mFns->bdPrintNodeId(std::clog, &mId);
-	fprintf(stderr, " Query State: %d", mState);
-	fprintf(stderr, " Query Age %ld secs", ts-mQueryTS);
+	syslog(LOG_INFO, " Query State: %d", mState);
+	syslog(LOG_INFO, " Query Age %ld secs", ts-mQueryTS);
 	if (mState >= BITDHT_QUERY_FAILURE)
 	{
-		fprintf(stderr, " Search Time: %d secs", mSearchTime);
+		syslog(LOG_INFO, " Search Time: %d secs", mSearchTime);
 	}
-	fprintf(stderr, "\n");
+	syslog(LOG_INFO, "\n");
 
-#ifdef DEBUG_QUERY 
-	fprintf(stderr, "Closest Available Peers:\n");
+#ifdef DEBUG_QUERY
+	syslog(LOG_INFO, "Closest Available Peers:\n");
 	std::multimap<bdMetric, bdPeer>::iterator it;
 	for(it = mClosest.begin(); it != mClosest.end(); it++)
 	{
-		fprintf(stderr, "Id:  ");
+		syslog(LOG_INFO, "Id:  ");
 		mFns->bdPrintId(std::clog, &(it->second.mPeerId));
-		fprintf(stderr, "  Bucket: %d ", mFns->bdBucketDistance(&(it->first)));
-		fprintf(stderr," Found: %ld ago", ts-it->second.mFoundTime);
-		fprintf(stderr," LastSent: %ld ago", ts-it->second.mLastSendTime);
-		fprintf(stderr," LastRecv: %ld ago", ts-it->second.mLastRecvTime);
-		fprintf(stderr, "\n");
+		syslog(LOG_INFO, "  Bucket: %d ", mFns->bdBucketDistance(&(it->first)));
+		syslog(LOG_INFO, " Found: %ld ago", ts-it->second.mFoundTime);
+		syslog(LOG_INFO, " LastSent: %ld ago", ts-it->second.mLastSendTime);
+		syslog(LOG_INFO, " LastRecv: %ld ago", ts-it->second.mLastRecvTime);
+		syslog(LOG_INFO, "\n");
 	}
 
-	fprintf(stderr, "\nClosest Potential Peers:\n");
+	syslog(LOG_INFO, "\nClosest Potential Peers:\n");
 	for(it = mPotentialClosest.begin(); it != mPotentialClosest.end(); it++)
 	{
-		fprintf(stderr, "Id:  ");
+		syslog(LOG_INFO, "Id:  ");
 		mFns->bdPrintId(std::clog, &(it->second.mPeerId));
-		fprintf(stderr, "  Bucket: %d ", mFns->bdBucketDistance(&(it->first)));
-		fprintf(stderr," Found: %ld ago", ts-it->second.mFoundTime);
-		fprintf(stderr," LastSent: %ld ago", ts-it->second.mLastSendTime);
-		fprintf(stderr," LastRecv: %ld ago", ts-it->second.mLastRecvTime);
-		fprintf(stderr, "\n");
+		syslog(LOG_INFO, "  Bucket: %d ", mFns->bdBucketDistance(&(it->first)));
+		syslog(LOG_INFO, " Found: %ld ago", ts-it->second.mFoundTime);
+		syslog(LOG_INFO, " LastSent: %ld ago", ts-it->second.mLastSendTime);
+		syslog(LOG_INFO, " LastRecv: %ld ago", ts-it->second.mLastRecvTime);
+		syslog(LOG_INFO, "\n");
 	}
 #else
 	// shortened version.
-	fprintf(stderr, "Closest Available Peer: ");
+	syslog(LOG_INFO, "Closest Available Peer: ");
 	std::multimap<bdMetric, bdPeer>::iterator it = mClosest.begin(); 
 	if (it != mClosest.end())
 	{
 		mFns->bdPrintId(std::clog, &(it->second.mPeerId));
-		fprintf(stderr, "  Bucket: %d ", mFns->bdBucketDistance(&(it->first)));
-		fprintf(stderr," Found: %ld ago", ts-it->second.mFoundTime);
-		fprintf(stderr," LastSent: %ld ago", ts-it->second.mLastSendTime);
-		fprintf(stderr," LastRecv: %ld ago", ts-it->second.mLastRecvTime);
+		syslog(LOG_INFO, "  Bucket: %d ", mFns->bdBucketDistance(&(it->first)));
+		syslog(LOG_INFO, " Found: %ld ago", ts-it->second.mFoundTime);
+		syslog(LOG_INFO, " LastSent: %ld ago", ts-it->second.mLastSendTime);
+		syslog(LOG_INFO, " LastRecv: %ld ago", ts-it->second.mLastRecvTime);
 	}
-	fprintf(stderr, "\n");
+	syslog(LOG_INFO, "\n");
 
-	fprintf(stderr, "Closest Potential Peer: ");
+	syslog(LOG_INFO, "Closest Potential Peer: ");
 	it = mPotentialClosest.begin(); 
 	if (it != mPotentialClosest.end())
 	{
 		mFns->bdPrintId(std::clog, &(it->second.mPeerId));
-		fprintf(stderr, "  Bucket: %d ", mFns->bdBucketDistance(&(it->first)));
-		fprintf(stderr," Found: %ld ago", ts-it->second.mFoundTime);
-		fprintf(stderr," LastSent: %ld ago", ts-it->second.mLastSendTime);
-		fprintf(stderr," LastRecv: %ld ago", ts-it->second.mLastRecvTime);
+		syslog(LOG_INFO, "  Bucket: %d ", mFns->bdBucketDistance(&(it->first)));
+		syslog(LOG_INFO, " Found: %ld ago", ts-it->second.mFoundTime);
+		syslog(LOG_INFO, " LastSent: %ld ago", ts-it->second.mLastSendTime);
+		syslog(LOG_INFO, " LastRecv: %ld ago", ts-it->second.mLastRecvTime);
 	}
-	fprintf(stderr, "\n");
+	syslog(LOG_INFO, "\n");
 #endif
 
 	return 1;
