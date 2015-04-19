@@ -64,7 +64,7 @@ int main(int argc, char **argv)
 	}
 	else
 	{
-		syslog(LOG_INFO, "didn't crash!\n");
+		LOG.info("didn't crash!\n");
 	}
 
 	msg[0] = 'd';
@@ -99,7 +99,7 @@ int main(int argc, char **argv)
 	}
 	else
 	{
-		syslog(LOG_INFO, "didn't crash!\n");
+		LOG.info("didn't crash!\n");
 	}
 
 	msg[0] = 'd';
@@ -173,7 +173,7 @@ int main(int argc, char **argv)
 	}
 	else
 	{
-		syslog(LOG_INFO, "didn't crash!\n");
+		LOG.info("didn't crash!\n");
 	}
 
 	return 1;

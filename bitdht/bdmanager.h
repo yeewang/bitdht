@@ -135,8 +135,8 @@ private:
 	void 	doPeerCallback(const bdNodeId *id, uint32_t status);
 	void 	doValueCallback(const bdNodeId *id, std::string key, uint32_t status);
 
-	int	status(std::ostream&);
-	int	checkStatus(std::ostream &debug);
+	int		status();
+	int		checkStatus();
 	int 	checkPingStatus();
 	int 	SearchOutOfDate();
 	void	startQueries();

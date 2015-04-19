@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 	/* Do this multiple times */
 	int i, j;
 
-	std::clog << "Test Mid Peer Intersection....." << std::endl;
+	LOG << log4cpp::Priority::INFO << "Test Mid Peer Intersection....." << std::endl;
 	for(i = 0; i < 10; i++)
 	{
 		bdNodeId targetId;
@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 		bdStdRandomNodeId(&targetId);
 		bdStdRandomNodeId(&peerId);
 	
-		std::clog << "-------------------------------------------------" << std::endl;
+		LOG << log4cpp::Priority::INFO << "-------------------------------------------------" << std::endl;
 
 		for(j = 0; j < 10; j++)
 		{
@@ -64,26 +64,26 @@ int main(int argc, char **argv)
 			int TMdist = bdStdBucketDistance(&TMmetric);
 			int PMdist = bdStdBucketDistance(&PMmetric);
 
-			std::clog << "Target: ";
-			bdStdPrintNodeId(std::clog,&targetId);
-			std::clog << " Peer: ";
-			bdStdPrintNodeId(std::clog,&peerId);
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "Target: ";
+			bdStdPrintNodeId(LOG << log4cpp::Priority::INFO,&targetId);
+			LOG << log4cpp::Priority::INFO << " Peer: ";
+			bdStdPrintNodeId(LOG << log4cpp::Priority::INFO,&peerId);
+			LOG << log4cpp::Priority::INFO << std::endl;
 
-			std::clog << "\tTarget ^ Peer: ";
-			bdStdPrintNodeId(std::clog,&TPmetric);
-			std::clog << " Bucket: " << TPdist;
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "\tTarget ^ Peer: ";
+			bdStdPrintNodeId(LOG << log4cpp::Priority::INFO,&TPmetric);
+			LOG << log4cpp::Priority::INFO << " Bucket: " << TPdist;
+			LOG << log4cpp::Priority::INFO << std::endl;
 
-			std::clog << "\tTarget ^ Mid: ";
-			bdStdPrintNodeId(std::clog,&TMmetric);
-			std::clog << " Bucket: " << TMdist;
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "\tTarget ^ Mid: ";
+			bdStdPrintNodeId(LOG << log4cpp::Priority::INFO,&TMmetric);
+			LOG << log4cpp::Priority::INFO << " Bucket: " << TMdist;
+			LOG << log4cpp::Priority::INFO << std::endl;
 
-			std::clog << "\tPeer ^ Mid: ";
-			bdStdPrintNodeId(std::clog,&PMmetric);
-			std::clog << " Bucket: " << PMdist;
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "\tPeer ^ Mid: ";
+			bdStdPrintNodeId(LOG << log4cpp::Priority::INFO,&PMmetric);
+			LOG << log4cpp::Priority::INFO << " Bucket: " << PMdist;
+			LOG << log4cpp::Priority::INFO << std::endl;
 
 			/* now save mid to peer... and repeat */
 			peerId = midId;

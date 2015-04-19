@@ -35,6 +35,7 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include <cstdio>
 
 /**
  * #define BITDHT_DEBUG 1
@@ -82,11 +83,11 @@ void bdZeroNodeId(bdNodeId *id)
 int operator<(const bdNodeId &a, const bdNodeId &b)
 {
 #if 0
-	std::clog <<  "operator<(");
-	bdPrintNodeId(std::clog, &a);
-	std::clog <<  ",";
-	bdPrintNodeId(std::clog, &b);
-	std::clog <<  ")" << std::endl;
+	LOG << log4cpp::Priority::INFO <<  "operator<(");
+	bdPrintNodeId(LOG << log4cpp::Priority::INFO, &a);
+	LOG << log4cpp::Priority::INFO <<  ",";
+	bdPrintNodeId(LOG << log4cpp::Priority::INFO, &b);
+	LOG << log4cpp::Priority::INFO <<  ")" << std::endl;
 #endif
 	
 	uint8_t *a_data = (uint8_t *) a.data;
@@ -95,18 +96,18 @@ int operator<(const bdNodeId &a, const bdNodeId &b)
 	{
 		if (*a_data < *b_data)
 		{
-			//syslog(LOG_INFO, "Return 1, at i = %d\n", i);
+			//LOG.info("Return 1, at i = %d\n", i);
 			return 1;
 		}
 		else if (*a_data > *b_data)
 		{
-			//syslog(LOG_INFO, "Return 0, at i = %d\n", i);
+			//LOG.info("Return 0, at i = %d\n", i);
 			return 0;
 		}
 		a_data++;
 		b_data++;
 	}
-	//syslog(LOG_INFO, "Return 0, at i = KEYLEN\n");
+	//LOG.info("Return 0, at i = KEYLEN\n");
 	return 0;
 }
 
@@ -297,7 +298,7 @@ int bdBucketDistance(const bdMetric *m)
 		unsigned char comp = (1 << bbit);
 
 #ifdef BITDHT_DEBUG
-		syslog(LOG_INFO, "bdBucketDistance: bit:%d  byte:%d bbit:%d comp:%x, data:%x\n", bit, byte, bbit, comp, m->data[byte]);
+		LOG.info("bdBucketDistance: bit:%d  byte:%d bbit:%d comp:%x, data:%x\n", bit, byte, bbit, comp, m->data[byte]);
 #endif
 
 		if (comp & m->data[byte])
@@ -338,7 +339,11 @@ int     bdSpace::clear()
 }
 
 
-int 	bdSpace::find_nearest_nodes(const bdNodeId *id, int number, std::list<bdId> /*excluding*/, std::multimap<bdMetric, bdId> &nearest)
+int bdSpace::find_nearest_nodes(
+		const bdNodeId *id,
+		int number,
+		std::list<bdId> /*excluding*/,
+		std::multimap<bdMetric, bdId> &nearest)
 {
 	std::multimap<bdMetric, bdId> closest;
 	std::multimap<bdMetric, bdId>::iterator mit;
@@ -349,12 +354,12 @@ int 	bdSpace::find_nearest_nodes(const bdNodeId *id, int number, std::list<bdId>
 #ifdef DEBUG_BD_SPACE
 	int bucket = mFns->bdBucketDistance(&dist);
 
-	std::clog << "bdSpace::find_nearest_nodes(NodeId:";
-	mFns->bdPrintNodeId(std::clog, id);
+	LOG << log4cpp::Priority::INFO << "bdSpace::find_nearest_nodes(NodeId:";
+	mFns->bdPrintNodeId(LOG << log4cpp::Priority::INFO, id);
 
-	std::clog << " Number: " << number;
-	std::clog << " Query Bucket #: " << bucket;
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << " Number: " << number;
+	LOG << log4cpp::Priority::INFO << " Query Bucket #: " << bucket;
+	LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 
 	std::vector<bdBucket>::iterator it;
@@ -368,11 +373,11 @@ int 	bdSpace::find_nearest_nodes(const bdNodeId *id, int number, std::list<bdId>
 			closest.insert(std::pair<bdMetric, bdId>(dist, eit->mPeerId));
 
 #if 0
-			std::clog << "Added NodeId: ";
-			bdPrintNodeId(std::clog, &(eit->mPeerId.id));
-			std::clog << " Metric: ";
-			bdPrintNodeId(std::clog, &(dist));
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "Added NodeId: ";
+			bdPrintNodeId(LOG << log4cpp::Priority::INFO, &(eit->mPeerId.id));
+			LOG << log4cpp::Priority::INFO << " Metric: ";
+			bdPrintNodeId(LOG << log4cpp::Priority::INFO, &(dist));
+			LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 		}
 	}
@@ -386,45 +391,45 @@ int 	bdSpace::find_nearest_nodes(const bdNodeId *id, int number, std::list<bdId>
 #ifdef DEBUG_BD_SPACE
 		int iBucket = mFns->bdBucketDistance(&(mit->first));
 
-		std::clog << "Closest " << i << ": ";
-		mFns->bdPrintNodeId(std::clog, &(mit->second.id));
-		std::clog << " Bucket:        " << iBucket;
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "Closest " << i << ": ";
+		mFns->bdPrintNodeId(LOG << log4cpp::Priority::INFO, &(mit->second.id));
+		LOG << log4cpp::Priority::INFO << " Bucket:        " << iBucket;
+		LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 
 
 #if 0
-		std::clog << "\tNodeId: ";
-		mFns->bdPrintNodeId(std::clog, &(mit->second.id));
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "\tNodeId: ";
+		mFns->bdPrintNodeId(LOG << log4cpp::Priority::INFO, &(mit->second.id));
+		LOG << log4cpp::Priority::INFO << std::endl;
 
-		std::clog << "\tOwn Id: ";
-		mFns->bdPrintNodeId(std::clog, &(mOwnId));
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "\tOwn Id: ";
+		mFns->bdPrintNodeId(LOG << log4cpp::Priority::INFO, &(mOwnId));
+		LOG << log4cpp::Priority::INFO << std::endl;
 
-		std::clog << "     Us Metric: ";
-		mFns->bdPrintNodeId(std::clog, &dist);
-		std::clog << " Bucket:        " << oBucket;
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "     Us Metric: ";
+		mFns->bdPrintNodeId(LOG << log4cpp::Priority::INFO, &dist);
+		LOG << log4cpp::Priority::INFO << " Bucket:        " << oBucket;
+		LOG << log4cpp::Priority::INFO << std::endl;
 
-		std::clog << "\tFindId: ";
-		mFns->bdPrintNodeId(std::clog, id);
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "\tFindId: ";
+		mFns->bdPrintNodeId(LOG << log4cpp::Priority::INFO, id);
+		LOG << log4cpp::Priority::INFO << std::endl;
 
-		std::clog << "     Id Metric: ";
-		mFns->bdPrintNodeId(std::clog, &(mit->first));
-		std::clog << " Bucket:        " << iBucket;
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "     Id Metric: ";
+		mFns->bdPrintNodeId(LOG << log4cpp::Priority::INFO, &(mit->first));
+		LOG << log4cpp::Priority::INFO << " Bucket:        " << iBucket;
+		LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 
 		nearest.insert(*mit);
 	}
 
 #ifdef DEBUG_BD_SPACE
-	std::clog << "#Nearest: " << (int) nearest.size();
-	std::clog << " #Closest: " << (int) closest.size();
-	std::clog << " #Requested: " << number;
-	std::clog << std::endl << std::endl;
+	LOG << log4cpp::Priority::INFO << "#Nearest: " << (int) nearest.size();
+	LOG << log4cpp::Priority::INFO << " #Closest: " << (int) closest.size();
+	LOG << log4cpp::Priority::INFO << " #Requested: " << number;
+	LOG << log4cpp::Priority::INFO << std::endl << std::endl;
 #endif
 
 	return 1;
@@ -478,14 +483,14 @@ int	bdSpace::out_of_date_peer(bdId &id)
  * 
  */
 
-int     bdSpace::add_peer(const bdId *id, uint32_t peerflags)
+int bdSpace::add_peer(const bdId *id, uint32_t peerflags)
 {
 	/* find the peer */
 	bool add = false;
 	time_t ts = time(NULL);
 	
 #ifdef DEBUG_BD_SPACE
-	syslog(LOG_INFO, "bdSpace::add_peer()\n");
+	LOG.info("bdSpace::add_peer()\n");
 #endif
 
 	/* calculate metric */
@@ -494,10 +499,10 @@ int     bdSpace::add_peer(const bdId *id, uint32_t peerflags)
 	int bucket = mFns->bdBucketDistance(&met);
 
 #ifdef DEBUG_BD_SPACE
-	syslog(LOG_INFO, "peer:");
-	mFns->bdPrintId(std::clog, id);	
-	syslog(LOG_INFO, " bucket: %d", bucket);
-	syslog(LOG_INFO, "\n");
+	LOG.info("peer:");
+	mFns->bdPrintId(LOG << log4cpp::Priority::INFO, id);	
+	LOG.info(" bucket: %d", bucket);
+	LOG.info("\n");
 #endif
 
 	/* select correct bucket */
@@ -524,7 +529,7 @@ int     bdSpace::add_peer(const bdId *id, uint32_t peerflags)
 			buck.entries.push_back(peer);
 
 #ifdef DEBUG_BD_SPACE
-			std::clog << "Peer already in bucket: moving to back of the list" << std::endl;
+			LOG << log4cpp::Priority::INFO << "Peer already in bucket: moving to back of the list" << std::endl;
 #endif
 
 			return 1;
@@ -542,7 +547,7 @@ int     bdSpace::add_peer(const bdId *id, uint32_t peerflags)
 	if (buck.entries.size() < mFns->bdNodesPerBucket())
 	{
 #ifdef DEBUG_BD_SPACE
-		std::clog << "Bucket not full: allowing add" << std::endl;
+		LOG << log4cpp::Priority::INFO << "Bucket not full: allowing add" << std::endl;
 #endif
 		add = true;
 	}
@@ -553,7 +558,7 @@ int     bdSpace::add_peer(const bdId *id, uint32_t peerflags)
 		if (peer.mLastRecvTime - ts >  BITDHT_MAX_RECV_PERIOD)
 		{
 #ifdef DEBUG_BD_SPACE
-			std::clog << "Dropping Out-of-Date peer in bucket" << std::endl;
+			LOG << log4cpp::Priority::INFO << "Dropping Out-of-Date peer in bucket" << std::endl;
 #endif
 			buck.entries.pop_front();
 			add = true;
@@ -573,14 +578,14 @@ int     bdSpace::add_peer(const bdId *id, uint32_t peerflags)
 			}
 
 #ifdef DEBUG_BD_SPACE
-			std::clog << "Inserting due to Priority: minScore: " << minScore 
+			LOG << log4cpp::Priority::INFO << "Inserting due to Priority: minScore: " << minScore 
 				<< " new Peer Score: " << peerscore <<  << std::endl;
 #endif
 		}
 		else
 		{
 #ifdef DEBUG_BD_SPACE
-			std::clog << "No Out-Of-Date peers in bucket... dropping new entry" << std::endl;
+			LOG << log4cpp::Priority::INFO << "No Out-Of-Date peers in bucket... dropping new entry" << std::endl;
 #endif
 		}
 	}
@@ -599,19 +604,11 @@ int     bdSpace::add_peer(const bdId *id, uint32_t peerflags)
 #ifdef DEBUG_BD_SPACE
 #endif
 		/* useful debug */
-		std::ostringstream ss;
-
-		ss << "bdSpace::add_peer() Added Bucket[";
-		ss << bucket << "] Entry: ";
-		mFns->bdPrintId(ss, id);
-		ss << std::endl;
-
-		syslog(LOG_INFO, ss.str().c_str(), "");
+		LOG.info("bdSpace::add_peer() Added Bucket[%d] Entry: %s",
+				bucket, mFns->bdPrintId(id).c_str());
 	}
 	return add;
 }
-
-
 
 /* print tables.
  */
@@ -628,12 +625,12 @@ int     bdSpace::printDHT()
 	int i = 0;
 
 #ifdef BITDHT_DEBUG
-	syslog(LOG_INFO, "bdSpace::printDHT()\n");
+	LOG.info("bdSpace::printDHT()\n");
 	for(it = buckets.begin(); it != buckets.end(); it++, i++)
 	{
 		if (it->entries.size() > 0)
 		{
-			syslog(LOG_INFO, "Bucket %d ----------------------------\n", i);
+			LOG.info("Bucket %d ----------------------------\n", i);
 		}
 
 		for(eit = it->entries.begin(); eit != it->entries.end(); eit++) 
@@ -641,19 +638,19 @@ int     bdSpace::printDHT()
 			bdMetric dist;
 			mFns->bdDistance(&(mOwnId), &(eit->mPeerId.id), &dist);
 
-			syslog(LOG_INFO, " Metric: ");
-			mFns->bdPrintNodeId(std::clog, &(dist));
-			syslog(LOG_INFO, " Id: ");
-			mFns->bdPrintId(std::clog, &(eit->mPeerId));
-			syslog(LOG_INFO, " PeerFlags: %08x", eit->mPeerFlags);
-			syslog(LOG_INFO, "\n");
+			LOG.info(" Metric: ");
+			mFns->bdPrintNodeId(LOG << log4cpp::Priority::INFO, &(dist));
+			LOG.info(" Id: ");
+			mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &(eit->mPeerId));
+			LOG.info(" PeerFlags: %08x", eit->mPeerFlags);
+			LOG.info("\n");
 		}
 	}
 #endif
 
-	syslog(LOG_INFO, "--------------------------------------\n");
-	syslog(LOG_INFO, "DHT Table Summary --------------------\n");
-	syslog(LOG_INFO, "--------------------------------------\n");
+	LOG.info("--------------------------------------");
+	LOG.info("DHT Table Summary --------------------");
+	LOG.info("--------------------------------------");
 
 	/* little summary */
 	unsigned long long sum = 0;
@@ -665,6 +662,7 @@ int     bdSpace::printDHT()
 	i = 0;
 	for(it = buckets.begin(); it != buckets.end(); it++, i++)
 	{
+		std::ostringstream debug;
 		int size = it->entries.size();
 		int shift = BITDHT_KEY_BITLEN - i;
 		bool toBig = false;
@@ -697,25 +695,37 @@ int     bdSpace::printDHT()
 
 		if (doPrint)
 		{
-			if (size)
-				syslog(LOG_INFO, "Bucket %d: %d peers: ", i, size);
+			if (size) {
+				char buf[80];
+				snprintf(buf, sizeof(buf), "Bucket %d: %d peers: ", i, size);
+				debug << buf;
+			}
 #ifdef BITDHT_DEBUG
-			else
-				syslog(LOG_INFO, "Bucket %d: %d peers: ", i, size);
+			else {
+				char buf[80];
+				snprintf(buf, sizeof(buf), "Bucket %d: %d peers: ", i, size);
+				debug << buf;
+			}
 #endif
 		}
 		if (toBig)
 		{
 			if (size)
 			{
-				if (doPrint)
-					syslog(LOG_INFO, "Estimated NetSize >> %llu\n", no_nets);
+				if (doPrint) {
+					char buf[80];
+					snprintf(buf, sizeof(buf), "Estimated NetSize >> %llu", no_nets);
+					debug << buf;
+				}
 			}
 			else
 			{
 #ifdef BITDHT_DEBUG
-				if (doPrint)
-					syslog(LOG_INFO, " Bucket = Net / >> %llu\n", no_nets);
+				if (doPrint) {
+					char buf[80];
+					snprintf(buf, sizeof(buf), " Bucket = Net / >> %llu", no_nets);
+					debug << buf;
+				}
 #endif
 			}
 		}
@@ -724,17 +734,22 @@ int     bdSpace::printDHT()
 			no_peers = no_nets * size;
 			if (size)
 			{	
-				if (doPrint)
-					syslog(LOG_INFO, "Estimated NetSize = %llu\n", no_peers);
+				if (doPrint) {
+					char buf[80];
+					snprintf(buf, sizeof(buf), "Estimated NetSize = %llu", no_peers);
+					debug << buf;
+				}
 			}
 			else
 			{
 
 #ifdef BITDHT_DEBUG
-				if (doPrint)
-					syslog(LOG_INFO, " Bucket = Net / %llu\n", no_nets);
+				if (doPrint) {
+					char buf[80];
+					snprintf(buf, sizeof(buf), " Bucket = Net / %llu\n", no_nets);
+					debug << buf;
+				}
 #endif
-
 			}
 		}
 		if (doPrint && doAvg && !toBig)
@@ -749,20 +764,23 @@ int     bdSpace::printDHT()
 				sum += no_peers;
 				count++;	
 #ifdef BITDHT_DEBUG
-				syslog(LOG_INFO, "Est: %d: %llu => %llu / %d\n", 
+				char buf[80];
+				snprintf(buf, sizeof(buf), "Est: %d: %llu => %llu / %d\n",
 					i, no_peers, sum, count);
+				debug << buf;
 #endif
 			}
 		}
-			
+
+		LOG.info(debug.str());
 	}
 	if (count == 0)
 	{
-		syslog(LOG_INFO, "Zero Network Size (count = 0)\n");
+		LOG.info("Zero Network Size (count = 0)");
 	}
 	else
 	{
-		syslog(LOG_INFO, "Estimated Network Size = (%llu / %d) = %llu\n", sum, count, sum / count);
+		LOG.info("Estimated Network Size = (%llu / %d) = %llu", sum, count, sum / count);
 	}
 
 	return 1;
@@ -840,8 +858,8 @@ uint32_t  bdSpace::calcNetworkSize()
 		NetSize = sum / count;
 	}
 
-	//std::clog << "bdSpace::calcNetworkSize() : " << NetSize;
-	//std::clog << std::endl;
+	//LOG << log4cpp::Priority::INFO << "bdSpace::calcNetworkSize() : " << NetSize;
+	//LOG << log4cpp::Priority::INFO << std::endl;
 
 	return NetSize;
 }
@@ -930,8 +948,8 @@ uint32_t  bdSpace::calcNetworkSizeWithFlag(uint32_t withFlag)
 		NetSize = sum / count;
 	}
 
-	//std::clog << "bdSpace::calcNetworkSize() : " << NetSize;
-	//std::clog << std::endl;
+	//LOG << log4cpp::Priority::INFO << "bdSpace::calcNetworkSize() : " << NetSize;
+	//LOG << log4cpp::Priority::INFO << std::endl;
 
 	return NetSize;
 }

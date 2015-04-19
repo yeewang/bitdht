@@ -5,76 +5,51 @@
  *      Author: Yi
  */
 
-#include "bdlog.h"
-
 #include <syslog.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
+
+#include <log4cpp/PropertyConfigurator.hh>
+
 #include "bdlog.h"
 
 
-BDLog::BDLog(std::string ident, int facility) {
-	facility_ = facility;
-	priority_ = LOG_DEBUG;
-	strncpy(ident_, ident.c_str(), sizeof(ident_));
-	ident_[sizeof(ident_)-1] = '\0';
-
-	openlog(ident_, LOG_PID, facility_);
+BDLog::BDLog()
+{
+	init();
+	setProperties();
 }
 
 BDLog::~BDLog()
 {
-	closelog();
+	log4cpp::Category::shutdown();
 }
 
-BDLog * BDLog::instance()
+void BDLog::init()
 {
-	static BDLog *log = NULL;
-	if (log == NULL) {
-		log = new BDLog("Tandem", LOG_LOCAL0);
-		std::clog.rdbuf(log);
-	}
-	return log;
+	log4cpp::Appender *appender1 = new log4cpp::OstreamAppender("console", &std::cout);
+	appender1->setLayout(new log4cpp::BasicLayout());
+
+	log4cpp::Appender *appender2 = new log4cpp::FileAppender("default", "program.log");
+	appender2->setLayout(new log4cpp::BasicLayout());
+
+	log4cpp::Category& root = log4cpp::Category::getRoot();
+	root.setPriority(log4cpp::Priority::INFO);
+	root.addAppender(appender1);
+
+	log4cpp::Category& sub1 = log4cpp::Category::getInstance(std::string("sub1"));
+	sub1.addAppender(appender2);
 }
 
-int BDLog::sync() {
-	if (buffer_.length()) {
-		syslog(priority_, "%s", buffer_.c_str());
-		buffer_.erase();
-		priority_ = LOG_DEBUG; // default to debug for each message
-	}
-	return 0;
-}
-
-int BDLog::overflow(int c) {
-	if (c != EOF) {
-		buffer_ += static_cast<char>(c);
-	} else {
-		sync();
-	}
-	return c;
-}
-
-std::ostream& operator<< (std::ostream& os, const LogPriority& log_priority) {
-	static_cast<BDLog *>(os.rdbuf())->priority_ = (int)log_priority;
-	return os;
-}
-
-template<typename... Args>
-void BDLog::info(Args... args)
+void BDLog::setProperties()
 {
-	syslog(LOG_INFO, args...);
+	std::string initFileName = "log4cpp.properties";
+	log4cpp::PropertyConfigurator::configure(initFileName);
 }
 
-template<typename... Args>
-void BDLog::debug(Args... args)
+log4cpp::Category& BDLog::log()
 {
-	syslog(LOG_DEBUG, args...);
-}
-
-template<typename... Args>
-void BDLog::error(Args... args)
-{
-	syslog(LOG_ERR, args...);
+	log4cpp::Category& root = log4cpp::Category::getRoot();
+	return root;
 }

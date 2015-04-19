@@ -118,12 +118,10 @@ void bdNode::updateStore()
 	mStore.writeStore();
 }
 
-void bdNode::printState(std::ostream &debug)
+void bdNode::printState()
 {
-	debug << "bdNode::printState() for Peer: ";
-	mFns->bdPrintNodeId(debug, &mOwnId);
-	debug << std::endl;
-
+	LOG.info("bdNode::printState() for Peer: " +
+			mFns->bdPrintNodeId(&mOwnId));
 	mNodeSpace.printDHT();
 
 	printQueries();
@@ -132,22 +130,21 @@ void bdNode::printState(std::ostream &debug)
 	mHistory.printMsgs();
 #endif
 
-	printStats(std::clog);
+	printStats();
 }
 
 void bdNode::printQueries()
 {
-	std::clog << "bdNode::printQueries() for Peer: ";
-	mFns->bdPrintNodeId(std::clog, &mOwnId);
-	std::clog << std::endl;
+	LOG.info("bdNode::printQueries() for Peer: " +
+			mFns->bdPrintNodeId(&mOwnId));
 
 	int i = 0;
 	std::list<bdQuery *>::iterator it;
 	for(it = mLocalQueries.begin(); it != mLocalQueries.end(); it++, i++)
 	{
-		syslog(LOG_INFO, "Query #%d:\n", i);
+		LOG.info("Query #%d:\n", i);
 		(*it)->printQuery();
-		syslog(LOG_INFO, "\n");
+		LOG.info("\n");
 	}
 }
 
@@ -167,9 +164,9 @@ void bdNode::iterationOff()
 void bdNode::iteration()
 {
 #ifdef DEBUG_NODE_MULTIPEER 
-	std::clog << "bdNode::iteration() of Peer: ";
-	mFns->bdPrintNodeId(std::clog, &mOwnId);
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdNode::iteration() of Peer: ";
+	mFns->bdPrintNodeId(LOG << log4cpp::Priority::INFO, &mOwnId);
+	LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 	/* iterate through queries */
 
@@ -272,9 +269,9 @@ void bdNode::iteration()
 			/* just add as peer */
 
 #ifdef DEBUG_NODE_MSGS 
-			std::clog << "bdNode::iteration() Pinging Known Potential Peer : ";
-			mFns->bdPrintId(std::clog, &pid);
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "bdNode::iteration() Pinging Known Potential Peer : ";
+			mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &pid);
+			LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 
 		}
@@ -294,9 +291,9 @@ void bdNode::iteration()
 			sentPings++;
 
 #ifdef DEBUG_NODE_MSGS 
-			std::clog << "bdNode::iteration() Pinging Potential Peer : ";
-			mFns->bdPrintId(std::clog, &pid);
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "bdNode::iteration() Pinging Potential Peer : ";
+			mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &pid);
+			LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 
 			mCounterPings++;
@@ -325,11 +322,11 @@ void bdNode::iteration()
 			msgout_find_node(&id, &transId, &targetNodeId);
 
 #ifdef DEBUG_NODE_MSGS 
-			std::clog << "bdNode::iteration() Find Node Req for : ";
-			mFns->bdPrintId(std::clog, &id);
-			std::clog << " searching for : ";
-			mFns->bdPrintNodeId(std::clog, &targetNodeId);
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "bdNode::iteration() Find Node Req for : ";
+			mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &id);
+			LOG << log4cpp::Priority::INFO << " searching for : ";
+			mFns->bdPrintNodeId(LOG << log4cpp::Priority::INFO, &targetNodeId);
+			LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 			mCounterQueryNode++;
 			sentMsgs++;
@@ -339,11 +336,11 @@ void bdNode::iteration()
 	}
 
 #ifdef DEBUG_NODE_ACTIONS 
-	std::clog << "bdNode::iteration() maxMsgs: " << maxMsgs << " sentPings: " << sentPings;
-	std::clog << " / " << allowedPings;
-	std::clog << " sentQueries: " << sentQueries;
-	std::clog << " / " << numQueries;
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdNode::iteration() maxMsgs: " << maxMsgs << " sentPings: " << sentPings;
+	LOG << log4cpp::Priority::INFO << " / " << allowedPings;
+	LOG << log4cpp::Priority::INFO << " sentQueries: " << sentQueries;
+	LOG << log4cpp::Priority::INFO << " / " << numQueries;
+	LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 
 	/* process remote query too */
@@ -358,9 +355,9 @@ void bdNode::iteration()
 		msgout_ping(&id, &transId);
 
 #ifdef DEBUG_NODE_MSGS 
-		std::clog << "bdNode::iteration() Pinging Out-Of-Date Peer: ";
-		mFns->bdPrintId(std::clog, &id);
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "bdNode::iteration() Pinging Out-Of-Date Peer: ";
+		mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &id);
+		LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 
 		mCounterOutOfDatePing++;
@@ -371,7 +368,7 @@ void bdNode::iteration()
 
 	doStats();
 
-	//printStats(std::clog);
+	//printStats(LOG << log4cpp::Priority::INFO);
 
 	//printQueries();
 }
@@ -412,32 +409,17 @@ void bdNode::doStats()
 	resetCounters();
 }
 
-void bdNode::printStats(std::ostream &out)
+void bdNode::printStats()
 {
-	out << "bdNode::printStats()" << std::endl;
-	out << "  Send                                                 Recv: ";
-	out << std::endl;
-	out << "  mLpfOutOfDatePing      : " << std::setw(10) << mLpfOutOfDatePing;
-	out << std::endl;
-	out << "  mLpfPings              : " << std::setw(10) <<  mLpfPings;
-	out << "  mLpfRecvPongs          : " << std::setw(10) << mLpfRecvPong;
-	out << std::endl;
-	out << "  mLpfPongs              : " << std::setw(10) << mLpfPongs;
-	out << "  mLpfRecvPings          : " << std::setw(10) << mLpfRecvPing;
-	out << std::endl;
-	out << "  mLpfQueryNode          : " << std::setw(10) << mLpfQueryNode;
-	out << "  mLpfRecvReplyFindNode  : " << std::setw(10) << mLpfRecvReplyFindNode;
-	out << std::endl;
-	out << "  mLpfQueryHash          : " << std::setw(10) << mLpfQueryHash;
-	out << "  mLpfRecvReplyQueryHash : " << std::setw(10) << mLpfRecvReplyQueryHash;
-	out << std::endl;
-	out << "  mLpfReplyFindNode      : " << std::setw(10) << mLpfReplyFindNode; 
-	out << "  mLpfRecvQueryNode      : " << std::setw(10) << mLpfRecvQueryNode;
-	out << std::endl;
-	out << "  mLpfReplyQueryHash/sec : " << std::setw(10) << mLpfReplyQueryHash;
-	out << "  mLpfRecvQueryHash/sec  : " << std::setw(10) << mLpfRecvQueryHash;
-	out << std::endl;
-	out << std::endl;
+	LOG.info("bdNode::printStats()");
+	LOG.info("  Send                                                 Recv:");
+	LOG.info("  mLpfOutOfDatePing      : %10lf", mLpfOutOfDatePing);
+	LOG.info("  mLpfPings              : %10lf  mLpfRecvPongs          : %10lf", mLpfPings, mLpfRecvPong);
+	LOG.info("  mLpfPongs              : %10lf  mLpfRecvPings          : %10lf", mLpfPongs, mLpfRecvPing);
+	LOG.info("  mLpfQueryNode          : %10lf  mLpfRecvReplyFindNode  : %10lf", mLpfQueryNode, mLpfRecvReplyFindNode);
+	LOG.info("  mLpfQueryHash          : %10lf  mLpfRecvReplyQueryHash : %10lf", mLpfQueryHash, mLpfRecvReplyQueryHash);
+	LOG.info("  mLpfReplyFindNode      : %10lf  mLpfRecvQueryNode      : %10lf", mLpfReplyFindNode, mLpfRecvQueryNode);
+	LOG.info("  mLpfReplyQueryHash/sec : %10lf  mLpfRecvQueryHash/sec  : %10lf", mLpfReplyQueryHash, mLpfRecvQueryHash);
 }
 
 void bdNode::resetCounters()
@@ -512,9 +494,9 @@ void bdNode::addPeer(const bdId *id, uint32_t peerflags)
 {
 
 #ifdef DEBUG_NODE_ACTIONS 
-	syslog(LOG_INFO, "bdNode::addPeer(");
-	mFns->bdPrintId(std::clog, id);
-	syslog(LOG_INFO, ")\n");
+	LOG.info("bdNode::addPeer(");
+	mFns->bdPrintId(LOG << log4cpp::Priority::INFO, id);
+	LOG.info(")\n");
 #endif
 
 	/* iterate through queries */
@@ -541,11 +523,11 @@ void bdNode::PeerResponse(const bdId *id, const bdNodeId *target, uint32_t peerf
 {
 
 #ifdef DEBUG_NODE_ACTIONS 
-	std::clog << "bdNode::PeerResponse(";
-	mFns->bdPrintId(std::clog, id);
-	std::clog << ", target: ";
-	mFns->bdPrintNodeId(std::clog, target);
-	syslog(LOG_INFO, ")\n");
+	LOG << log4cpp::Priority::INFO << "bdNode::PeerResponse(";
+	mFns->bdPrintId(LOG << log4cpp::Priority::INFO, id);
+	LOG << log4cpp::Priority::INFO << ", target: ";
+	mFns->bdPrintNodeId(LOG << log4cpp::Priority::INFO, target);
+	LOG.info(")\n");
 #endif
 
 	/* iterate through queries */
@@ -576,9 +558,7 @@ void bdNode::addQuery(const bdNodeId *id, uint32_t qflags)
 
 	mNodeSpace.find_nearest_nodes(id, BITDHT_QUERY_START_PEERS, startList, nearest);
 
-	std::clog << "bdNode::addQuery(";
-	mFns->bdPrintNodeId(std::clog, id);
-	std::clog << ")\n";
+	LOG.info("bdNode::addQuery(" + mFns->bdPrintNodeId(id) + ")\n");
 
 	for(it = nearest.begin(); it != nearest.end(); it++)
 	{
@@ -658,12 +638,12 @@ void bdNode::processRemoteQuery()
 				}
 				msgout_reply_find_node(&(query.mId), &(query.mTransId), nearList);
 #ifdef DEBUG_NODE_MSGS 
-				std::clog << "bdNode::processRemoteQuery() Reply to Find Node: ";
-				mFns->bdPrintId(std::clog, &(query.mId));
-				std::clog << " searching for : ";
-				mFns->bdPrintNodeId(std::clog, &(query.mQuery));
-				std::clog << ", found " << nearest.size() << " nodes ";
-				std::clog << std::endl;
+				LOG << log4cpp::Priority::INFO << "bdNode::processRemoteQuery() Reply to Find Node: ";
+				mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &(query.mId));
+				LOG << log4cpp::Priority::INFO << " searching for : ";
+				mFns->bdPrintNodeId(LOG << log4cpp::Priority::INFO, &(query.mQuery));
+				LOG << log4cpp::Priority::INFO << ", found " << nearest.size() << " nodes ";
+				LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 
 				mCounterReplyFindNode++;
@@ -673,10 +653,10 @@ void bdNode::processRemoteQuery()
 			case BD_QUERY_HASH:
 			{
 #ifdef DEBUG_NODE_MSGS 
-				std::clog << "bdNode::processRemoteQuery() Reply to Query Node: ";
-				mFns->bdPrintId(std::clog, &(query.mId));
-				std::clog << " TODO";
-				std::clog << std::endl;
+				LOG << log4cpp::Priority::INFO << "bdNode::processRemoteQuery() Reply to Query Node: ";
+				mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &(query.mId));
+				LOG << log4cpp::Priority::INFO << " TODO";
+				LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 				mCounterReplyQueryHash++;
 
@@ -699,9 +679,9 @@ void bdNode::processRemoteQuery()
 		else
 		{
 #ifdef DEBUG_NODE_MSGS 
-			std::clog << "bdNode::processRemoteQuery() Query Too Old: Discarding: ";
-			mFns->bdPrintId(std::clog, &(query.mId));
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "bdNode::processRemoteQuery() Query Too Old: Discarding: ";
+			mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &(query.mId));
+			LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 		}
 
@@ -722,29 +702,29 @@ int     bdNode::outgoingMsg(struct sockaddr_in *addr, char *msg, int *len)
 	if (mOutgoingMsgs.size() > 0)
 	{
 		bdNodeNetMsg *bdmsg = mOutgoingMsgs.front();
-		//bdmsg->print(std::clog);
+		//bdmsg->print(LOG << log4cpp::Priority::INFO);
 		mOutgoingMsgs.pop_front();
-		//bdmsg->print(std::clog);
+		//bdmsg->print(LOG << log4cpp::Priority::INFO);
 
 		/* truncate if necessary */
 		if (bdmsg->mSize < *len)
 		{
-			//std::clog << "bdNode::outgoingMsg space(" << *len << ") msgsize(" << bdmsg->mSize << ")";
-			//std::clog << std::endl;
+			//LOG << log4cpp::Priority::INFO << "bdNode::outgoingMsg space(" << *len << ") msgsize(" << bdmsg->mSize << ")";
+			//LOG << log4cpp::Priority::INFO << std::endl;
 			*len = bdmsg->mSize;
 		}
 		else
 		{
-			//std::clog << "bdNode::outgoingMsg space(" << *len << ") small - trunc from: "
+			//LOG << log4cpp::Priority::INFO << "bdNode::outgoingMsg space(" << *len << ") small - trunc from: "
 			//<< bdmsg->mSize;
-			//std::clog << std::endl;
+			//LOG << log4cpp::Priority::INFO << std::endl;
 		}
 
 
 		memcpy(msg, bdmsg->data, *len);
 		*addr = bdmsg->addr;
 
-		//bdmsg->print(std::clog);
+		//bdmsg->print(LOG << log4cpp::Priority::INFO);
 
 		delete bdmsg;
 		return 1;
@@ -765,11 +745,11 @@ void    bdNode::incomingMsg(struct sockaddr_in *addr, char *msg, int len)
 void bdNode::msgout_ping(bdId *id, bdToken *transId)
 {
 #ifdef DEBUG_NODE_MSGOUT
-	std::clog << "bdNode::msgout_ping() TransId: ";
-	bdPrintTransId(std::clog, transId);
-	std::clog << " To: ";
-	mFns->bdPrintId(std::clog, id);
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdNode::msgout_ping() TransId: ";
+	bdPrintTransId(LOG << log4cpp::Priority::INFO, transId);
+	LOG << log4cpp::Priority::INFO << " To: ";
+	mFns->bdPrintId(LOG << log4cpp::Priority::INFO, id);
+	LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 
 	registerOutgoingMsg(id, transId, BITDHT_MSG_TYPE_PING);
@@ -789,12 +769,12 @@ void bdNode::msgout_ping(bdId *id, bdToken *transId)
 void bdNode::msgout_pong(bdId *id, bdToken *transId)
 {
 #ifdef DEBUG_NODE_MSGOUT
-	std::clog << "bdNode::msgout_pong() TransId: ";
-	bdPrintTransId(std::clog, transId);
-	std::clog << " Version: " << version;
-	std::clog << " To: ";
-	mFns->bdPrintId(std::clog, id);
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdNode::msgout_pong() TransId: ";
+	bdPrintTransId(LOG << log4cpp::Priority::INFO, transId);
+	LOG << log4cpp::Priority::INFO << " Version: " << version;
+	LOG << log4cpp::Priority::INFO << " To: ";
+	mFns->bdPrintId(LOG << log4cpp::Priority::INFO, id);
+	LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 
 	registerOutgoingMsg(id, transId, BITDHT_MSG_TYPE_PONG);
@@ -822,13 +802,13 @@ void bdNode::msgout_pong(bdId *id, bdToken *transId)
 void bdNode::msgout_find_node(bdId *id, bdToken *transId, bdNodeId *query)
 {
 #ifdef DEBUG_NODE_MSGOUT
-	std::clog << "bdNode::msgout_find_node() TransId: ";
-	bdPrintTransId(std::clog, transId);
-	std::clog << " To: ";
-	mFns->bdPrintId(std::clog, id);
-	std::clog << " Query: ";
-	mFns->bdPrintNodeId(std::clog, query);
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdNode::msgout_find_node() TransId: ";
+	bdPrintTransId(LOG << log4cpp::Priority::INFO, transId);
+	LOG << log4cpp::Priority::INFO << " To: ";
+	mFns->bdPrintId(LOG << log4cpp::Priority::INFO, id);
+	LOG << log4cpp::Priority::INFO << " Query: ";
+	mFns->bdPrintNodeId(LOG << log4cpp::Priority::INFO, query);
+	LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 
 	registerOutgoingMsg(id, transId, BITDHT_MSG_TYPE_FIND_NODE);
@@ -858,18 +838,18 @@ void bdNode::msgout_reply_find_node(bdId *id, bdToken *transId, std::list<bdId> 
 	sendPkt(msg, blen, id->addr);
 
 #ifdef DEBUG_NODE_MSGOUT
-	std::clog << "bdNode::msgout_reply_find_node() TransId: ";
-	bdPrintTransId(std::clog, transId);
-	std::clog << " To: ";
-	mFns->bdPrintId(std::clog, id);
-	std::clog << " Peers:";
+	LOG << log4cpp::Priority::INFO << "bdNode::msgout_reply_find_node() TransId: ";
+	bdPrintTransId(LOG << log4cpp::Priority::INFO, transId);
+	LOG << log4cpp::Priority::INFO << " To: ";
+	mFns->bdPrintId(LOG << log4cpp::Priority::INFO, id);
+	LOG << log4cpp::Priority::INFO << " Peers:";
 	std::list<bdId>::iterator it;
 	for(it = peers.begin(); it != peers.end(); it++)
 	{
-		std::clog << " ";
-		mFns->bdPrintId(std::clog, &(*it));
+		LOG << log4cpp::Priority::INFO << " ";
+		mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &(*it));
 	}
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 }
 
@@ -881,13 +861,13 @@ void bdNode::msgout_reply_find_node(bdId *id, bdToken *transId, std::list<bdId> 
 void bdNode::msgout_get_hash(bdId *id, bdToken *transId, bdNodeId *info_hash)
 {
 #ifdef DEBUG_NODE_MSGOUT
-	std::clog << "bdNode::msgout_get_hash() TransId: ";
-	bdPrintTransId(std::clog, transId);
-	std::clog << " To: ";
-	mFns->bdPrintId(std::clog, id);
-	std::clog << " InfoHash: ";
-	mFns->bdPrintNodeId(std::clog, info_hash);
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdNode::msgout_get_hash() TransId: ";
+	bdPrintTransId(LOG << log4cpp::Priority::INFO, transId);
+	LOG << log4cpp::Priority::INFO << " To: ";
+	mFns->bdPrintId(LOG << log4cpp::Priority::INFO, id);
+	LOG << log4cpp::Priority::INFO << " InfoHash: ";
+	mFns->bdPrintNodeId(LOG << log4cpp::Priority::INFO, info_hash);
+	LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 
 	char msg[10240];
@@ -906,21 +886,21 @@ void bdNode::msgout_get_hash(bdId *id, bdToken *transId, bdNodeId *info_hash)
 void bdNode::msgout_reply_hash(bdId *id, bdToken *transId, bdToken *token, std::list<std::string> &values)
 {
 #ifdef DEBUG_NODE_MSGOUT
-	std::clog << "bdNode::msgout_reply_hash() TransId: ";
-	bdPrintTransId(std::clog, transId);
-	std::clog << " To: ";
-	mFns->bdPrintId(std::clog, id);
-	std::clog << " Token: ";
-	bdPrintToken(std::clog, token);
+	LOG << log4cpp::Priority::INFO << "bdNode::msgout_reply_hash() TransId: ";
+	bdPrintTransId(LOG << log4cpp::Priority::INFO, transId);
+	LOG << log4cpp::Priority::INFO << " To: ";
+	mFns->bdPrintId(LOG << log4cpp::Priority::INFO, id);
+	LOG << log4cpp::Priority::INFO << " Token: ";
+	bdPrintToken(LOG << log4cpp::Priority::INFO, token);
 
-	std::clog << " Peers: ";
+	LOG << log4cpp::Priority::INFO << " Peers: ";
 	std::list<std::string>::iterator it;
 	for(it = values.begin(); it != values.end(); it++)
 	{
-		std::clog << " ";
-		bdPrintCompactPeerId(std::clog, *it);
+		LOG << log4cpp::Priority::INFO << " ";
+		bdPrintCompactPeerId(LOG << log4cpp::Priority::INFO, *it);
 	}
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 
 	char msg[10240];
@@ -938,21 +918,21 @@ void bdNode::msgout_reply_hash(bdId *id, bdToken *transId, bdToken *token, std::
 void bdNode::msgout_reply_nearest(bdId *id, bdToken *transId, bdToken *token, std::list<bdId> &nodes)
 {
 #ifdef DEBUG_NODE_MSGOUT
-	std::clog << "bdNode::msgout_reply_nearest() TransId: ";
-	bdPrintTransId(std::clog, transId);
-	std::clog << " To: ";
-	mFns->bdPrintId(std::clog, id);
-	std::clog << " Token: ";
-	bdPrintToken(std::clog, token);
-	std::clog << " Nodes:";
+	LOG << log4cpp::Priority::INFO << "bdNode::msgout_reply_nearest() TransId: ";
+	bdPrintTransId(LOG << log4cpp::Priority::INFO, transId);
+	LOG << log4cpp::Priority::INFO << " To: ";
+	mFns->bdPrintId(LOG << log4cpp::Priority::INFO, id);
+	LOG << log4cpp::Priority::INFO << " Token: ";
+	bdPrintToken(LOG << log4cpp::Priority::INFO, token);
+	LOG << log4cpp::Priority::INFO << " Nodes:";
 
 	std::list<bdId>::iterator it;
 	for(it = nodes.begin(); it != nodes.end(); it++)
 	{
-		std::clog << " ";
-		mFns->bdPrintId(std::clog, &(*it));
+		LOG << log4cpp::Priority::INFO << " ";
+		mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &(*it));
 	}
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 
 	char msg[10240];
@@ -971,16 +951,16 @@ void bdNode::msgout_reply_nearest(bdId *id, bdToken *transId, bdToken *token, st
 void bdNode::msgout_post_hash(bdId *id, bdToken *transId, bdNodeId *info_hash, uint32_t port, bdToken *token)
 {
 #ifdef DEBUG_NODE_MSGOUT
-	std::clog << "bdNode::msgout_post_hash() TransId: ";
-	bdPrintTransId(std::clog, transId);
-	std::clog << " To: ";
-	mFns->bdPrintId(std::clog, id);
-	std::clog << " Info_Hash: ";
-	mFns->bdPrintNodeId(std::clog, info_hash);
-	std::clog << " Port: " << port;
-	std::clog << " Token: ";
-	bdPrintToken(std::clog, token);
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdNode::msgout_post_hash() TransId: ";
+	bdPrintTransId(LOG << log4cpp::Priority::INFO, transId);
+	LOG << log4cpp::Priority::INFO << " To: ";
+	mFns->bdPrintId(LOG << log4cpp::Priority::INFO, id);
+	LOG << log4cpp::Priority::INFO << " Info_Hash: ";
+	mFns->bdPrintNodeId(LOG << log4cpp::Priority::INFO, info_hash);
+	LOG << log4cpp::Priority::INFO << " Port: " << port;
+	LOG << log4cpp::Priority::INFO << " Token: ";
+	bdPrintToken(LOG << log4cpp::Priority::INFO, token);
+	LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 
 	char msg[10240];
@@ -998,11 +978,11 @@ void bdNode::msgout_post_hash(bdId *id, bdToken *transId, bdNodeId *info_hash, u
 void bdNode::msgout_reply_post(bdId *id, bdToken *transId)
 {
 #ifdef DEBUG_NODE_MSGOUT
-	std::clog << "bdNode::msgout_reply_post() TransId: ";
-	bdPrintTransId(std::clog, transId);
-	std::clog << " To: ";
-	mFns->bdPrintId(std::clog, id);
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdNode::msgout_reply_post() TransId: ";
+	bdPrintTransId(LOG << log4cpp::Priority::INFO, transId);
+	LOG << log4cpp::Priority::INFO << " To: ";
+	mFns->bdPrintId(LOG << log4cpp::Priority::INFO, id);
+	LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 
 	/* generate message, send to udp */
@@ -1020,13 +1000,13 @@ void bdNode::msgout_reply_post(bdId *id, bdToken *transId)
 
 void    bdNode::sendPkt(char *msg, int len, struct sockaddr_in addr)
 {
-	//syslog(LOG_INFO, "bdNode::sendPkt(%d) to %s:%d\n", 
+	//LOG.info("bdNode::sendPkt(%d) to %s:%d\n", 
 	//		len, inet_ntoa(addr.sin_addr), htons(addr.sin_port));
 
 	bdNodeNetMsg *bdmsg = new bdNodeNetMsg(msg, len, &addr);
-	//bdmsg->print(std::clog);
+	//bdmsg->print(LOG << log4cpp::Priority::INFO);
 	mOutgoingMsgs.push_back(bdmsg);
-	//bdmsg->print(std::clog);
+	//bdmsg->print(LOG << log4cpp::Priority::INFO);
 
 	return;
 }
@@ -1041,19 +1021,19 @@ void    bdNode::sendPkt(char *msg, int len, struct sockaddr_in addr)
 void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 {
 #ifdef DEBUG_NODE_PARSE
-	std::clog << "bdNode::recvPkt() msg[" << len << "] = ";
+	LOG << log4cpp::Priority::INFO << "bdNode::recvPkt() msg[" << len << "] = ";
 	for(int i = 0; i < len; i++)
 	{
 		if ((msg[i] > 31) && (msg[i] < 127))
 		{
-			std::clog << msg[i];
+			LOG << log4cpp::Priority::INFO << msg[i];
 		}
 		else
 		{
-			std::clog << "[" << (int) msg[i] << "]";
+			LOG << log4cpp::Priority::INFO << "[" << (int) msg[i] << "]";
 		}
 	}
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 
 	/* convert to a be_node */
@@ -1062,23 +1042,23 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	{
 		/* invalid decode */
 #ifdef DEBUG_NODE_PARSE
-		std::clog << "bdNode::recvPkt() Failure to decode. Dropping Msg";
-		std::clog << std::endl;
-		std::clog << "message length: " << len;
-		std::clog << std::endl;
-		std::clog << "msg[] = ";
+		LOG << log4cpp::Priority::INFO << "bdNode::recvPkt() Failure to decode. Dropping Msg";
+		LOG << log4cpp::Priority::INFO << std::endl;
+		LOG << log4cpp::Priority::INFO << "message length: " << len;
+		LOG << log4cpp::Priority::INFO << std::endl;
+		LOG << log4cpp::Priority::INFO << "msg[] = ";
 		for(int i = 0; i < len; i++)
 		{
 			if ((msg[i] > 31) && (msg[i] < 127))
 			{
-				std::clog << msg[i];
+				LOG << log4cpp::Priority::INFO << msg[i];
 			}
 			else
 			{
-				std::clog << "[" << (int) msg[i] << "]";
+				LOG << log4cpp::Priority::INFO << "[" << (int) msg[i] << "]";
 			}
 		}
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 		return;
 	}
@@ -1090,8 +1070,8 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	if (!beType)
 	{
 #ifdef DEBUG_NODE_PARSE
-		std::clog << "bdNode::recvPkt() Invalid Message Type. Dropping Msg";
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "bdNode::recvPkt() Invalid Message Type. Dropping Msg";
+		LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 		/* invalid message */
 		be_free(node);
@@ -1108,8 +1088,8 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	else
 	{
 #ifdef DEBUG_NODE_PARSE
-		std::clog << "bdNode::recvPkt() TransId Failure. Dropping Msg";
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "bdNode::recvPkt() TransId Failure. Dropping Msg";
+		LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 		be_free(node);
 		return;
@@ -1128,8 +1108,8 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	if (!be_data)
 	{
 #ifdef DEBUG_NODE_PARSE
-		std::clog << "bdNode::recvPkt() Missing Data Body. Dropping Msg";
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "bdNode::recvPkt() Missing Data Body. Dropping Msg";
+		LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 		be_free(node);
 		return;
@@ -1145,8 +1125,8 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	else
 	{
 #ifdef DEBUG_NODE_PARSE
-		std::clog << "bdNode::recvPkt() Missing Peer Id. Dropping Msg";
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "bdNode::recvPkt() Missing Peer Id. Dropping Msg";
+		LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 		be_free(node);
 		return;
@@ -1161,8 +1141,8 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 		if (!be_version)
 		{
 #ifdef DEBUG_NODE_PARSE
-			std::clog << "bdNode::recvPkt() NOTE: PONG missing Optional Version.";
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "bdNode::recvPkt() NOTE: PONG missing Optional Version.";
+			LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 		}
 	}
@@ -1181,8 +1161,8 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 		if (!be_target)
 		{
 #ifdef DEBUG_NODE_PARSE
-			std::clog << "bdNode::recvPkt() Missing Target / Info_Hash. Dropping Msg";
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "bdNode::recvPkt() Missing Target / Info_Hash. Dropping Msg";
+			LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 			be_free(node);
 			return;
@@ -1195,8 +1175,8 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 		if (!be_target)
 		{
 #ifdef DEBUG_NODE_PARSE
-			std::clog << "bdNode::recvPkt() Missing Target / Info_Hash. Dropping Msg";
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "bdNode::recvPkt() Missing Target / Info_Hash. Dropping Msg";
+			LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 			be_free(node);
 			return;
@@ -1218,8 +1198,8 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 		if (!be_nodes)
 		{
 #ifdef DEBUG_NODE_PARSE
-			std::clog << "bdNode::recvPkt() Missing Nodes. Dropping Msg";
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "bdNode::recvPkt() Missing Nodes. Dropping Msg";
+			LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 			be_free(node);
 			return;
@@ -1240,8 +1220,8 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 		if (!be_values)
 		{
 #ifdef DEBUG_NODE_PARSE
-			std::clog << "bdNode::recvPkt() Missing Values. Dropping Msg";
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "bdNode::recvPkt() Missing Values. Dropping Msg";
+			LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 			be_free(node);
 			return;
@@ -1264,8 +1244,8 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 		if (!be_token)
 		{
 #ifdef DEBUG_NODE_PARSE
-			std::clog << "bdNode::recvPkt() Missing Token. Dropping Msg";
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "bdNode::recvPkt() Missing Token. Dropping Msg";
+			LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 			be_free(node);
 			return;
@@ -1286,8 +1266,8 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 		if (!be_port)
 		{
 #ifdef DEBUG_NODE_PARSE
-			std::clog << "bdNode::recvPkt() POST_HASH Missing Port. Dropping Msg";
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "bdNode::recvPkt() POST_HASH Missing Port. Dropping Msg";
+			LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 			be_free(node);
 			return;
@@ -1309,9 +1289,9 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	case BITDHT_MSG_TYPE_PING:  /* a: id, transId */
 	{
 #ifdef DEBUG_NODE_MSGS 
-		std::clog << "bdNode::recvPkt() Responding to Ping : ";
-		mFns->bdPrintId(std::clog, &srcId);
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "bdNode::recvPkt() Responding to Ping : ";
+		mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &srcId);
+		LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 		msgin_ping(&srcId, &transId);
 		break;
@@ -1319,9 +1299,9 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	case BITDHT_MSG_TYPE_PONG:  /* r: id, transId */
 	{
 #ifdef DEBUG_NODE_MSGS 
-		std::clog << "bdNode::recvPkt() Received Pong from : ";
-		mFns->bdPrintId(std::clog, &srcId);
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "bdNode::recvPkt() Received Pong from : ";
+		mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &srcId);
+		LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 		if (be_version)
 		{
@@ -1337,11 +1317,11 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	case BITDHT_MSG_TYPE_FIND_NODE: /* a: id, transId, target */
 	{
 #ifdef DEBUG_NODE_MSGS 
-		std::clog << "bdNode::recvPkt() Req Find Node from : ";
-		mFns->bdPrintId(std::clog, &srcId);
-		std::clog << " Looking for: ";
-		mFns->bdPrintNodeId(std::clog, &target_info_hash);
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "bdNode::recvPkt() Req Find Node from : ";
+		mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &srcId);
+		LOG << log4cpp::Priority::INFO << " Looking for: ";
+		mFns->bdPrintNodeId(LOG << log4cpp::Priority::INFO, &target_info_hash);
+		LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 		msgin_find_node(&srcId, &transId, &target_info_hash);
 		break;
@@ -1349,9 +1329,9 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	case BITDHT_MSG_TYPE_REPLY_NODE: /* r: id, transId, nodes  */
 	{
 #ifdef DEBUG_NODE_MSGS 
-		std::clog << "bdNode::recvPkt() Received Reply Node from : ";
-		mFns->bdPrintId(std::clog, &srcId);
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "bdNode::recvPkt() Received Reply Node from : ";
+		mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &srcId);
+		LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 		msgin_reply_find_node(&srcId, &transId, nodes);
 		break;
@@ -1359,11 +1339,11 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	case BITDHT_MSG_TYPE_GET_HASH:    /* a: id, transId, info_hash */
 	{
 #ifdef DEBUG_NODE_MSGS 
-		std::clog << "bdNode::recvPkt() Received SearchHash : ";
-		mFns->bdPrintId(std::clog, &srcId);
-		std::clog << " for Hash: ";
-		mFns->bdPrintNodeId(std::clog, &target_info_hash);
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "bdNode::recvPkt() Received SearchHash : ";
+		mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &srcId);
+		LOG << log4cpp::Priority::INFO << " for Hash: ";
+		mFns->bdPrintNodeId(LOG << log4cpp::Priority::INFO, &target_info_hash);
+		LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 		msgin_get_hash(&srcId, &transId, &target_info_hash);
 		break;
@@ -1371,9 +1351,9 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	case BITDHT_MSG_TYPE_REPLY_HASH:  /* r: id, transId, token, values */
 	{
 #ifdef DEBUG_NODE_MSGS 
-		std::clog << "bdNode::recvPkt() Received Reply Hash : ";
-		mFns->bdPrintId(std::clog, &srcId);
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "bdNode::recvPkt() Received Reply Hash : ";
+		mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &srcId);
+		LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 		msgin_reply_hash(&srcId, &transId, &token, values);
 		break;
@@ -1381,9 +1361,9 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	case BITDHT_MSG_TYPE_REPLY_NEAR:  /* r: id, transId, token, nodes */
 	{
 #ifdef DEBUG_NODE_MSGS 
-		std::clog << "bdNode::recvPkt() Received Reply Near : ";
-		mFns->bdPrintId(std::clog, &srcId);
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "bdNode::recvPkt() Received Reply Near : ";
+		mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &srcId);
+		LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 		msgin_reply_nearest(&srcId, &transId, &token, nodes);
 		break;
@@ -1391,12 +1371,12 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	case BITDHT_MSG_TYPE_POST_HASH:   /* a: id, transId, info_hash, port, token */
 	{
 #ifdef DEBUG_NODE_MSGS 
-		std::clog << "bdNode::recvPkt() Post Hash from : ";
-		mFns->bdPrintId(std::clog, &srcId);
-		std::clog << " to post: ";
-		mFns->bdPrintNodeId(std::clog, &target_info_hash);
-		std::clog << " with port: " << port;
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "bdNode::recvPkt() Post Hash from : ";
+		mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &srcId);
+		LOG << log4cpp::Priority::INFO << " to post: ";
+		mFns->bdPrintNodeId(LOG << log4cpp::Priority::INFO, &target_info_hash);
+		LOG << log4cpp::Priority::INFO << " with port: " << port;
+		LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 		msgin_post_hash(&srcId, &transId, &target_info_hash, port, &token);
 		break;
@@ -1404,9 +1384,9 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	case BITDHT_MSG_TYPE_REPLY_POST:  /* r: id, transId */
 	{
 #ifdef DEBUG_NODE_MSGS 
-		std::clog << "bdNode::recvPkt() Reply Post from: ";
-		mFns->bdPrintId(std::clog, &srcId);
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "bdNode::recvPkt() Reply Post from: ";
+		mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &srcId);
+		LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 		msgin_reply_post(&srcId, &transId);
 		break;
@@ -1414,8 +1394,8 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	default:
 	{
 #ifdef DEBUG_NODE_MSGS 
-		std::clog << "bdNode::recvPkt() ERROR";
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "bdNode::recvPkt() ERROR";
+		LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 		/* ERROR */
 		break;
@@ -1433,11 +1413,11 @@ void    bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 void bdNode::msgin_ping(bdId *id, bdToken *transId)
 {
 #ifdef DEBUG_NODE_MSGIN
-	std::clog << "bdNode::msgin_ping() TransId: ";
-	bdPrintTransId(std::clog, transId);
-	std::clog << " To: ";
-	mFns->bdPrintId(std::clog, id);
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdNode::msgin_ping() TransId: ";
+	bdPrintTransId(LOG << log4cpp::Priority::INFO, transId);
+	LOG << log4cpp::Priority::INFO << " To: ";
+	mFns->bdPrintId(LOG << log4cpp::Priority::INFO, id);
+	LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 	mCounterRecvPing++;
 	mCounterPongs++;
@@ -1458,12 +1438,12 @@ void bdNode::msgin_ping(bdId *id, bdToken *transId)
 void bdNode::msgin_pong(bdId *id, bdToken *transId, bdToken *versionId)
 {
 #ifdef DEBUG_NODE_MSGIN
-	std::clog << "bdNode::msgin_pong() TransId: ";
-	bdPrintTransId(std::clog, transId);
-	std::clog << " Version: TODO!"; // << version;
-	std::clog << " To: ";
-	mFns->bdPrintId(std::clog, id);
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdNode::msgin_pong() TransId: ";
+	bdPrintTransId(LOG << log4cpp::Priority::INFO, transId);
+	LOG << log4cpp::Priority::INFO << " Version: TODO!"; // << version;
+	LOG << log4cpp::Priority::INFO << " To: ";
+	mFns->bdPrintId(LOG << log4cpp::Priority::INFO, id);
+	LOG << log4cpp::Priority::INFO << std::endl;
 #else
 	(void) transId;
 #endif
@@ -1481,12 +1461,12 @@ void bdNode::msgin_pong(bdId *id, bdToken *transId, bdToken *versionId)
 	{
 
 #ifdef DEBUG_NODE_MSGIN
-		std::clog << "bdNode::msgin_pong() Peer Version: ";
+		LOG << log4cpp::Priority::INFO << "bdNode::msgin_pong() Peer Version: ";
 		for(int i = 0; i < versionId->len; i++)
 		{
-			std::clog << versionId->data[i];
+			LOG << log4cpp::Priority::INFO << versionId->data[i];
 		}
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 
 		/* check two bytes */
@@ -1514,8 +1494,8 @@ void bdNode::msgin_pong(bdId *id, bdToken *transId, bdToken *versionId)
 	{
 
 #ifdef DEBUG_NODE_MSGIN
-		std::clog << "bdNode::msgin_pong() No Version";
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "bdNode::msgin_pong() No Version";
+		LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 	}
 
@@ -1544,13 +1524,13 @@ void bdNode::msgin_pong(bdId *id, bdToken *transId, bdToken *versionId)
 void bdNode::msgin_find_node(bdId *id, bdToken *transId, bdNodeId *query)
 {
 #ifdef DEBUG_NODE_MSGIN
-	std::clog << "bdNode::msgin_find_node() TransId: ";
-	bdPrintTransId(std::clog, transId);
-	std::clog << " From: ";
-	mFns->bdPrintId(std::clog, id);
-	std::clog << " Query: ";
-	mFns->bdPrintNodeId(std::clog, query);
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdNode::msgin_find_node() TransId: ";
+	bdPrintTransId(LOG << log4cpp::Priority::INFO, transId);
+	LOG << log4cpp::Priority::INFO << " From: ";
+	mFns->bdPrintId(LOG << log4cpp::Priority::INFO, id);
+	LOG << log4cpp::Priority::INFO << " Query: ";
+	mFns->bdPrintNodeId(LOG << log4cpp::Priority::INFO, query);
+	LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 
 	mCounterRecvQueryNode++;
@@ -1568,17 +1548,17 @@ void bdNode::msgin_reply_find_node(bdId *id, bdToken *transId, std::list<bdId> &
 	std::list<bdId>::iterator it;
 
 #ifdef DEBUG_NODE_MSGS
-	std::clog << "bdNode::msgin_reply_find_node() TransId: ";
-	bdPrintTransId(std::clog, transId);
-	std::clog << " From: ";
-	mFns->bdPrintId(std::clog, id);
-	std::clog << " Peers:";
+	LOG << log4cpp::Priority::INFO << "bdNode::msgin_reply_find_node() TransId: ";
+	bdPrintTransId(LOG << log4cpp::Priority::INFO, transId);
+	LOG << log4cpp::Priority::INFO << " From: ";
+	mFns->bdPrintId(LOG << log4cpp::Priority::INFO, id);
+	LOG << log4cpp::Priority::INFO << " Peers:";
 	for(it = nodes.begin(); it != nodes.end(); it++)
 	{
-		std::clog << " ";
-		mFns->bdPrintId(std::clog, &(*it));
+		LOG << log4cpp::Priority::INFO << " ";
+		mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &(*it));
 	}
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << std::endl;
 #else
 	(void) transId;
 #endif
@@ -1603,13 +1583,13 @@ void bdNode::msgin_reply_find_node(bdId *id, bdToken *transId, std::list<bdId> &
 void bdNode::msgin_get_hash(bdId *id, bdToken *transId, bdNodeId *info_hash)
 {
 #ifdef DEBUG_NODE_MSGIN
-	std::clog << "bdNode::msgin_get_hash() TransId: ";
-	bdPrintTransId(std::clog, transId);
-	std::clog << " From: ";
-	mFns->bdPrintId(std::clog, id);
-	std::clog << " InfoHash: ";
-	mFns->bdPrintNodeId(std::clog, info_hash);
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdNode::msgin_get_hash() TransId: ";
+	bdPrintTransId(LOG << log4cpp::Priority::INFO, transId);
+	LOG << log4cpp::Priority::INFO << " From: ";
+	mFns->bdPrintId(LOG << log4cpp::Priority::INFO, id);
+	LOG << log4cpp::Priority::INFO << " InfoHash: ";
+	mFns->bdPrintNodeId(LOG << log4cpp::Priority::INFO, info_hash);
+	LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 
 	mCounterRecvQueryHash++;
@@ -1624,21 +1604,21 @@ void bdNode::msgin_reply_hash(bdId *id, bdToken *transId, bdToken *token, std::l
 	mCounterRecvReplyQueryHash++;
 
 #ifdef DEBUG_NODE_MSGIN
-	std::clog << "bdNode::msgin_reply_hash() TransId: ";
-	bdPrintTransId(std::clog, transId);
-	std::clog << " From: ";
-	mFns->bdPrintId(std::clog, id);
-	std::clog << " Token: ";
-	bdPrintToken(std::clog, token);
+	LOG << log4cpp::Priority::INFO << "bdNode::msgin_reply_hash() TransId: ";
+	bdPrintTransId(LOG << log4cpp::Priority::INFO, transId);
+	LOG << log4cpp::Priority::INFO << " From: ";
+	mFns->bdPrintId(LOG << log4cpp::Priority::INFO, id);
+	LOG << log4cpp::Priority::INFO << " Token: ";
+	bdPrintToken(LOG << log4cpp::Priority::INFO, token);
 
-	std::clog << " Peers: ";
+	LOG << log4cpp::Priority::INFO << " Peers: ";
 	std::list<std::string>::iterator it;
 	for(it = values.begin(); it != values.end(); it++)
 	{
-		std::clog << " ";
-		bdPrintCompactPeerId(std::clog, *it);
+		LOG << log4cpp::Priority::INFO << " ";
+		bdPrintCompactPeerId(LOG << log4cpp::Priority::INFO, *it);
 	}
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << std::endl;
 #else
 	(void) id;
 	(void) transId;
@@ -1652,21 +1632,21 @@ void bdNode::msgin_reply_nearest(bdId *id, bdToken *transId, bdToken *token, std
 	//mCounterRecvReplyNearestHash++;
 
 #ifdef DEBUG_NODE_MSGIN
-	std::clog << "bdNode::msgin_reply_nearest() TransId: ";
-	bdPrintTransId(std::clog, transId);
-	std::clog << " From: ";
-	mFns->bdPrintId(std::clog, id);
-	std::clog << " Token: ";
-	bdPrintToken(std::clog, token);
-	std::clog << " Nodes:";
+	LOG << log4cpp::Priority::INFO << "bdNode::msgin_reply_nearest() TransId: ";
+	bdPrintTransId(LOG << log4cpp::Priority::INFO, transId);
+	LOG << log4cpp::Priority::INFO << " From: ";
+	mFns->bdPrintId(LOG << log4cpp::Priority::INFO, id);
+	LOG << log4cpp::Priority::INFO << " Token: ";
+	bdPrintToken(LOG << log4cpp::Priority::INFO, token);
+	LOG << log4cpp::Priority::INFO << " Nodes:";
 
 	std::list<bdId>::iterator it;
 	for(it = nodes.begin(); it != nodes.end(); it++)
 	{
-		std::clog << " ";
-		mFns->bdPrintId(std::clog, &(*it));
+		LOG << log4cpp::Priority::INFO << " ";
+		mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &(*it));
 	}
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << std::endl;
 #else
 	(void) id;
 	(void) transId;
@@ -1682,16 +1662,16 @@ void bdNode::msgin_post_hash(bdId *id,  bdToken *transId,  bdNodeId *info_hash, 
 	//mCounterRecvPostHash++;
 
 #ifdef DEBUG_NODE_MSGIN
-	std::clog << "bdNode::msgin_post_hash() TransId: ";
-	bdPrintTransId(std::clog, transId);
-	std::clog << " From: ";
-	mFns->bdPrintId(std::clog, id);
-	std::clog << " Info_Hash: ";
-	mFns->bdPrintNodeId(std::clog, info_hash);
-	std::clog << " Port: " << port;
-	std::clog << " Token: ";
-	bdPrintToken(std::clog, token);
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdNode::msgin_post_hash() TransId: ";
+	bdPrintTransId(LOG << log4cpp::Priority::INFO, transId);
+	LOG << log4cpp::Priority::INFO << " From: ";
+	mFns->bdPrintId(LOG << log4cpp::Priority::INFO, id);
+	LOG << log4cpp::Priority::INFO << " Info_Hash: ";
+	mFns->bdPrintNodeId(LOG << log4cpp::Priority::INFO, info_hash);
+	LOG << log4cpp::Priority::INFO << " Port: " << port;
+	LOG << log4cpp::Priority::INFO << " Token: ";
+	bdPrintToken(LOG << log4cpp::Priority::INFO, token);
+	LOG << log4cpp::Priority::INFO << std::endl;
 #else
 	(void) id;
 	(void) transId;
@@ -1709,11 +1689,11 @@ void bdNode::msgin_reply_post(bdId *id, bdToken *transId)
 	//mCounterRecvReplyPostHash++;
 
 #ifdef DEBUG_NODE_MSGIN
-	std::clog << "bdNode::msgin_reply_post() TransId: ";
-	bdPrintTransId(std::clog, transId);
-	std::clog << " From: ";
-	mFns->bdPrintId(std::clog, id);
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdNode::msgin_reply_post() TransId: ";
+	bdPrintTransId(LOG << log4cpp::Priority::INFO, transId);
+	LOG << log4cpp::Priority::INFO << " From: ";
+	mFns->bdPrintId(LOG << log4cpp::Priority::INFO, id);
+	LOG << log4cpp::Priority::INFO << std::endl;
 #else
 	(void) id;
 	(void) transId;
@@ -1726,8 +1706,7 @@ void bdNode::msgin_reply_post(bdId *id, bdToken *transId)
 void bdNode::genNewToken(bdToken *token)
 {
 #ifdef DEBUG_NODE_ACTIONS 
-	syslog(LOG_INFO, "bdNode::genNewToken()");
-	syslog(LOG_INFO, ")\n");
+	LOG.info("bdNode::genNewToken()");
 #endif
 
 	std::ostringstream out;
@@ -1750,8 +1729,8 @@ void bdNode::genNewTransId(bdToken *token)
 {
 	/* generate message, send to udp */
 #ifdef DEBUG_NODE_ACTIONS 
-	syslog(LOG_INFO, "bdNode::genNewTransId()");
-	syslog(LOG_INFO, ")\n");
+	LOG.info("bdNode::genNewTransId()");
+	LOG.info(")\n");
 #endif
 
 	std::ostringstream out;
@@ -1773,7 +1752,7 @@ void bdNode::genNewTransId(bdToken *token)
 int bdNode::queueQuery(bdId *id, bdNodeId *query, bdToken *transId, uint32_t query_type)
 {
 #ifdef DEBUG_NODE_ACTIONS 
-	std::clog << "bdnode::queueQuery()" << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdnode::queueQuery()" << std::endl;
 #endif
 
 	mRemoteQueries.push_back(bdRemoteQuery(id, query, transId, query_type));	
@@ -1787,10 +1766,10 @@ void bdNode::registerOutgoingMsg(bdId *id, bdToken *transId, uint32_t msgType)
 {
 
 #ifdef DEBUG_MSG_CHECKS
-	std::clog << "bdNode::registerOutgoingMsg(";
-	mFns->bdPrintId(std::clog, id);
-	std::clog << ", " << msgType << ")";
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdNode::registerOutgoingMsg(";
+	mFns->bdPrintId(LOG << log4cpp::Priority::INFO, id);
+	LOG << log4cpp::Priority::INFO << ", " << msgType << ")";
+	LOG << log4cpp::Priority::INFO << std::endl;
 #else
 	(void) id;
 	(void) msgType;
@@ -1825,10 +1804,10 @@ uint32_t bdNode::checkIncomingMsg(bdId *id, bdToken *transId, uint32_t msgType)
 {
 
 #ifdef DEBUG_MSG_CHECKS
-	std::clog << "bdNode::checkIncomingMsg(";
-	mFns->bdPrintId(std::clog, id);
-	std::clog << ", " << msgType << ")";
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdNode::checkIncomingMsg(";
+	mFns->bdPrintId(LOG << log4cpp::Priority::INFO, id);
+	LOG << log4cpp::Priority::INFO << ", " << msgType << ")";
+	LOG << log4cpp::Priority::INFO << std::endl;
 #else
 	(void) id;
 	(void) msgType;
@@ -1857,7 +1836,7 @@ bdNodeNetMsg::bdNodeNetMsg(char *msg, int len, struct sockaddr_in *in_addr)
 {
 	data = (char *) malloc(len);
 	memcpy(data, msg, len);
-	//print(std::clog);
+	//print(LOG << log4cpp::Priority::INFO);
 }
 
 void bdNodeNetMsg::print(std::ostream &out)

@@ -27,6 +27,7 @@
 
 #include "bdthreads.h"
 #include <unistd.h>    /* for usleep() */
+#include "util/bdlog.h"
 
 /*******
  * #define DEBUG_THREADS 1
@@ -41,16 +42,14 @@
 extern "C" void* bdthread_init(void* p)
 {
 #ifdef DEBUG_THREADS
-	std::clog << "bdthread_init()";
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdthread_init()";
 #endif
 
   bdThread *thread = (bdThread *) p;
   if (!thread)
   {
 #ifdef DEBUG_THREADS
-	std::clog << "bdthread_init() Error Invalid thread pointer.";
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdthread_init() Error Invalid thread pointer.";
 #endif
     return 0;
   }
@@ -65,8 +64,7 @@ pthread_t  createThread(bdThread &thread)
     void  *data = (void *) (&thread);
 
 #ifdef DEBUG_THREADS
-    std::clog << "createThread() creating a bdThread";
-    std::clog << std::endl;
+    LOG << log4cpp::Priority::INFO << "createThread() creating a bdThread";
 #endif
 
     thread.mMutex.lock();
@@ -76,14 +74,13 @@ pthread_t  createThread(bdThread &thread)
     }
 
 #ifdef DEBUG_THREADS
-    std::clog << "createThread() created Thread.mTid: ";
+    LOG << log4cpp::Priority::INFO << "createThread() created Thread.mTid: ";
 
 #if defined(_WIN32) || defined(__MINGW32__)
-    std::clog << "WIN32: Cannot print mTid ";
+    LOG << log4cpp::Priority::INFO << "WIN32: Cannot print mTid ";
 #else
-    std::clog << thread.mTid;
+    LOG << log4cpp::Priority::INFO << thread.mTid;
 #endif
-    std::clog << std::endl;
 
 #endif
 
@@ -99,8 +96,7 @@ bdThread::bdThread()
 {
 
 #ifdef DEBUG_THREADS
-    	std::clog << "bdThread::bdThread()";
-    	std::clog << std::endl;
+    	LOG << log4cpp::Priority::INFO << "bdThread::bdThread()";
 #endif
 
 #if defined(_WIN32) || defined(__MINGW32__)
@@ -113,15 +109,14 @@ bdThread::bdThread()
 void bdThread::join() /* waits for the the mTid thread to stop */
 {
 #ifdef DEBUG_THREADS
-    	std::clog << "bdThread::join() Called! Waiting for Thread.mTid: ";
+    	LOG << log4cpp::Priority::INFO << "bdThread::join() Called! Waiting for Thread.mTid: ";
 
 #if defined(_WIN32) || defined(__MINGW32__)
-    std::clog << "WIN32: Cannot print mTid ";
+    LOG << log4cpp::Priority::INFO << "WIN32: Cannot print mTid ";
 #else
-    std::clog << mTid;
+    LOG << log4cpp::Priority::INFO << mTid;
 #endif
 
-    std::clog << std::endl;
 #endif
 
     mMutex.lock();
@@ -134,17 +129,15 @@ void bdThread::join() /* waits for the the mTid thread to stop */
 		pthread_join(mTid, NULL);
 
 #ifdef DEBUG_THREADS
-    std::clog << "bdThread::join() Joined Thread.mTid: ";
+    LOG << log4cpp::Priority::INFO << "bdThread::join() Joined Thread.mTid: ";
 
 #if defined(_WIN32) || defined(__MINGW32__)
-    std::clog << "WIN32: Cannot print mTid ";
+    LOG << log4cpp::Priority::INFO << "WIN32: Cannot print mTid ";
 #else
-    std::clog << mTid;
+    LOG << log4cpp::Priority::INFO << mTid;
 #endif
 
-    std::clog << std::endl;
-    std::clog << "bdThread::join() Setting mTid = 0";
-    std::clog << std::endl;
+    LOG << log4cpp::Priority::INFO << "bdThread::join() Setting mTid = 0";
 #endif
 
 #if defined(_WIN32) || defined(__MINGW32__)
@@ -161,8 +154,7 @@ void bdThread::join() /* waits for the the mTid thread to stop */
 void bdThread::stop() 
 {
 #ifdef DEBUG_THREADS
-    	std::clog << "bdThread::stop() Called!";
-    	std::clog << std::endl;
+    	LOG << log4cpp::Priority::INFO << "bdThread::stop() Called!";
 #endif
 
 	pthread_exit(NULL);

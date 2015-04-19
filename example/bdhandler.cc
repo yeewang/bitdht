@@ -63,21 +63,21 @@ virtual int dhtValueCallback(const bdNodeId *id, std::string key, uint32_t statu
 
 BitDhtHandler::BitDhtHandler(bdNodeId *ownId, uint16_t port, std::string appId, std::string bootstrapfile)
 {
-	std::clog << "BitDhtHandler::BitDhtHandler()" << std::endl;
-	std::clog << "Using Id: ";
-	bdStdPrintNodeId(std::clog, ownId);
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "BitDhtHandler::BitDhtHandler()" << std::endl;
+	LOG << log4cpp::Priority::INFO << "Using Id: ";
+	bdStdPrintNodeId(LOG << log4cpp::Priority::INFO, ownId);
+	LOG << log4cpp::Priority::INFO << std::endl;
 
-	std::clog << "Using Bootstrap File: " << bootstrapfile;
-	std::clog << std::endl;
-	std::clog << "Converting OwnId to bdNodeId....";
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "Using Bootstrap File: " << bootstrapfile;
+	LOG << log4cpp::Priority::INFO << std::endl;
+	LOG << log4cpp::Priority::INFO << "Converting OwnId to bdNodeId....";
+	LOG << log4cpp::Priority::INFO << std::endl;
 
 	/* standard dht behaviour */
 	bdDhtFunctions *stdfns = new bdStdDht();
 
-	std::clog << "BitDhtHandler() startup ... creating UdpBitDht";
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "BitDhtHandler() startup ... creating UdpBitDht";
+	LOG << log4cpp::Priority::INFO << std::endl;
 
 	/* create dht */
         struct sockaddr_in local;
@@ -95,8 +95,8 @@ BitDhtHandler::BitDhtHandler(bdNodeId *ownId, uint16_t port, std::string appId, 
 	BdCallback *bdcb = new BdCallback(this);
 	mUdpBitDht->addCallback(bdcb);
 
-	std::clog << "BitDhtHandler() starting threads and dht";
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "BitDhtHandler() starting threads and dht";
+	LOG << log4cpp::Priority::INFO << std::endl;
 
 	mUdpBitDht->start(); /* starts up the bitdht thread */
 
@@ -107,8 +107,8 @@ BitDhtHandler::BitDhtHandler(bdNodeId *ownId, uint16_t port, std::string appId, 
 	/* pqiNetAssist - external interface functions */
 void    BitDhtHandler::enable(bool on)
 {
-        std::clog << "p3BitDht::enable(" << on << ")";
-        std::clog << std::endl;
+        LOG << log4cpp::Priority::INFO << "p3BitDht::enable(" << on << ")";
+        LOG << log4cpp::Priority::INFO << std::endl;
         if (on)
         {
                 mUdpBitDht->startDht();
@@ -148,9 +148,9 @@ bool    BitDhtHandler::getActive()
 	/* add / remove peers */
 bool 	BitDhtHandler::FindNode(bdNodeId *peerId)
 {
-	std::clog << "BitDhtHandler::FindNode(";
-	bdStdPrintNodeId(std::clog, peerId);
-	std::clog << ")" << std::endl;
+	LOG << log4cpp::Priority::INFO << "BitDhtHandler::FindNode(";
+	bdStdPrintNodeId(LOG << log4cpp::Priority::INFO, peerId);
+	LOG << log4cpp::Priority::INFO << ")" << std::endl;
 
 	/* add in peer */
 	mUdpBitDht->addFindNode(peerId, BITDHT_QFLAGS_DO_IDLE);
@@ -160,10 +160,10 @@ bool 	BitDhtHandler::FindNode(bdNodeId *peerId)
 
 bool 	BitDhtHandler::DropNode(bdNodeId *peerId)
 {
-	std::clog << "BitDhtHandler::DropNode(";
-	bdStdPrintNodeId(std::clog, peerId);
-	std::clog << ")" << std::endl;
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "BitDhtHandler::DropNode(";
+	bdStdPrintNodeId(LOG << log4cpp::Priority::INFO, peerId);
+	LOG << log4cpp::Priority::INFO << ")" << std::endl;
+	LOG << log4cpp::Priority::INFO << std::endl;
 
 	/* remove in peer */
 	mUdpBitDht->removeFindNode(peerId);
@@ -178,10 +178,10 @@ bool 	BitDhtHandler::DropNode(bdNodeId *peerId)
 int BitDhtHandler::NodeCallback(const bdId *id, uint32_t peerflags)
 {
 #ifdef DEBUG_BITDHT
-	std::clog << "BitDhtHandler::NodeCallback()";
-	bdStdPrintNodeId(std::clog, &(id->id));
-	std::clog << " flags: " << peerflags;
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "BitDhtHandler::NodeCallback()";
+	bdStdPrintNodeId(LOG << log4cpp::Priority::INFO, &(id->id));
+	LOG << log4cpp::Priority::INFO << " flags: " << peerflags;
+	LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 
 	return 0;
@@ -189,33 +189,33 @@ int BitDhtHandler::NodeCallback(const bdId *id, uint32_t peerflags)
 
 int BitDhtHandler::PeerCallback(const bdNodeId *id, uint32_t status)
 {
-	std::clog << "BitDhtHandler::PeerCallback() NodeId: ";
-	bdStdPrintNodeId(std::clog, id);
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "BitDhtHandler::PeerCallback() NodeId: ";
+	bdStdPrintNodeId(LOG << log4cpp::Priority::INFO, id);
+	LOG << log4cpp::Priority::INFO << std::endl;
 
 	bool connect = false;
 	switch(status)
 	{
   		case BITDHT_MGR_QUERY_FAILURE:
 			/* do nothing */
-			std::clog << "BitDhtHandler::PeerCallback() QUERY FAILURE ... do nothin ";
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "BitDhtHandler::PeerCallback() QUERY FAILURE ... do nothin ";
+			LOG << log4cpp::Priority::INFO << std::endl;
 
 		break;
 
 		case BITDHT_MGR_QUERY_PEER_OFFLINE:
 			/* do nothing */
 
-			std::clog << "BitDhtHandler::PeerCallback() QUERY PEER OFFLINE ... do nothin ";
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "BitDhtHandler::PeerCallback() QUERY PEER OFFLINE ... do nothin ";
+			LOG << log4cpp::Priority::INFO << std::endl;
 
 			break;
 
 		case BITDHT_MGR_QUERY_PEER_UNREACHABLE:
 			/* do nothing */
 
-			std::clog << "BitDhtHandler::PeerCallback() QUERY PEER UNREACHABLE ... flag? / do nothin ";
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "BitDhtHandler::PeerCallback() QUERY PEER UNREACHABLE ... flag? / do nothin ";
+			LOG << log4cpp::Priority::INFO << std::endl;
 
 
 		break;
@@ -223,8 +223,8 @@ int BitDhtHandler::PeerCallback(const bdNodeId *id, uint32_t status)
 		case BITDHT_MGR_QUERY_PEER_ONLINE:
 			/* do something */
 
-			std::clog << "BitDhtHandler::PeerCallback() QUERY PEER ONLINE ... try udp connection";
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "BitDhtHandler::PeerCallback() QUERY PEER ONLINE ... try udp connection";
+			LOG << log4cpp::Priority::INFO << std::endl;
 
 			connect = true;
 		break;
@@ -236,14 +236,14 @@ int BitDhtHandler::PeerCallback(const bdNodeId *id, uint32_t status)
 
 int BitDhtHandler::ValueCallback(const bdNodeId *id, std::string key, uint32_t status)
 {
-	std::clog << "BitDhtHandler::ValueCallback() NOOP for NOW";
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "BitDhtHandler::ValueCallback() NOOP for NOW";
+	LOG << log4cpp::Priority::INFO << std::endl;
 
-	std::clog << "BitDhtHandler::ValueCallback()";
-	bdStdPrintNodeId(std::clog, id);
-	std::clog << " key: " << key;
-	std::clog << " status: " << status;
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "BitDhtHandler::ValueCallback()";
+	bdStdPrintNodeId(LOG << log4cpp::Priority::INFO, id);
+	LOG << log4cpp::Priority::INFO << " key: " << key;
+	LOG << log4cpp::Priority::INFO << " status: " << status;
+	LOG << log4cpp::Priority::INFO << std::endl;
 
 	/* ignore for now */
 	return 0;

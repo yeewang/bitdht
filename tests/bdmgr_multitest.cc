@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 
 	bdDhtFunctions *fns = new bdStdDht();
 
-	std::clog << "bdmgr_multitest() Setting up Nodes" << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdmgr_multitest() Setting up Nodes" << std::endl;
 	/* setup nodes */
 	for(i = 0; i < n_nodes; i++)
 	{
@@ -67,9 +67,9 @@ int main(int argc, char **argv)
 
 		//id.addr.sin_port = htons(i);
 		//((uint32_t *) (id.id.data))[0] = i * 16 * 16; /* force this so the sort order is maintained! */
-		std::clog << "bdmgr_multitest() Id: ";
-		fns->bdPrintId(std::clog, &id);
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "bdmgr_multitest() Id: ";
+		fns->bdPrintId(LOG << log4cpp::Priority::INFO, &id);
+		LOG << log4cpp::Priority::INFO << std::endl;
 
 		bdNodeManager *mgr = new bdNodeManager(&(id.id), "bdTEST", "", fns);
 
@@ -80,7 +80,7 @@ int main(int argc, char **argv)
 
 	}
 
-	std::clog << "bdmgr_multitest() Cross Seeding" << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdmgr_multitest() Cross Seeding" << std::endl;
 	/* do a little cross seeding */
 	for(nit = nodes.begin(); nit != nodes.end(); nit++)
 	{
@@ -101,12 +101,12 @@ int main(int argc, char **argv)
 
 	/* ready to run */
 	
-	std::clog << "bdmgr_multitest() Simulation Time....." << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdmgr_multitest() Simulation Time....." << std::endl;
 	i = 0;
 	while(time(NULL) < starttime + sim_time)
 	{
 		i++;
-		std::clog << "bdmgr_multitest() Iteration: " << i << std::endl;
+		LOG << log4cpp::Priority::INFO << "bdmgr_multitest() Iteration: " << i << std::endl;
 
 		for(it = nodes.begin(), j = 0; it != nodes.end(); it++, j++)
 		{
@@ -118,7 +118,7 @@ int main(int argc, char **argv)
 
 			while(it->second->outgoingMsg(&addr, data, &len))
 			{
-				std::clog << "bdmgr_multitest() Msg from Peer: " << j;
+				LOG << log4cpp::Priority::INFO << "bdmgr_multitest() Msg from Peer: " << j;
 
 				/* find the peer */
 				ait = addrIdx.find(addr);
@@ -126,14 +126,14 @@ int main(int argc, char **argv)
 				if (ait != addrIdx.end())
 				{
 					nit = nodes.find(ait->second);
-					std::clog << " For: ";
-					fns->bdPrintId(std::clog, &(nit->first));
-					std::clog << std::endl;
+					LOG << log4cpp::Priority::INFO << " For: ";
+					fns->bdPrintId(LOG << log4cpp::Priority::INFO, &(nit->first));
+					LOG << log4cpp::Priority::INFO << std::endl;
 				}
 				else
 				{
-					std::clog << " For Unknown Destination";
-					std::clog << std::endl;
+					LOG << log4cpp::Priority::INFO << " For Unknown Destination";
+					LOG << log4cpp::Priority::INFO << std::endl;
 
 				}
 
@@ -150,7 +150,7 @@ int main(int argc, char **argv)
 		for(it = nodes.begin(), j = 0; it != nodes.end(); it++, j++)
 		{
 			/* tick */
-			std::clog << "bdmgr_multitest() Ticking peer: " << j << std::endl;
+			LOG << log4cpp::Priority::INFO << "bdmgr_multitest() Ticking peer: " << j << std::endl;
 			it->second->iteration();
 		}
 
@@ -159,11 +159,11 @@ int main(int argc, char **argv)
 		sleep(1);
 	}
 
-	std::clog << "bdmgr_multitest() Displying States"<< std::endl;
+	LOG << log4cpp::Priority::INFO << "bdmgr_multitest() Displying States"<< std::endl;
 	for(it = nodes.begin(), j = 0; it != nodes.end(); it++, j++)
 	{
 		/* tick */
-		std::clog << "bdmgr_multitest() Peer State: " << j << std::endl;
+		LOG << log4cpp::Priority::INFO << "bdmgr_multitest() Peer State: " << j << std::endl;
 		it->second->printState();
 	}
 

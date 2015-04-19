@@ -1,5 +1,5 @@
 
-LIBS = ../log2cpp/src/.libs/liblog4cpp.a
+LIBS = ../log4cpp/src/.libs/liblog4cpp.a
 	
 AM_CFLAGS = -Wall -lpthread 
 AM_CXXFLAGS = -Wall  -lpthread -I../log4cpp/include -std=c++11

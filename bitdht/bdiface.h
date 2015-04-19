@@ -98,6 +98,8 @@ public:
 	virtual void bdPrintId(std::ostream &out, const bdId *a) = 0;
 	virtual void bdPrintNodeId(std::ostream &out, const bdNodeId *a) = 0;
 
+	virtual const std::string bdPrintId(const bdId *a) = 0;
+	virtual const std::string bdPrintNodeId(const bdNodeId *a) = 0;
 };
 
 /* peer flags

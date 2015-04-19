@@ -33,6 +33,8 @@
 
 #include <algorithm>
 
+#include "util/bdlog.h"
+
 /***
  * #define DEBUG_UDP_RECV	1
  ***/
@@ -47,23 +49,20 @@ UdpStack::UdpStack(struct sockaddr_in &local)
 	return;
 }
 
-bool    UdpStack::resetAddress(struct sockaddr_in &local)
+bool UdpStack::resetAddress(struct sockaddr_in &local)
 {
-	std::clog << "UdpStack::resetAddress(" << local << ")";
-	std::clog << std::endl;
+	LOG.info("UdpStack::resetAddress():%s:%d",
+			inet_ntoa(local.sin_addr), htons(local.sin_port));
 
 	return udpLayer->reset(local);
 }
-
-
 
 /* higher level interface */
 int UdpStack::recvPkt(void *data, int size, struct sockaddr_in &from)
 {
 	/* print packet information */
 #ifdef DEBUG_UDP_RECV
-	std::clog << "UdpStack::recvPkt(" << size << ") from: " << from;
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "UdpStack::recvPkt(" << size << ") from: " << from;
 #endif
 
         bdStackMutex stack(stackMtx);   /********** LOCK MUTEX *********/
@@ -75,8 +74,8 @@ int UdpStack::recvPkt(void *data, int size, struct sockaddr_in &from)
 		if ((*it)->recvPkt(data, size, from))
 		{
 #ifdef DEBUG_UDP_RECV
-			std::clog << "UdpStack::recvPkt(" << size << ") from: " << from;
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "UdpStack::recvPkt(" << size << ") from: " << from;
+			LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 			break;
 		}
@@ -88,9 +87,9 @@ int  UdpStack::sendPkt(const void *data, int size, struct sockaddr_in &to, int t
 {
 	/* print packet information */
 #ifdef DEBUG_UDP_RECV
-	std::clog << "UdpStack::sendPkt(" << size << ") ttl: " << ttl;
-	std::clog << " to: " << to;
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "UdpStack::sendPkt(" << size << ") ttl: " << ttl;
+	LOG << log4cpp::Priority::INFO << " to: " << to;
+	LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 
 	/* send to udpLayer */
@@ -158,8 +157,8 @@ int UdpStack::addReceiver(UdpReceiver *recv)
 	/* otherwise its already there! */
 
 #ifdef DEBUG_UDP_RECV
-	std::clog << "UdpStack::addReceiver() Recv already exists!" << std::endl;
-	std::clog << "UdpStack::addReceiver() ERROR" << std::endl;
+	LOG << log4cpp::Priority::INFO << "UdpStack::addReceiver() Recv already exists!" << std::endl;
+	LOG << log4cpp::Priority::INFO << "UdpStack::addReceiver() ERROR" << std::endl;
 #endif
 
 	return 0;
@@ -181,8 +180,8 @@ int UdpStack::removeReceiver(UdpReceiver *recv)
 	/* otherwise its not there! */
 
 #ifdef DEBUG_UDP_RECV
-	std::clog << "UdpStack::removeReceiver() Recv dont exist!" << std::endl;
-	std::clog << "UdpStack::removeReceiver() ERROR" << std::endl;
+	LOG << log4cpp::Priority::INFO << "UdpStack::removeReceiver() Recv dont exist!" << std::endl;
+	LOG << log4cpp::Priority::INFO << "UdpStack::removeReceiver() ERROR" << std::endl;
 #endif
 
 	return 0;
@@ -202,13 +201,11 @@ int  UdpSubReceiver::sendPkt(const void *data, int size, struct sockaddr_in &to,
 {
 	/* print packet information */
 #ifdef DEBUG_UDP_RECV
-	std::clog << "UdpSubReceiver::sendPkt(" << size << ") ttl: " << ttl;
-	std::clog << " to: " << to;
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "UdpSubReceiver::sendPkt(" << size << ") ttl: " << ttl;
+	LOG << log4cpp::Priority::INFO << " to: " << to;
+	LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 
 	/* send to udpLayer */
 	return mPublisher->sendPkt(data, size, to, ttl);
 }
-
-

@@ -54,7 +54,7 @@ bencoded = d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:y1:qe
 int bitdht_create_ping_msg(bdToken *tid, bdNodeId *id, char *msg, int avail)
 {
 #ifdef DEBUG_MSGS 
-	syslog(LOG_INFO, "bitdht_create_ping_msg()\n");
+	LOG.info("bitdht_create_ping_msg()\n");
 #endif
 
 	be_node *dict = be_create_dict();
@@ -96,7 +96,7 @@ int bitdht_response_ping_msg(bdToken *tid, bdNodeId *id, bdToken *vid,
 					char *msg, int avail)
 {
 #ifdef DEBUG_MSGS 
-	syslog(LOG_INFO, "bitdht_response_ping_msg()\n");
+	LOG.info("bitdht_response_ping_msg()\n");
 #endif
 
         be_node *dict = be_create_dict();
@@ -138,7 +138,7 @@ int bitdht_find_node_msg(bdToken *tid, bdNodeId *id, bdNodeId *target,
 					char *msg, int avail)
 {
 #ifdef DEBUG_MSGS 
-	syslog(LOG_INFO, "bitdht_find_node_msg()\n");
+	LOG.info("bitdht_find_node_msg()\n");
 #endif
 
         be_node *dict = be_create_dict();
@@ -181,7 +181,7 @@ int bitdht_resp_node_msg(bdToken *tid, bdNodeId *id, std::list<bdId> &nodes,
 					char *msg, int avail)
 {
 #ifdef DEBUG_MSGS 
-	syslog(LOG_INFO, "bitdht_resp_node_msg()\n");
+	LOG.info("bitdht_resp_node_msg()\n");
 #endif
 
         be_node *dict = be_create_dict();
@@ -210,7 +210,7 @@ int bitdht_resp_node_msg(bdToken *tid, bdNodeId *id, std::list<bdId> &nodes,
 	be_free(dict);
 
 #ifdef DEBUG_MSG_DUMP
-	syslog(LOG_INFO, "bitdht_resp_node_msg() len = %d / %d\n", blen, avail);
+	LOG.info("bitdht_resp_node_msg() len = %d / %d\n", blen, avail);
 #endif
 
 	return blen;
@@ -226,7 +226,7 @@ int bitdht_get_peers_msg(bdToken *tid, bdNodeId *id, bdNodeId *info_hash,
 					char *msg, int avail)
 {
 #ifdef DEBUG_MSGS 
-	syslog(LOG_INFO, "bitdht_get_peers_msg()\n");
+	LOG.info("bitdht_get_peers_msg()\n");
 #endif
 
         be_node *dict = be_create_dict();
@@ -269,7 +269,7 @@ int bitdht_peers_reply_hash_msg(bdToken *tid, bdNodeId *id,
 					char *msg, int avail)
 {
 #ifdef DEBUG_MSGS 
-	syslog(LOG_INFO, "bitdht_peers_reply_hash_msg()\n");
+	LOG.info("bitdht_peers_reply_hash_msg()\n");
 #endif
 
         be_node *dict = be_create_dict();
@@ -315,7 +315,7 @@ int bitdht_peers_reply_closest_msg(bdToken *tid, bdNodeId *id,
 					char *msg, int avail)
 {
 #ifdef DEBUG_MSGS 
-	syslog(LOG_INFO, "bitdht_peers_reply_closest_msg()\n");
+	LOG.info("bitdht_peers_reply_closest_msg()\n");
 #endif
 
         be_node *dict = be_create_dict();
@@ -361,7 +361,7 @@ bencoded = d1:ad2:id20:abcdefghij01234567899:info_hash20:mnopqrstuvwxyz1234564:p
 int bitdht_announce_peers_msg(bdToken *tid, bdNodeId *id, bdNodeId *info_hash, uint32_t port, bdToken *token, char *msg, int avail)
 {
 #ifdef DEBUG_MSGS 
-	syslog(LOG_INFO, "bitdht_announce_peers_msg()\n");
+	LOG.info("bitdht_announce_peers_msg()\n");
 #endif
 
 	be_node *dict = be_create_dict();
@@ -414,7 +414,7 @@ int bitdht_reply_announce_msg(bdToken *tid, bdNodeId *id,
 					char *msg, int avail)
 {
 #ifdef DEBUG_MSGS 
-	syslog(LOG_INFO, "bitdht_response_ping_msg()\n");
+	LOG.info("bitdht_response_ping_msg()\n");
 #endif
 
         be_node *dict = be_create_dict();
@@ -521,13 +521,13 @@ uint32_t beMsgType(be_node *n)
 	uint32_t beY = beMsgGetY(n);
 
 #ifdef DEBUG_MSG_TYPE 
-	std::clog << "bsMsgType() beY: " << beY << std::endl;
+	LOG << log4cpp::Priority::INFO << "bsMsgType() beY: " << beY << std::endl;
 #endif
 
 	if (beY == BE_Y_UNKNOWN)
 	{
 #ifdef DEBUG_MSG_TYPE 
-		std::clog << "bsMsgType() UNKNOWN MSG TYPE" << std::endl;
+		LOG << log4cpp::Priority::INFO << "bsMsgType() UNKNOWN MSG TYPE" << std::endl;
 #endif
 
 		return BITDHT_MSG_TYPE_UNKNOWN;
@@ -536,40 +536,40 @@ uint32_t beMsgType(be_node *n)
 	if (beY == BE_Y_Q) /* query */
 	{
 #ifdef DEBUG_MSG_TYPE 
-		std::clog << "bsMsgType() QUERY MSG TYPE" << std::endl;
+		LOG << log4cpp::Priority::INFO << "bsMsgType() QUERY MSG TYPE" << std::endl;
 #endif
 	        be_node *query = beMsgGetDictNode(n, "q");
 
 		if (beMsgMatchString(query, "ping", 4))
 		{
 #ifdef DEBUG_MSG_TYPE 
-			std::clog << "bsMsgType() QUERY:ping MSG TYPE" << std::endl;
+			LOG << log4cpp::Priority::INFO << "bsMsgType() QUERY:ping MSG TYPE" << std::endl;
 #endif
 			return BITDHT_MSG_TYPE_PING;
 		}
 		else if (beMsgMatchString(query, "find_node", 9))
 		{
 #ifdef DEBUG_MSG_TYPE 
-			std::clog << "bsMsgType() QUERY:find_node MSG TYPE" << std::endl;
+			LOG << log4cpp::Priority::INFO << "bsMsgType() QUERY:find_node MSG TYPE" << std::endl;
 #endif
 			return BITDHT_MSG_TYPE_FIND_NODE;
 		}
 		else if (beMsgMatchString(query, "get_peers", 9))
 		{
 #ifdef DEBUG_MSG_TYPE 
-			std::clog << "bsMsgType() QUERY:get_peers MSG TYPE" << std::endl;
+			LOG << log4cpp::Priority::INFO << "bsMsgType() QUERY:get_peers MSG TYPE" << std::endl;
 #endif
 			return BITDHT_MSG_TYPE_GET_HASH;
 		}
 		else if (beMsgMatchString(query, "announce_peer", 13))
 		{
 #ifdef DEBUG_MSG_TYPE 
-			std::clog << "bsMsgType() QUERY:announce_peer MSG TYPE" << std::endl;
+			LOG << log4cpp::Priority::INFO << "bsMsgType() QUERY:announce_peer MSG TYPE" << std::endl;
 #endif
 			return BITDHT_MSG_TYPE_POST_HASH;
 		}
 #ifdef DEBUG_MSG_TYPE 
-		std::clog << "bsMsgType() QUERY:UNKNOWN MSG TYPE, dumping dict" << std::endl;
+		LOG << log4cpp::Priority::INFO << "bsMsgType() QUERY:UNKNOWN MSG TYPE, dumping dict" << std::endl;
         	/* dump answer */
         	be_dump(n);
 #endif
@@ -579,13 +579,13 @@ uint32_t beMsgType(be_node *n)
 	if (beY != BE_Y_R)
 	{
 #ifdef DEBUG_MSG_TYPE 
-		std::clog << "bsMsgType() UNKNOWN2 MSG TYPE" << std::endl;
+		LOG << log4cpp::Priority::INFO << "bsMsgType() UNKNOWN2 MSG TYPE" << std::endl;
 #endif
 		return BITDHT_MSG_TYPE_UNKNOWN;
 	}
 
 #ifdef DEBUG_MSG_TYPE 
-		std::clog << "bsMsgType() REPLY MSG TYPE" << std::endl;
+		LOG << log4cpp::Priority::INFO << "bsMsgType() REPLY MSG TYPE" << std::endl;
 #endif
 
 	/* otherwise a reply or - invalid 

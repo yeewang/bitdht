@@ -37,8 +37,8 @@ bdStore::bdStore(std::string file, bdDhtFunctions *fns)
 	:mFns(fns)
 {
 #ifdef DEBUG_STORE
-	std::clog << "bdStore::bdStore(" << file << ")";
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdStore::bdStore(" << file << ")";
+	LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 
 	/* read data from file */
@@ -61,7 +61,7 @@ int bdStore::reloadFromStore()
 	FILE *fd = fopen(mStoreFile.c_str(), "r");
 	if (!fd)
 	{
-		syslog(LOG_INFO, "Failed to Open File: %s ... No Peers\n", mStoreFile.c_str());
+		LOG.info("Failed to Open File: %s ... No Peers\n", mStoreFile.c_str());
 		return 0;
 	}
 		
@@ -86,7 +86,7 @@ int bdStore::reloadFromStore()
 				peer.mLastRecvTime = 0;
 				store.push_back(peer);
 #ifdef DEBUG_STORE
-				syslog(LOG_INFO, "Read: %s %d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
+				LOG.info("Read: %s %d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 #endif
 			}
 		}
@@ -95,7 +95,7 @@ int bdStore::reloadFromStore()
 	fclose(fd);
 
 #ifdef DEBUG_STORE
-	syslog(LOG_INFO, "Read %ld Peers\n", (long) store.size());
+	LOG.info("Read %ld Peers\n", (long) store.size());
 #endif
 
 	return 1;
@@ -105,7 +105,7 @@ int bdStore::reloadFromStore()
 int 	bdStore::getPeer(bdPeer *peer)
 {
 #ifdef DEBUG_STORE
-	syslog(LOG_INFO, "bdStore::getPeer() %ld Peers left\n", (long) store.size());
+	LOG.info("bdStore::getPeer() %ld Peers left\n", (long) store.size());
 #endif
 
 	std::list<bdPeer>::iterator it;
@@ -126,9 +126,9 @@ int 	bdStore::getPeer(bdPeer *peer)
 void	bdStore::addStore(bdPeer *peer)
 {
 #ifdef DEBUG_STORE
-	std::clog << "bdStore::addStore() ";
-	mFns->bdPrintId(std::clog, &(peer->mPeerId));
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdStore::addStore() ";
+	mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &(peer->mPeerId));
+	LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 
 	/* remove old entry */
@@ -142,9 +142,9 @@ void	bdStore::addStore(bdPeer *peer)
 		{
 			removed = true;
 #ifdef DEBUG_STORE
-			std::clog << "bdStore::addStore() Removed Existing Entry: ";
-			mFns->bdPrintId(std::clog, &(it->mPeerId));
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "bdStore::addStore() Removed Existing Entry: ";
+			mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &(it->mPeerId));
+			LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 			it = store.erase(it);
 		}
@@ -155,16 +155,16 @@ void	bdStore::addStore(bdPeer *peer)
 	}
 
 #ifdef DEBUG_STORE
-	std::clog << "bdStore::addStore() Push_back";
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdStore::addStore() Push_back";
+	LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 	store.push_back(*peer);
 
 	while(store.size() > MAX_ENTRIES)
 	{
 #ifdef DEBUG_STORE
-		std::clog << "bdStore::addStore() pop_front()";
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "bdStore::addStore() pop_front()";
+		LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 		store.pop_front();
 	}
@@ -174,14 +174,14 @@ void	bdStore::writeStore(std::string file)
 {
 	/* write out store */
 #ifdef DEBUG_STORE
-	syslog(LOG_INFO, "bdStore::writeStore(%s) =  %d entries\n", file.c_str(), store.size());
+	LOG.info("bdStore::writeStore(%s) =  %d entries\n", file.c_str(), store.size());
 #endif
 
 	if (store.size() < 0.9 * MAX_ENTRIES)
 	{
 		/* don't save yet! */
 #ifdef DEBUG_STORE
-		syslog(LOG_INFO, "bdStore::writeStore() Delaying until more entries\n");
+		LOG.info("bdStore::writeStore() Delaying until more entries\n");
 #endif
 		return;
 	}
@@ -193,7 +193,7 @@ void	bdStore::writeStore(std::string file)
 	{
 #ifdef DEBUG_STORE
 #endif
-		syslog(LOG_INFO, "bdStore::writeStore() FAILED to Open File\n");
+		LOG.info("bdStore::writeStore() FAILED to Open File\n");
 		return;
 	}
 	
@@ -202,7 +202,7 @@ void	bdStore::writeStore(std::string file)
 	{
 		fprintf(fd, "%s %d\n", inet_ntoa(it->mPeerId.addr.sin_addr), ntohs(it->mPeerId.addr.sin_port));
 #ifdef DEBUG_STORE
-		syslog(LOG_INFO, "Storing Peer Address: %s %d\n", inet_ntoa(it->mPeerId.addr.sin_addr), ntohs(it->mPeerId.addr.sin_port));
+		LOG.info("Storing Peer Address: %s %d\n", inet_ntoa(it->mPeerId.addr.sin_addr), ntohs(it->mPeerId.addr.sin_port));
 #endif
 
 	}

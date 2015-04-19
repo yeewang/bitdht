@@ -97,7 +97,7 @@ void	bdMsgHistoryList::printHistory(std::ostream &out, int mode, time_t start_ts
 
 bool	bdMsgHistoryList::canSend()
 {
-	std::clog << "bdMsgHistoryList::canSend()";
+	LOG << log4cpp::Priority::INFO << "bdMsgHistoryList::canSend()";
 
 	std::multimap<time_t, uint32_t>::reverse_iterator rit;
 
@@ -107,8 +107,7 @@ bool	bdMsgHistoryList::canSend()
 		time_t now = time(NULL);
 		if (now - rit->first > MIN_RESEND_PERIOD)
 		{
-			std::clog << " OVER RESEND_PERIOD... true";
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << " OVER RESEND_PERIOD... true";
 
 			return true;
 		}
@@ -116,21 +115,19 @@ bool	bdMsgHistoryList::canSend()
 
 	if (msgHistory.size() % 2 == 0)
 	{
-		std::clog << " SIZE: " << msgHistory.size() << " % 2 = 0 ... true";
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << " SIZE: " << msgHistory.size() << " % 2 = 0 ... true";
 
 		return true;
 	}
 
-	std::clog << " false";
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << " false";
 
 	return false;
 }
 
 bool	bdMsgHistoryList::validPeer()
 {
-	std::clog << "bdMsgHistoryList::validPeer()";
+	LOG << log4cpp::Priority::INFO << "bdMsgHistoryList::validPeer()";
 
 	std::multimap<time_t, uint32_t>::iterator it;
 
@@ -138,15 +135,13 @@ bool	bdMsgHistoryList::validPeer()
 	{
 		if (MSG_DIRECTION_INCOMING & it->second)
 		{
-			std::clog << " Incoming Msg... so validPeer";
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << " Incoming Msg... so validPeer";
 
 			return true;
 		}
 	}
 
-	std::clog << " false";
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << " false";
 
 	return false;
 }
@@ -177,7 +172,7 @@ void bdHistory::printMsgs()
 
 			out << std::endl;
 
-			syslog(LOG_INFO, out.str().c_str(), "");
+			LOG.info(out.str().c_str());
 		}
 	}
 }

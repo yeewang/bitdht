@@ -82,8 +82,10 @@ virtual void bdRandomMidId(const bdNodeId *target, const bdNodeId *other, bdNode
 virtual void bdPrintId(std::ostream &out, const bdId *a);
 virtual void bdPrintNodeId(std::ostream &out, const bdNodeId *a);
 
+virtual const std::string bdPrintId(const bdId *a);
+virtual const std::string bdPrintNodeId(const bdNodeId *a);
+
 };
 
 
 #endif
-

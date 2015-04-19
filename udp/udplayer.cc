@@ -31,6 +31,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "util/bdlog.h"
+
 /***
  * #define UDP_ENABLE_BROADCAST		1
  * #define UDP_LOOPBACK_TESTING		1
@@ -182,37 +184,37 @@ int     UdpLayer::status(std::ostream &out)
 int UdpLayer::reset(struct sockaddr_in &local)
 {
 #ifdef DEBUG_UDP_LAYER
-	std::clog << "UdpLayer::reset()" << std::endl;
+	LOG << log4cpp::Priority::INFO << "UdpLayer::reset()" << std::endl;
 #endif
 
 	/* stop the old thread */
 	{
 		bdStackMutex stack(sockMtx);   /********** LOCK MUTEX *********/
 #ifdef DEBUG_UDP_LAYER
-		std::clog << "UdpLayer::reset() setting stopThread flag" << std::endl;
+		LOG << log4cpp::Priority::INFO << "UdpLayer::reset() setting stopThread flag" << std::endl;
 #endif
 		stopThread = true;
 	}
 #ifdef DEBUG_UDP_LAYER
-	std::clog << "UdpLayer::reset() joining" << std::endl;
+	LOG << log4cpp::Priority::INFO << "UdpLayer::reset() joining" << std::endl;
 #endif
 
 	join(); 
 
 #ifdef DEBUG_UDP_LAYER
-	std::clog << "UdpLayer::reset() closing socket" << std::endl;
+	LOG << log4cpp::Priority::INFO << "UdpLayer::reset() closing socket" << std::endl;
 #endif
 	closeSocket();
 
 #ifdef DEBUG_UDP_LAYER
-	std::clog << "UdpLayer::reset() resetting variables" << std::endl;
+	LOG << log4cpp::Priority::INFO << "UdpLayer::reset() resetting variables" << std::endl;
 #endif
 	laddr = local;
 	errorState = 0;
 	ttl = UDP_DEF_TTL;
 
 #ifdef DEBUG_UDP_LAYER
-	std::clog << "UdpLayer::reset() opening socket" << std::endl;
+	LOG << log4cpp::Priority::INFO << "UdpLayer::reset() opening socket" << std::endl;
 #endif
 	openSocket();
 
@@ -263,7 +265,7 @@ void UdpLayer::recv_loop()
 			if (toStop)
 			{
 #ifdef DEBUG_UDP_LAYER
-				std::clog << "UdpLayer::recv_loop() stopping thread" << std::endl;
+				LOG << log4cpp::Priority::INFO << "UdpLayer::recv_loop() stopping thread" << std::endl;
 #endif
 				stop();
 			}
@@ -280,7 +282,7 @@ void UdpLayer::recv_loop()
 			else if (status < 0) 
 			{
 #ifdef DEBUG_UDP_LAYER
-                                std::clog << "UdpLayer::recv_loop() Error: " << bdnet_errno() << std::endl;
+                                LOG << log4cpp::Priority::INFO << "UdpLayer::recv_loop() Error: " << bdnet_errno() << std::endl;
 #endif
                         }
                 };      
@@ -290,8 +292,8 @@ void UdpLayer::recv_loop()
 		if (0 < receiveUdpPacket(inbuf, &nsize, from))
 		{
 #ifdef DEBUG_UDP_LAYER
-			std::clog << "UdpLayer::readPkt()  from : " << from << std::endl;
-			std::clog << printPkt(inbuf, nsize);
+			LOG << log4cpp::Priority::INFO << "UdpLayer::readPkt()  from : " << from << std::endl;
+			LOG << log4cpp::Priority::INFO << printPkt(inbuf, nsize);
 #endif
 			// send to reciever.
 			recv -> recvPkt(inbuf, nsize, from);
@@ -299,8 +301,8 @@ void UdpLayer::recv_loop()
 		else
 		{
 #ifdef DEBUG_UDP_LAYER
-			std::clog << "UdpLayer::readPkt() not ready" << from;
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "UdpLayer::readPkt() not ready" << from;
+			LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 		}
 	}
@@ -318,8 +320,8 @@ int UdpLayer::sendPkt(const void *data, int size, sockaddr_in &to, int ttl)
 
 	/* and send! */
 #ifdef DEBUG_UDP_LAYER
-	std::clog << "UdpLayer::sendPkt()  to: " << to << std::endl;
-	std::clog << printPkt((void *) data, size);
+	LOG << log4cpp::Priority::INFO << "UdpLayer::sendPkt()  to: " << to << std::endl;
+	LOG << log4cpp::Priority::INFO << printPkt((void *) data, size);
 #endif
 	sendUdpPacket(data, size, to);
 	return size;
@@ -333,7 +335,7 @@ int UdpLayer::openSocket()
 	/* make a socket */
        	sockfd = bdnet_socket(PF_INET, SOCK_DGRAM, 0);
 #ifdef DEBUG_UDP_LAYER
-	std::clog << "UpdStreamer::openSocket()" << std::endl;
+	LOG << log4cpp::Priority::INFO << "UpdStreamer::openSocket()" << std::endl;
 #endif
 	/* bind to address */
 
@@ -351,8 +353,8 @@ int UdpLayer::openSocket()
 #endif
 	{
 #ifdef DEBUG_UDP_LAYER
-		std::clog << "Socket Failed to Bind to : " << laddr << std::endl;
-		std::clog << "Error: " << bdnet_errno() << std::endl;
+		LOG << log4cpp::Priority::INFO << "Socket Failed to Bind to : " << laddr << std::endl;
+		LOG << log4cpp::Priority::INFO << "Error: " << bdnet_errno() << std::endl;
 #endif
 		errorState = EADDRINUSE;
 		//exit(1);
@@ -364,7 +366,7 @@ int UdpLayer::openSocket()
 	if (-1 == bdnet_fcntl(sockfd, F_SETFL, O_NONBLOCK))
 	{
 #ifdef DEBUG_UDP_LAYER
-		std::clog << "Failed to Make Non-Blocking" << std::endl;
+		LOG << log4cpp::Priority::INFO << "Failed to Make Non-Blocking" << std::endl;
 #endif
 	}
 
@@ -374,7 +376,7 @@ int UdpLayer::openSocket()
 	if (-1 == setsockopt(sockfd, SOL_SOCKET, SO_BROADCAST, &val, sizeof(int)))
 	{
 #ifdef DEBUG_UDP_LAYER
-		std::clog << "Failed to Make Socket Broadcast" << std::endl;
+		LOG << log4cpp::Priority::INFO << "Failed to Make Socket Broadcast" << std::endl;
 #endif
 	}
 #endif
@@ -382,13 +384,13 @@ int UdpLayer::openSocket()
 	errorState = 0;
 
 #ifdef DEBUG_UDP_LAYER
-	std::clog << "Socket Bound to : " << laddr << std::endl;
+	LOG << log4cpp::Priority::INFO << "Socket Bound to : " << laddr << std::endl;
 #endif
 
 	sockMtx.unlock(); /******** UNLOCK MUTEX *********/
 
 #ifdef DEBUG_UDP_LAYER
-	std::clog << "Setting TTL to " << UDP_DEF_TTL << std::endl;
+	LOG << log4cpp::Priority::INFO << "Setting TTL to " << UDP_DEF_TTL << std::endl;
 #endif
 	setTTL(UDP_DEF_TTL);
 
@@ -413,8 +415,8 @@ int UdpLayer::setTTL(int t)
 	sockMtx.unlock(); /******** UNLOCK MUTEX *********/
 
 #ifdef DEBUG_UDP_LAYER
-	std::clog << "UdpLayer::setTTL(" << t << ") returned: " << err;
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "UdpLayer::setTTL(" << t << ") returned: " << err;
+	LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 
 	return err;
@@ -445,7 +447,7 @@ int UdpLayer::okay()
 #ifdef DEBUG_UDP_LAYER
 	if (!nonFatalError)
 	{
-		std::clog << "UdpLayer::NOT okay(): Error: " << errorState << std::endl;
+		LOG << log4cpp::Priority::INFO << "UdpLayer::NOT okay(): Error: " << errorState << std::endl;
 	}
 
 #endif
@@ -456,7 +458,7 @@ int UdpLayer::okay()
 int UdpLayer::tick()
 {
 #ifdef DEBUG_UDP_LAYER
-	std::clog << "UdpLayer::tick()" << std::endl;
+	LOG << log4cpp::Priority::INFO << "UdpLayer::tick()" << std::endl;
 #endif
 	return 1;
 }
@@ -479,9 +481,9 @@ int UdpLayer::receiveUdpPacket(void *data, int *size, struct sockaddr_in &from)
 	if (0 < insize)
 	{
 #ifdef DEBUG_UDP_LAYER
-		std::clog << "receiveUdpPacket() from: " << fromaddr;
-		std::clog << " Size: " << insize;
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "receiveUdpPacket() from: " << fromaddr;
+		LOG << log4cpp::Priority::INFO << " Size: " << insize;
+		LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 		*size = insize;
 		from = fromaddr;
@@ -494,8 +496,8 @@ int UdpLayer::sendUdpPacket(const void *data, int size, struct sockaddr_in &to)
 {
 	/* send out */
 #ifdef DEBUG_UDP_LAYER
-	std::clog << "UdpLayer::sendUdpPacket(): size: " << size;
-	std::clog << " To: " << to << std::endl;
+	LOG << log4cpp::Priority::INFO << "UdpLayer::sendUdpPacket(): size: " << size;
+	LOG << log4cpp::Priority::INFO << " To: " << to << std::endl;
 #endif
 	struct sockaddr_in toaddr = to;
 
@@ -530,12 +532,9 @@ int LossyUdpLayer::receiveUdpPacket(void *data, int *size, struct sockaddr_in &f
 	/* but discard */
 		if (0 < UdpLayer::receiveUdpPacket(data, size, from))
 		{
-			std::clog << "LossyUdpLayer::receiveUdpPacket() Dropping packet!";
-			std::clog << std::endl;
-			std::clog << printPkt(data, *size);
-			std::clog << std::endl;
-			std::clog << "LossyUdpLayer::receiveUdpPacket() Packet Dropped!";
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "LossyUdpLayer::receiveUdpPacket() Dropping packet!";
+			LOG << log4cpp::Priority::INFO << printPkt(data, *size);
+			LOG << log4cpp::Priority::INFO << "LossyUdpLayer::receiveUdpPacket() Packet Dropped!";
 		}
 	
 		size = 0;
@@ -555,12 +554,9 @@ int LossyUdpLayer::sendUdpPacket(const void *data, int size, struct sockaddr_in 
 	{
 		/* discard */
 	
-		std::clog << "LossyUdpLayer::sendUdpPacket() Dropping packet!";
-		std::clog << std::endl;
-		std::clog << printPkt((void *) data, size);
-		std::clog << std::endl;
-		std::clog << "LossyUdpLayer::sendUdpPacket() Packet Dropped!";
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "LossyUdpLayer::sendUdpPacket() Dropping packet!";
+		LOG << log4cpp::Priority::INFO << printPkt((void *) data, size);
+		LOG << log4cpp::Priority::INFO << "LossyUdpLayer::sendUdpPacket() Packet Dropped!";
 	
 		return size;
 	}

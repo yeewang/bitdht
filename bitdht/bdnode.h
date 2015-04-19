@@ -105,7 +105,7 @@ class bdNode
 	// peer flags defined in bdiface.h
 	virtual void addPeer(const bdId *id, uint32_t peerflags);
 
-	void printState(std::ostream &debug);
+	void printState();
 	void checkPotentialPeer(bdId *id);
 	void addPotentialPeer(bdId *id);
 
@@ -178,7 +178,7 @@ void	recvPkt(char *msg, int len, struct sockaddr_in addr);
 	void getOwnId(bdNodeId *id);
 
 	void doStats();
-	void printStats(std::ostream &out);	
+	void printStats();
 	void printQueries();
 
 	void resetCounters();

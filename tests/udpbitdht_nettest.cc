@@ -91,13 +91,13 @@ int main(int argc, char **argv)
 			if ((tmp_port > MIN_DEF_PORT) && (tmp_port < MAX_DEF_PORT))
 			{
 				port = tmp_port;
-				std::clog << "Port: " << port;
-				std::clog << std::endl;
+				LOG << log4cpp::Priority::INFO << "Port: " << port;
+				LOG << log4cpp::Priority::INFO << std::endl;
 			}
 			else
 			{
-				std::clog << "Invalid Port";
-				std::clog << std::endl;
+				LOG << log4cpp::Priority::INFO << "Invalid Port";
+				LOG << log4cpp::Priority::INFO << std::endl;
 				args(argv[0]);
 				return 1;
 			}
@@ -107,24 +107,24 @@ int main(int argc, char **argv)
 		case 'b':
 		{
 			bootfile = optarg;
-			std::clog << "Bootfile: " << bootfile;
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "Bootfile: " << bootfile;
+			LOG << log4cpp::Priority::INFO << std::endl;
 		}
 		break;
 		case 'u':
 		{
 			setUid = true;
 			uid = optarg;
-			std::clog << "UID: " << uid;
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "UID: " << uid;
+			LOG << log4cpp::Priority::INFO << std::endl;
 		}
 		break;
 		case 'q':
 		{
 			doRandomQueries = true;
 			noQueries = atoi(optarg);
-			std::clog << "Doing Random Queries";
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "Doing Random Queries";
+			LOG << log4cpp::Priority::INFO << std::endl;
 		}
 		break;
 
@@ -159,9 +159,9 @@ int main(int argc, char **argv)
 		}
 	}
 
-	std::clog << "Using NodeId: ";
-	fns->bdPrintNodeId(std::clog, &id);
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "Using NodeId: ";
+	fns->bdPrintNodeId(LOG << log4cpp::Priority::INFO, &id);
+	LOG << log4cpp::Priority::INFO << std::endl;
 
 	/* setup the udp port */
 	struct sockaddr_in local;
@@ -196,8 +196,8 @@ int main(int argc, char **argv)
 	int count = 0;
 	int running = 1;
 
-	std::clog << "Starting Dht: ";
-	std::clog << std::endl;
+	LOG << log4cpp::Priority::INFO << "Starting Dht: ";
+	LOG << log4cpp::Priority::INFO << std::endl;
 	bitdht->startDht();
 
 
@@ -208,9 +208,9 @@ int main(int argc, char **argv)
 			bdNodeId rndId;
 			bdStdRandomNodeId(&rndId);
 
-			std::clog << "BitDht Launching Random Search: ";
-			bdStdPrintNodeId(std::clog, &rndId);
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "BitDht Launching Random Search: ";
+			bdStdPrintNodeId(LOG << log4cpp::Priority::INFO, &rndId);
+			LOG << log4cpp::Priority::INFO << std::endl;
 
 			bitdht->addFindNode(&rndId, mode);
 
@@ -222,9 +222,9 @@ int main(int argc, char **argv)
 		bdNodeId rndId;
 		bdStdRandomNodeId(&rndId);
 
-		std::clog << "BitDht Launching Random Search: ";
-		bdStdPrintNodeId(std::clog, &rndId);
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "BitDht Launching Random Search: ";
+		bdStdPrintNodeId(LOG << log4cpp::Priority::INFO, &rndId);
+		LOG << log4cpp::Priority::INFO << std::endl;
 
 		bitdht->addFindNode(&rndId, mode);
 	}
@@ -233,17 +233,17 @@ int main(int argc, char **argv)
 	{
 		sleep(60);
 
-		std::clog << "BitDht State: ";
-		std::clog << bitdht->stateDht();
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "BitDht State: ";
+		LOG << log4cpp::Priority::INFO << bitdht->stateDht();
+		LOG << log4cpp::Priority::INFO << std::endl;
 
-		std::clog << "Dht Network Size: ";
-		std::clog << bitdht->statsNetworkSize();
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "Dht Network Size: ";
+		LOG << log4cpp::Priority::INFO << bitdht->statsNetworkSize();
+		LOG << log4cpp::Priority::INFO << std::endl;
 
-		std::clog << "BitDht Network Size: ";
-		std::clog << bitdht->statsBDVersionSize();
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "BitDht Network Size: ";
+		LOG << log4cpp::Priority::INFO << bitdht->statsBDVersionSize();
+		LOG << log4cpp::Priority::INFO << std::endl;
 
 		if (++count == 2)
 		{
@@ -257,8 +257,8 @@ int main(int argc, char **argv)
 			if (count % 2 == 0)
 			{
 
-				std::clog << "Resetting UdpStack: ";
-				std::clog << std::endl;
+				LOG << log4cpp::Priority::INFO << "Resetting UdpStack: ";
+				LOG << log4cpp::Priority::INFO << std::endl;
 
 				udpstack->resetAddress(local);
 			}
@@ -270,16 +270,16 @@ int main(int argc, char **argv)
 				if (running)
 				{
 
-					std::clog << "Stopping Dht: ";
-					std::clog << std::endl;
+					LOG << log4cpp::Priority::INFO << "Stopping Dht: ";
+					LOG << log4cpp::Priority::INFO << std::endl;
 
 					bitdht->stopDht();
 					running = 0;
 				}
 				else
 				{
-					std::clog << "Starting Dht: ";
-					std::clog << std::endl;
+					LOG << log4cpp::Priority::INFO << "Starting Dht: ";
+					LOG << log4cpp::Priority::INFO << std::endl;
 
 					bitdht->startDht();
 					running = 1;

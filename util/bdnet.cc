@@ -44,7 +44,7 @@ int bdnet_errno()
 
 int bdnet_init() 
 { 
-	std::clog << "bdnet_init()" << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdnet_init()" << std::endl;
 	bdnet_int_errno = 0;
 
         // Windows Networking Init.
@@ -53,13 +53,13 @@ int bdnet_init()
 
         if (0 != WSAStartup(wVerReq, &wsaData))
         {
-                std::clog << "Failed to Startup Windows Networking";
-                std::clog << std::endl;
+                LOG << log4cpp::Priority::INFO << "Failed to Startup Windows Networking";
+                LOG << log4cpp::Priority::INFO << std::endl;
         }
         else
         {
-                std::clog << "Started Windows Networking";
-                std::clog << std::endl;
+                LOG << log4cpp::Priority::INFO << "Started Windows Networking";
+                LOG << log4cpp::Priority::INFO << std::endl;
         }
 
 	return 0; 
@@ -68,7 +68,7 @@ int bdnet_init()
 /* check if we can modify the TTL on a UDP packet */
 int bdnet_checkTTL(int fd) 
 {
-	std::clog << "bdnet_checkTTL()" << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdnet_checkTTL()" << std::endl;
 	int optlen = 4;
 	char optval[optlen];
 
@@ -78,32 +78,32 @@ int bdnet_checkTTL(int fd)
 	{
 		ret = -1;
 		bdnet_int_errno = bdnet_w2u_errno(WSAGetLastError());
-		std::clog << "bdnet_checkTTL() Failed!";
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "bdnet_checkTTL() Failed!";
+		LOG << log4cpp::Priority::INFO << std::endl;
 	}
 	else
 	{
-		std::clog << "bdnet_checkTTL() :";
-		std::clog << (int) optval[0] << ":";
-		std::clog << (int) optval[1] << ":";
-		std::clog << (int) optval[2] << ":";
-		std::clog << (int) optval[3] << ": RET: ";
-		std::clog << ret << ":";
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "bdnet_checkTTL() :";
+		LOG << log4cpp::Priority::INFO << (int) optval[0] << ":";
+		LOG << log4cpp::Priority::INFO << (int) optval[1] << ":";
+		LOG << log4cpp::Priority::INFO << (int) optval[2] << ":";
+		LOG << log4cpp::Priority::INFO << (int) optval[3] << ": RET: ";
+		LOG << log4cpp::Priority::INFO << ret << ":";
+		LOG << log4cpp::Priority::INFO << std::endl;
 	}
 	return ret;
 }
 
 int bdnet_close(int fd) 
 { 
-	std::clog << "bdnet_close()" << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdnet_close()" << std::endl;
 	return closesocket(fd); 
 }
 
 int bdnet_socket(int domain, int type, int protocol)
 {
         int osock = socket(domain, type, protocol);
-	std::clog << "bdnet_socket()" << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdnet_socket()" << std::endl;
 
 	if ((unsigned) osock == INVALID_SOCKET)
 	{
@@ -117,7 +117,7 @@ int bdnet_socket(int domain, int type, int protocol)
 
 int bdnet_bind(int  sockfd,  const  struct  sockaddr  *my_addr,  socklen_t addrlen)
 {
-	std::clog << "bdnet_bind()" << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdnet_bind()" << std::endl;
 	int ret = bind(sockfd,my_addr,addrlen);
 	if (ret != 0)
 	{
@@ -135,13 +135,13 @@ int bdnet_fcntl(int fd, int cmd, long arg)
         int ret;
 	
 	unsigned long int on = 1;
-	std::clog << "bdnet_fcntl()" << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdnet_fcntl()" << std::endl;
 
 	/* can only do NONBLOCK at the moment */
 	if ((cmd != F_SETFL) || (arg != O_NONBLOCK))
 	{
-		std::clog << "bdnet_fcntl() limited to fcntl(fd, F_SETFL, O_NONBLOCK)";
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "bdnet_fcntl() limited to fcntl(fd, F_SETFL, O_NONBLOCK)";
+		LOG << log4cpp::Priority::INFO << std::endl;
 		bdnet_int_errno =  EOPNOTSUPP;
 		return -1;
 	}
@@ -162,13 +162,13 @@ int bdnet_fcntl(int fd, int cmd, long arg)
 int bdnet_setsockopt(int s, int level, int optname, 
 				const void *optval, socklen_t optlen)
 {
-	std::clog << "bdnet_setsockopt() val:" << *((int *) optval) << std::endl;
-	std::clog << "bdnet_setsockopt() len:" << optlen << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdnet_setsockopt() val:" << *((int *) optval) << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdnet_setsockopt() len:" << optlen << std::endl;
 	if ((level != IPPROTO_IP) || (optname != IP_TTL))
 	{
-		std::clog << "bdnet_setsockopt() limited to ";
-		std::clog << "setsockopt(fd, IPPROTO_IP, IP_TTL, ....)";
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "bdnet_setsockopt() limited to ";
+		LOG << log4cpp::Priority::INFO << "setsockopt(fd, IPPROTO_IP, IP_TTL, ....)";
+		LOG << log4cpp::Priority::INFO << std::endl;
 		bdnet_int_errno =  EOPNOTSUPP;
 		return -1;
 	}
@@ -187,7 +187,7 @@ int bdnet_setsockopt(int s, int level, int optname,
 ssize_t bdnet_recvfrom(int s, void *buf, size_t len, int flags,
                               struct sockaddr *from, socklen_t *fromlen)
 {
-	std::clog << "bdnet_recvfrom()" << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdnet_recvfrom()" << std::endl;
 	int ret = recvfrom(s, (char *) buf, len, flags, from, fromlen);
 	if (ret == SOCKET_ERROR)
 	{
@@ -200,7 +200,7 @@ ssize_t bdnet_recvfrom(int s, void *buf, size_t len, int flags,
 ssize_t bdnet_sendto(int s, const void *buf, size_t len, int flags, 
  				const struct sockaddr *to, socklen_t tolen)
 {
-	std::clog << "bdnet_sendto()" << std::endl;
+	LOG << log4cpp::Priority::INFO << "bdnet_sendto()" << std::endl;
 	int ret = sendto(s, (const char *) buf, len, flags, to, tolen);
 	if (ret == SOCKET_ERROR)
 	{
@@ -213,7 +213,7 @@ ssize_t bdnet_sendto(int s, const void *buf, size_t len, int flags,
 int bdnet_w2u_errno(int err)
 {
 	/* switch */
-	std::clog << "tou_net_w2u_errno(" << err << ")" << std::endl;
+	LOG << log4cpp::Priority::INFO << "tou_net_w2u_errno(" << err << ")" << std::endl;
 	switch(err)
 	{
 		case WSAEINPROGRESS:
@@ -244,9 +244,9 @@ int bdnet_w2u_errno(int err)
 		 * but not a real error... translate into EINPROGRESS
 		 */
 		case WSAECONNRESET:
-			std::clog << "tou_net_w2u_errno(" << err << ")";
-			std::clog << " = WSAECONNRESET ---> EINPROGRESS";
-	 		std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "tou_net_w2u_errno(" << err << ")";
+			LOG << log4cpp::Priority::INFO << " = WSAECONNRESET ---> EINPROGRESS";
+	 		LOG << log4cpp::Priority::INFO << std::endl;
 			return EINPROGRESS;
 			break;
 		/***
@@ -258,8 +258,8 @@ int bdnet_w2u_errno(int err)
 		 ***/
 		
 		default:
-			std::clog << "tou_net_w2u_errno(" << err << ") Unknown";
-			std::clog << std::endl;
+			LOG << log4cpp::Priority::INFO << "tou_net_w2u_errno(" << err << ") Unknown";
+			LOG << log4cpp::Priority::INFO << std::endl;
 			break;
 	}
 

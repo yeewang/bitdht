@@ -32,7 +32,7 @@ int main(int argc, char **argv)
 
 		dht.DropNode(&searchId);
 
-		std::clog << "is Active: "<< dht.getActive() << std::endl;
+		LOG << log4cpp::Priority::INFO << "is Active: "<< dht.getActive() << std::endl;
 	}
 
 	return 1;

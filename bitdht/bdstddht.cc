@@ -26,6 +26,7 @@
 
 #include "bitdht/bdstddht.h"
 #include "bitdht/bdpeer.h"
+#include "util/bdlog.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -199,7 +200,7 @@ int bdStdBucketDistance(const bdMetric *m)
 		unsigned char comp = (1 << bbit);
 
 #ifdef BITDHT_DEBUG
-		syslog(LOG_INFO, "bdStdBucketDistance: bit:%d  byte:%d bbit:%d comp:%x, data:%x\n", bit, byte, bbit, comp, m->data[byte]);
+		LOG.info("bdStdBucketDistance: bit:%d  byte:%d bbit:%d comp:%x, data:%x\n", bit, byte, bbit, comp, m->data[byte]);
 #endif
 
 		if (comp & m->data[byte])
@@ -267,4 +268,18 @@ void bdStdDht::bdPrintId(std::ostream &out, const bdId *a)
 void bdStdDht::bdPrintNodeId(std::ostream &out, const bdNodeId *a)
 {
 	return bdStdPrintNodeId(out, a);
+}
+
+const std::string bdStdDht::bdPrintId(const bdId *a)
+{
+	std::ostringstream out;
+	bdStdPrintId(out, a);
+	return out.str();
+}
+
+const std::string bdStdDht::bdPrintNodeId(const bdNodeId *a)
+{
+	std::ostringstream out;
+	bdStdPrintNodeId(out, a);
+	return out.str();
 }

@@ -39,7 +39,7 @@ INITTEST();
 
 int main(int argc, char **argv)
 {
-        std::clog << "libbitdht: " << argv[0] << std::endl;
+        LOG << log4cpp::Priority::INFO << "libbitdht: " << argv[0] << std::endl;
 
 	test_metric_explicit();
 
@@ -49,7 +49,7 @@ int main(int argc, char **argv)
 
 bool test_metric_explicit()
 {
-        std::clog << "test_metric_explicit:" << std::endl;
+        LOG << log4cpp::Priority::INFO << "test_metric_explicit:" << std::endl;
 
 #define NUM_IDS 6
 
@@ -85,9 +85,9 @@ bool test_metric_explicit()
 		
 	for(i = 0; i < NUM_IDS; i++)
 	{
-		syslog(LOG_INFO, "id[%d]:", i+1);
-		bdStdPrintId(std::clog,&(id[i]));
-		syslog(LOG_INFO, "\n");
+		LOG.info("id[%d]:", i+1);
+		bdStdPrintId(LOG << log4cpp::Priority::INFO,&(id[i]));
+		LOG.info("\n");
 	}
 
 	/* now do the sums */
@@ -101,12 +101,12 @@ bool test_metric_explicit()
 		{
 			bdStdDistance(&(id[i].id), &(id[j].id), &met);
 
-			syslog(LOG_INFO, "%d^%d:", i, j);
-			bdStdPrintNodeId(std::clog,&met);
-			syslog(LOG_INFO, "\n");
+			LOG.info("%d^%d:", i, j);
+			bdStdPrintNodeId(LOG << log4cpp::Priority::INFO,&met);
+			LOG.info("\n");
 
 			bdist = bdStdBucketDistance(&met);
-			syslog(LOG_INFO, " bucket: %d\n", bdist);
+			LOG.info(" bucket: %d\n", bdist);
 		}
 	}
 
@@ -114,7 +114,7 @@ bool test_metric_explicit()
 	int c1 = met < met2;
 	int c2 = met2 < met;
 
-	syslog(LOG_INFO, "1^2<1^3? : %d  1^3<1^2?: %d\n", c1, c2);
+	LOG.info("1^2<1^3? : %d  1^3<1^2?: %d\n", c1, c2);
 #endif
 
 
@@ -128,7 +128,7 @@ bool test_metric_explicit()
 
 bool test_metric_random()
 {
-        std::clog << "test_metric_random:" << std::endl;
+        LOG << log4cpp::Priority::INFO << "test_metric_random:" << std::endl;
 
 	/* create some ids */
 	bdId id1;
@@ -145,29 +145,29 @@ bool test_metric_random()
 	bdStdRandomId(&id5);
 	bdStdRandomId(&id6);
 
-	syslog(LOG_INFO, "id1:");
-	bdStdPrintId(std::clog,&id1);
-	syslog(LOG_INFO, "\n");
+	LOG.info("id1:");
+	bdStdPrintId(LOG << log4cpp::Priority::INFO,&id1);
+	LOG.info("\n");
 
-	syslog(LOG_INFO, "id2:");
-	bdStdPrintId(std::clog,&id2);
-	syslog(LOG_INFO, "\n");
+	LOG.info("id2:");
+	bdStdPrintId(LOG << log4cpp::Priority::INFO,&id2);
+	LOG.info("\n");
 
-	syslog(LOG_INFO, "id3:");
-	bdStdPrintId(std::clog,&id3);
-	syslog(LOG_INFO, "\n");
+	LOG.info("id3:");
+	bdStdPrintId(LOG << log4cpp::Priority::INFO,&id3);
+	LOG.info("\n");
 
-	syslog(LOG_INFO, "id4:");
-	bdStdPrintId(std::clog,&id4);
-	syslog(LOG_INFO, "\n");
+	LOG.info("id4:");
+	bdStdPrintId(LOG << log4cpp::Priority::INFO,&id4);
+	LOG.info("\n");
 
-	syslog(LOG_INFO, "id5:");
-	bdStdPrintId(std::clog,&id5);
-	syslog(LOG_INFO, "\n");
+	LOG.info("id5:");
+	bdStdPrintId(LOG << log4cpp::Priority::INFO,&id5);
+	LOG.info("\n");
 
-	syslog(LOG_INFO, "id6:");
-	bdStdPrintId(std::clog,&id6);
-	syslog(LOG_INFO, "\n");
+	LOG.info("id6:");
+	bdStdPrintId(LOG << log4cpp::Priority::INFO,&id6);
+	LOG.info("\n");
 
 	/* now do the sums */
 	bdMetric met;
@@ -175,87 +175,87 @@ bool test_metric_random()
 	int bdist = 0;
 	bdStdDistance(&(id1.id), &(id2.id), &met);
 
-	syslog(LOG_INFO, "1^2:");
-	bdStdPrintNodeId(std::clog,&met);
-	syslog(LOG_INFO, "\n");
+	LOG.info("1^2:");
+	bdStdPrintNodeId(LOG << log4cpp::Priority::INFO,&met);
+	LOG.info("\n");
 	bdist = bdStdBucketDistance(&met);
-	syslog(LOG_INFO, " bucket: %d\n", bdist);
+	LOG.info(" bucket: %d\n", bdist);
 
 	bdStdDistance(&(id1.id), &(id3.id), &met2);
 	bdist = bdStdBucketDistance(&met2);
 
-	syslog(LOG_INFO, "1^3:");
-	bdStdPrintNodeId(std::clog,&met2);
-	syslog(LOG_INFO, "\n");
-	syslog(LOG_INFO, " bucket: %d\n", bdist);
+	LOG.info("1^3:");
+	bdStdPrintNodeId(LOG << log4cpp::Priority::INFO,&met2);
+	LOG.info("\n");
+	LOG.info(" bucket: %d\n", bdist);
 
 	int c1 = met < met2;
 	int c2 = met2 < met;
 
-	syslog(LOG_INFO, "1^2<1^3? : %d  1^3<1^2?: %d\n", c1, c2);
+	LOG.info("1^2<1^3? : %d  1^3<1^2?: %d\n", c1, c2);
 
 
 	bdStdDistance(&(id1.id), &(id4.id), &met2);
 	bdist = bdStdBucketDistance(&met2);
 
-	syslog(LOG_INFO, "1^4:");
-	bdStdPrintNodeId(std::clog,&met2);
-	syslog(LOG_INFO, "\n");
-	syslog(LOG_INFO, " bucket: %d\n", bdist);
+	LOG.info("1^4:");
+	bdStdPrintNodeId(LOG << log4cpp::Priority::INFO,&met2);
+	LOG.info("\n");
+	LOG.info(" bucket: %d\n", bdist);
 
 	c1 = met < met2;
 	c2 = met2 < met;
 
-	syslog(LOG_INFO, "1^2<1^4? : %d  1^4<1^2?: %d\n", c1, c2);
+	LOG.info("1^2<1^4? : %d  1^4<1^2?: %d\n", c1, c2);
 
 	bdStdDistance(&(id1.id), &(id5.id), &met);
 	bdist = bdStdBucketDistance(&met);
 
-	syslog(LOG_INFO, "1^5:");
-	bdStdPrintNodeId(std::clog,&met);
-	syslog(LOG_INFO, "\n");
-	syslog(LOG_INFO, " bucket: %d\n", bdist);
+	LOG.info("1^5:");
+	bdStdPrintNodeId(LOG << log4cpp::Priority::INFO,&met);
+	LOG.info("\n");
+	LOG.info(" bucket: %d\n", bdist);
 
 	bdStdDistance(&(id1.id), &(id6.id), &met);
 	bdist = bdStdBucketDistance(&met);
 
-	syslog(LOG_INFO, "1^6:");
-	bdStdPrintNodeId(std::clog,&met);
-	syslog(LOG_INFO, "\n");
-	syslog(LOG_INFO, " bucket: %d\n", bdist);
+	LOG.info("1^6:");
+	bdStdPrintNodeId(LOG << log4cpp::Priority::INFO,&met);
+	LOG.info("\n");
+	LOG.info(" bucket: %d\n", bdist);
 
 	bdStdDistance(&(id2.id), &(id3.id), &met);
 	bdist = bdStdBucketDistance(&met);
 
-	syslog(LOG_INFO, "2^3:");
-	bdStdPrintNodeId(std::clog,&met);
-	syslog(LOG_INFO, "\n");
-	syslog(LOG_INFO, " bucket: %d\n", bdist);
+	LOG.info("2^3:");
+	bdStdPrintNodeId(LOG << log4cpp::Priority::INFO,&met);
+	LOG.info("\n");
+	LOG.info(" bucket: %d\n", bdist);
 
 
-	syslog(LOG_INFO, "id1:");
-	bdStdPrintId(std::clog,&id1);
-	syslog(LOG_INFO, "\n");
+	LOG.info("id1:");
+	bdStdPrintId(LOG << log4cpp::Priority::INFO,&id1);
+	LOG.info("\n");
 
-	syslog(LOG_INFO, "id2:");
-	bdStdPrintId(std::clog,&id2);
-	syslog(LOG_INFO, "\n");
+	LOG.info("id2:");
+	bdStdPrintId(LOG << log4cpp::Priority::INFO,&id2);
+	LOG.info("\n");
 
-	syslog(LOG_INFO, "id3:");
-	bdStdPrintId(std::clog,&id3);
-	syslog(LOG_INFO, "\n");
+	LOG.info("id3:");
+	bdStdPrintId(LOG << log4cpp::Priority::INFO,&id3);
+	LOG.info("\n");
 
-	syslog(LOG_INFO, "id4:");
-	bdStdPrintId(std::clog,&id4);
-	syslog(LOG_INFO, "\n");
+	LOG.info("id4:");
+	bdStdPrintId(LOG << log4cpp::Priority::INFO,&id4);
+	LOG.info("\n");
 
-	syslog(LOG_INFO, "id5:");
-	bdStdPrintId(std::clog,&id5);
-	syslog(LOG_INFO, "\n");
+	LOG.info("id5:");
+	bdStdPrintId(LOG << log4cpp::Priority::INFO,&id5);
+	LOG.info("\n");
 
-	syslog(LOG_INFO, "id6:");
-	bdStdPrintId(std::clog,&id6);
-	syslog(LOG_INFO, "\n");
+	LOG.info("id6:");
+	bdStdPrintId(LOG << log4cpp::Priority::INFO,&id6);
+	LOG.info("\n");
 
 
 	return 1;

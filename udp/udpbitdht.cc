@@ -235,8 +235,8 @@ int UdpBitDht::tick()
 	while((i < MAX_MSG_PER_TICK) && (mBitDhtManager->outgoingMsg(&toAddr, data, &size)))
 	{
 #ifdef DEBUG_UDP_BITDHT 
-		std::clog << "UdpBitDht::tick() outgoing msg(" << size << ") to " << toAddr;
-		std::clog << std::endl;
+		LOG << log4cpp::Priority::INFO << "UdpBitDht::tick() outgoing msg(" << size << ") to " << toAddr;
+		LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 
 		sendPkt(data, size, toAddr, BITDHT_TTL);
