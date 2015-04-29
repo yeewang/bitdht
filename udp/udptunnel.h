@@ -1,8 +1,8 @@
-#ifndef UDP_BIT_DHT_CLASS_H
-#define UDP_BIT_DHT_CLASS_H
+#ifndef UDP_TUNNEL_CLASS_H
+#define UDP_TUNNEL_CLASS_H
 
 /*
- * bitdht/udpbitdht.h
+ * bitdht/UdpTunnel.h
  *
  * BitDHT: An Flexible DHT library.
  *
@@ -33,7 +33,7 @@
 
 #include "udp/udpstack.h"
 #include "bitdht/bdiface.h"
-#include "bitdht/bdmanager.h"
+#include "bitdht/bdtunnelmanager.h"
 
 /* 
  * This implements a UdpSubReceiver class to allow the DHT to talk to the network.
@@ -45,41 +45,29 @@
 
 // class BitDhtCallback defined in bdiface.h 
 
-
-class UdpBitDht: public UdpSubReceiver, public bdThread, public BitDhtInterface
+class UdpTunnel: public UdpSubReceiver, public bdThread
 {
 public:
 
-	UdpBitDht(UdpPublisher *pub, bdNodeId *id, std::string dhtVersion,
-			std::string bootstrapfile, bdDhtFunctions *fns,
-			PacketCallback *packetCallback);
-	virtual ~UdpBitDht();
-
+	UdpTunnel(UdpPublisher *pub, bdDhtFunctions *fns);
+	virtual ~UdpTunnel();
 
 	/*********** External Interface to the World (BitDhtInterface) ************/
 
 	/***** Functions to Call down to bdNodeManager ****/
 	/* Request DHT Peer Lookup */
 	/* Request Keyword Lookup */
-	virtual	void addFindNode(bdNodeId *id, uint32_t mode);
-	virtual	void removeFindNode(bdNodeId *id);
-	virtual void removeAllFindNode();
-	virtual	void findDhtValue(bdNodeId *id, std::string key, uint32_t mode);
+	virtual	void connectNode(const bdId *id);
+	virtual	void disconnectNode(const bdId *id);
 
 	/***** Add / Remove Callback Clients *****/
 	virtual	void addCallback(BitDhtCallback *cb);
 	virtual	void removeCallback(BitDhtCallback *cb);
 
-	/***** Get Results Details *****/
-	virtual int getDhtPeerAddress(const bdNodeId *id, struct sockaddr_in &from);
-	virtual int getDhtValue(const bdNodeId *id, std::string key, std::string &value);
-
 	/* stats and Dht state */
-	virtual int startDht();
-	virtual int stopDht();
+	virtual int startTunnel();
+	virtual int stopTunnel();
 	virtual int stateDht();
-	virtual uint32_t statsNetworkSize();
-	virtual uint32_t statsBDVersionSize();
 
 	/******************* Internals *************************/
 	/***** Iteration / Loop Management *****/
@@ -98,9 +86,8 @@ public:
 private:
 
 	bdMutex dhtMtx; /* for all class data (below) */
-	bdNodeManager *mBitDhtManager;
+	bdTunnelManager *mTunnelManager;
 	bdDhtFunctions *mFns;
 };
-
 
 #endif

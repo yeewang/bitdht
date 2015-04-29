@@ -50,39 +50,39 @@ std::string printPktOffset(unsigned int offset, void *d, unsigned int size);
 
 class UdpReceiver
 {
-	public:
-virtual ~UdpReceiver() {}
-virtual int recvPkt(void *data, int size, struct sockaddr_in &from) = 0;
-virtual int status(std::ostream &out) = 0;
+public:
+	virtual ~UdpReceiver() {}
+	virtual int recvPkt(void *data, int size, struct sockaddr_in &from) = 0;
+	virtual int status(std::ostream &out) = 0;
 };
 
 class UdpPublisher
 {
-	public:
-virtual ~UdpPublisher() {}
-virtual	int sendPkt(const void *data, int size, struct sockaddr_in &to, int ttl) = 0;
+public:
+	virtual ~UdpPublisher() {}
+	virtual	int sendPkt(const void *data, int size, struct sockaddr_in &to, int ttl) = 0;
 };
 
 
 class UdpLayer: public bdThread
 {
-	public:
+public:
 
 	UdpLayer(UdpReceiver *recv, struct sockaddr_in &local);
-virtual ~UdpLayer() { return; }
+	virtual ~UdpLayer() { return; }
 
-int 	reset(struct sockaddr_in &local); /* calls join, close, openSocket */
+	int 	reset(struct sockaddr_in &local); /* calls join, close, openSocket */
 
-int     status(std::ostream &out);
+	int     status(std::ostream &out);
 
 	/* setup connections */
 	int closeSocket();
 	int openSocket();
 
 	/* RsThread functions */
-virtual void run(); /* called once the thread is started */
+	virtual void run(); /* called once the thread is started */
 
-void	recv_loop(); /* uses callback to UdpReceiver */
+	void	recv_loop(); /* uses callback to UdpReceiver */
 
 	/* Higher Level Interface */
 	//int  readPkt(void *data, int *size, struct sockaddr_in &from);
@@ -95,16 +95,16 @@ void	recv_loop(); /* uses callback to UdpReceiver */
 
 	/* data */
 	/* internals */
-	protected:
+protected:
 
-virtual	int receiveUdpPacket(void *data, int *size, struct sockaddr_in &from);
-virtual	int sendUdpPacket(const void *data, int size, struct sockaddr_in &to);
- 
+	virtual	int receiveUdpPacket(void *data, int *size, struct sockaddr_in &from);
+	virtual	int sendUdpPacket(const void *data, int size, struct sockaddr_in &to);
+
 	int setTTL(int t);
 	int getTTL();
 
 	/* low level */
-	private:
+private:
 
 	UdpReceiver *recv;
 
@@ -122,14 +122,14 @@ virtual	int sendUdpPacket(const void *data, int size, struct sockaddr_in &to);
 /* For Testing - drops packets */
 class LossyUdpLayer: public UdpLayer
 {
-	public:
-  LossyUdpLayer(UdpReceiver *udpr, struct sockaddr_in &local, double frac);
-virtual ~LossyUdpLayer();
+public:
+	LossyUdpLayer(UdpReceiver *udpr, struct sockaddr_in &local, double frac);
+	virtual ~LossyUdpLayer();
 
-        protected:
+protected:
 
-virtual int receiveUdpPacket(void *data, int *size, struct sockaddr_in &from);
-virtual int sendUdpPacket(const void *data, int size, struct sockaddr_in &to);
+	virtual int receiveUdpPacket(void *data, int *size, struct sockaddr_in &from);
+	virtual int sendUdpPacket(const void *data, int size, struct sockaddr_in &to);
 
 	double lossFraction;
 };

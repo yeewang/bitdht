@@ -51,13 +51,13 @@
 
 class UdpSubReceiver: public UdpReceiver
 {
-	public:
+public:
 	UdpSubReceiver(UdpPublisher *pub);
 
-		/* calls mPublisher->sendPkt */
-virtual int sendPkt(const void *data, int size, struct sockaddr_in &to, int ttl);
-		/* callback for recved data (overloaded from UdpReceiver) */
-//virtual int recvPkt(void *data, int size, struct sockaddr_in &from) = 0;
+	/* calls mPublisher->sendPkt */
+	virtual int sendPkt(const void *data, int size, struct sockaddr_in &to, int ttl);
+	/* callback for recved data (overloaded from UdpReceiver) */
+	//virtual int recvPkt(void *data, int size, struct sockaddr_in &from) = 0;
 
 	UdpPublisher *mPublisher;
 };
@@ -65,37 +65,37 @@ virtual int sendPkt(const void *data, int size, struct sockaddr_in &to, int ttl)
 
 class UdpStack: public UdpReceiver, public UdpPublisher
 {
-	public:
+public:
 
 	UdpStack(struct sockaddr_in &local);
-virtual ~UdpStack() { return; }
+	virtual ~UdpStack() { return; }
 
-bool	resetAddress(struct sockaddr_in &local);
+	bool resetAddress(struct sockaddr_in &local);
 
 
 	/* add in a receiver */
-int	addReceiver(UdpReceiver *recv);
-int 	removeReceiver(UdpReceiver *recv);
+	int	addReceiver(UdpReceiver *recv);
+	int 	removeReceiver(UdpReceiver *recv);
 
 	/* Packet IO */
-		/* pass-through send packets */
-virtual int sendPkt(const void *data, int size, struct sockaddr_in &to, int ttl);
-		/* callback for recved data (overloaded from UdpReceiver) */
+	/* pass-through send packets */
+	virtual int sendPkt(const void *data, int size, struct sockaddr_in &to, int ttl);
+	/* callback for recved data (overloaded from UdpReceiver) */
 
-virtual int recvPkt(void *data, int size, struct sockaddr_in &from);
+	virtual int recvPkt(void *data, int size, struct sockaddr_in &from);
 
-int     status(std::ostream &out);
+	int  status(std::ostream &out);
 
 	/* setup connections */
 	int openSocket();
 
 	/* monitoring / updates */
 	int okay();
-//	int tick();
+	//	int tick();
 
 	int close();
 
-	private:
+private:
 
 	UdpLayer *udpLayer;
 

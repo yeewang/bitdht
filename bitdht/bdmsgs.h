@@ -44,6 +44,9 @@
 #define BITDHT_MSG_TYPE_REPLY_NEAR      7
 #define BITDHT_MSG_TYPE_POST_HASH       8
 #define BITDHT_MSG_TYPE_REPLY_POST      9
+#define BITDHT_MSG_TYPE_NEWCONN        	10
+#define BITDHT_MSG_TYPE_REPLY_NEWCONN  	11
+
 
 #define BITDHT_COMPACTNODEID_LEN 	26
 #define BITDHT_COMPACTPEERID_LEN 	6
@@ -76,7 +79,8 @@ int bitdht_announce_peers_msg(bdToken *tid, bdNodeId *id, bdNodeId *info_hash,
 			uint32_t port, bdToken *token, char *msg, int avail);
 int bitdht_reply_announce_msg(bdToken *tid, bdNodeId *id,         
                                         char *msg, int avail);
-
+int bitdht_new_conn_msg(bdToken *tid, bdNodeId *id, char *msg, int avail);
+int bitdht_reply_new_conn_msg(bdToken *tid, bdNodeId *id, char *msg, bool started, int avail);
 
 //int response_peers_message()
 //int response_closestnodes_message()

@@ -15,18 +15,18 @@
 #include "bdlog.h"
 
 
-BDLog::BDLog()
+TDLog::TDLog()
 {
 	init();
 	setProperties();
 }
 
-BDLog::~BDLog()
+TDLog::~TDLog()
 {
 	log4cpp::Category::shutdown();
 }
 
-void BDLog::init()
+void TDLog::init()
 {
 	log4cpp::Appender *appender1 = new log4cpp::OstreamAppender("console", &std::cout);
 	appender1->setLayout(new log4cpp::BasicLayout());
@@ -42,13 +42,13 @@ void BDLog::init()
 	sub1.addAppender(appender2);
 }
 
-void BDLog::setProperties()
+void TDLog::setProperties()
 {
 	std::string initFileName = "log4cpp.properties";
 	log4cpp::PropertyConfigurator::configure(initFileName);
 }
 
-log4cpp::Category& BDLog::log()
+log4cpp::Category& TDLog::log()
 {
 	log4cpp::Category& root = log4cpp::Category::getRoot();
 	return root;

@@ -22,7 +22,9 @@ libbitdht_a_SOURCES = bitdht/bencode.c \
 		bitdht/bdhash.cc \
 		bitdht/bdstore.cc \
 		bitdht/bdnode.cc \
+		bitdht/bdtunnelnode.cc \
 		bitdht/bdmanager.cc \
+		bitdht/bdtunnelmanager.cc \
 		bitdht/bdstddht.cc \
 		bitdht/bdhistory.cc \
 		util/bdnet.cc \
@@ -30,4 +32,5 @@ libbitdht_a_SOURCES = bitdht/bencode.c \
 		util/bdlog.cc \
 		udp/udplayer.cc \
 		udp/udpstack.cc \
-		udp/udpbitdht.cc 
+		udp/udpbitdht.cc \
+		udp/udptunnel.cc

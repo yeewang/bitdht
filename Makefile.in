@@ -110,11 +110,13 @@ am_libbitdht_a_OBJECTS = bitdht/bencode.$(OBJEXT) \
 	bitdht/bdobj.$(OBJEXT) bitdht/bdmsgs.$(OBJEXT) \
 	bitdht/bdpeer.$(OBJEXT) bitdht/bdquery.$(OBJEXT) \
 	bitdht/bdhash.$(OBJEXT) bitdht/bdstore.$(OBJEXT) \
-	bitdht/bdnode.$(OBJEXT) bitdht/bdmanager.$(OBJEXT) \
+	bitdht/bdnode.$(OBJEXT) bitdht/bdtunnelnode.$(OBJEXT) \
+	bitdht/bdmanager.$(OBJEXT) bitdht/bdtunnelmanager.$(OBJEXT) \
 	bitdht/bdstddht.$(OBJEXT) bitdht/bdhistory.$(OBJEXT) \
 	util/bdnet.$(OBJEXT) util/bdthreads.$(OBJEXT) \
 	util/bdlog.$(OBJEXT) udp/udplayer.$(OBJEXT) \
-	udp/udpstack.$(OBJEXT) udp/udpbitdht.$(OBJEXT)
+	udp/udpstack.$(OBJEXT) udp/udpbitdht.$(OBJEXT) \
+	udp/udptunnel.$(OBJEXT)
 libbitdht_a_OBJECTS = $(am_libbitdht_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -308,7 +310,9 @@ libbitdht_a_SOURCES = bitdht/bencode.c \
 		bitdht/bdhash.cc \
 		bitdht/bdstore.cc \
 		bitdht/bdnode.cc \
+		bitdht/bdtunnelnode.cc \
 		bitdht/bdmanager.cc \
+		bitdht/bdtunnelmanager.cc \
 		bitdht/bdstddht.cc \
 		bitdht/bdhistory.cc \
 		util/bdnet.cc \
@@ -316,7 +320,8 @@ libbitdht_a_SOURCES = bitdht/bencode.c \
 		util/bdlog.cc \
 		udp/udplayer.cc \
 		udp/udpstack.cc \
-		udp/udpbitdht.cc 
+		udp/udpbitdht.cc \
+		udp/udptunnel.cc
 
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -397,7 +402,11 @@ bitdht/bdstore.$(OBJEXT): bitdht/$(am__dirstamp) \
 	bitdht/$(DEPDIR)/$(am__dirstamp)
 bitdht/bdnode.$(OBJEXT): bitdht/$(am__dirstamp) \
 	bitdht/$(DEPDIR)/$(am__dirstamp)
+bitdht/bdtunnelnode.$(OBJEXT): bitdht/$(am__dirstamp) \
+	bitdht/$(DEPDIR)/$(am__dirstamp)
 bitdht/bdmanager.$(OBJEXT): bitdht/$(am__dirstamp) \
+	bitdht/$(DEPDIR)/$(am__dirstamp)
+bitdht/bdtunnelmanager.$(OBJEXT): bitdht/$(am__dirstamp) \
 	bitdht/$(DEPDIR)/$(am__dirstamp)
 bitdht/bdstddht.$(OBJEXT): bitdht/$(am__dirstamp) \
 	bitdht/$(DEPDIR)/$(am__dirstamp)
@@ -427,6 +436,8 @@ udp/udpstack.$(OBJEXT): udp/$(am__dirstamp) \
 	udp/$(DEPDIR)/$(am__dirstamp)
 udp/udpbitdht.$(OBJEXT): udp/$(am__dirstamp) \
 	udp/$(DEPDIR)/$(am__dirstamp)
+udp/udptunnel.$(OBJEXT): udp/$(am__dirstamp) \
+	udp/$(DEPDIR)/$(am__dirstamp)
 
 libbitdht.a: $(libbitdht_a_OBJECTS) $(libbitdht_a_DEPENDENCIES) $(EXTRA_libbitdht_a_DEPENDENCIES) 
 	$(AM_V_at)-rm -f libbitdht.a
@@ -452,10 +463,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@bitdht/$(DEPDIR)/bdquery.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@bitdht/$(DEPDIR)/bdstddht.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@bitdht/$(DEPDIR)/bdstore.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@bitdht/$(DEPDIR)/bdtunnelmanager.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@bitdht/$(DEPDIR)/bdtunnelnode.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@bitdht/$(DEPDIR)/bencode.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@udp/$(DEPDIR)/udpbitdht.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@udp/$(DEPDIR)/udplayer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@udp/$(DEPDIR)/udpstack.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@udp/$(DEPDIR)/udptunnel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/bdlog.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/bdnet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/bdthreads.Po@am__quote@

@@ -34,26 +34,26 @@
 
 class bdMutex
 {
-	public:
+public:
 
 	bdMutex() { pthread_mutex_init(&realMutex, NULL); }
-        ~bdMutex() { pthread_mutex_destroy(&realMutex); }
-void	lock() { pthread_mutex_lock(&realMutex); }
-void	unlock() { pthread_mutex_unlock(&realMutex); }
-bool	trylock() { return (0 == pthread_mutex_trylock(&realMutex)); }
+	~bdMutex() { pthread_mutex_destroy(&realMutex); }
+	void	lock() { pthread_mutex_lock(&realMutex); }
+	void	unlock() { pthread_mutex_unlock(&realMutex); }
+	bool	trylock() { return (0 == pthread_mutex_trylock(&realMutex)); }
 
-	private:
+private:
 	pthread_mutex_t  realMutex;
 };
 
 class bdStackMutex
 {
-	public:
+public:
 
 	bdStackMutex(bdMutex &mtx): mMtx(mtx) { mMtx.lock(); }
-        ~bdStackMutex() { mMtx.unlock(); }
+	~bdStackMutex() { mMtx.unlock(); }
 
-	private:
+private:
 	bdMutex &mMtx;
 };
 
@@ -64,18 +64,17 @@ pthread_t  createThread(bdThread &thread);
 
 class bdThread
 {
-	public:
+public:
 	bdThread();
-virtual ~bdThread() { return; }
+	virtual ~bdThread() { return; }
 
-virtual void start() { createThread(*this); }
-virtual void run() = 0; /* called once the thread is started */
-virtual	void join(); /* waits for the mTid thread to stop */
-virtual	void stop(); /* calls pthread_exit() */
+	virtual void start() { createThread(*this); }
+	virtual void run() = 0; /* called once the thread is started */
+	virtual	void join(); /* waits for the mTid thread to stop */
+	virtual	void stop(); /* calls pthread_exit() */
 
 	pthread_t mTid;
-        bdMutex   mMutex;
+	bdMutex   mMutex;
 };
-
 
 #endif

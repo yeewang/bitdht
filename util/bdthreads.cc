@@ -36,7 +36,7 @@
 #define DEBUG_THREADS 1
 
 #ifdef DEBUG_THREADS
-	#include <iostream>
+#include <iostream>
 #endif
 
 extern "C" void* bdthread_init(void* p)
@@ -45,58 +45,57 @@ extern "C" void* bdthread_init(void* p)
 	LOG << log4cpp::Priority::INFO << "bdthread_init()";
 #endif
 
-  bdThread *thread = (bdThread *) p;
-  if (!thread)
-  {
+	bdThread *thread = (bdThread *) p;
+	if (!thread)
+	{
 #ifdef DEBUG_THREADS
-	LOG << log4cpp::Priority::INFO << "bdthread_init() Error Invalid thread pointer.";
+		LOG << log4cpp::Priority::INFO << "bdthread_init() Error Invalid thread pointer.";
 #endif
-    return 0;
-  }
-  thread -> run();
-  return 0;
+		return 0;
+	}
+	thread -> run();
+	return 0;
 }
 
 
 pthread_t  createThread(bdThread &thread)
 {
-    pthread_t tid;
-    void  *data = (void *) (&thread);
+	pthread_t tid;
+	void  *data = (void *) (&thread);
 
 #ifdef DEBUG_THREADS
-    LOG << log4cpp::Priority::INFO << "createThread() creating a bdThread";
+	std::ostringstream debug;
+	debug << "createThread() creating a bdThread";
 #endif
 
-    thread.mMutex.lock();
-    {
-      	pthread_create(&tid, 0, &bdthread_init, data);
-      	thread.mTid = tid;
-    }
+	thread.mMutex.lock();
+	{
+		pthread_create(&tid, 0, &bdthread_init, data);
+		thread.mTid = tid;
+	}
 
 #ifdef DEBUG_THREADS
-    LOG << log4cpp::Priority::INFO << "createThread() created Thread.mTid: ";
+	debug << "createThread() created Thread.mTid: ";
 
 #if defined(_WIN32) || defined(__MINGW32__)
-    LOG << log4cpp::Priority::INFO << "WIN32: Cannot print mTid ";
+	debug << "WIN32: Cannot print mTid ";
 #else
-    LOG << log4cpp::Priority::INFO << thread.mTid;
+	debug << thread.mTid;
 #endif
 
+	LOG.info(debug.str().c_str());
 #endif
 
-    thread.mMutex.unlock();
+	thread.mMutex.unlock();
 
-
-
-    return tid;
-
+	return tid;
 }
 
 bdThread::bdThread()
 {
 
 #ifdef DEBUG_THREADS
-    	LOG << log4cpp::Priority::INFO << "bdThread::bdThread()";
+	LOG << log4cpp::Priority::INFO << "bdThread::bdThread()";
 #endif
 
 #if defined(_WIN32) || defined(__MINGW32__)
@@ -109,52 +108,52 @@ bdThread::bdThread()
 void bdThread::join() /* waits for the the mTid thread to stop */
 {
 #ifdef DEBUG_THREADS
-    	LOG << log4cpp::Priority::INFO << "bdThread::join() Called! Waiting for Thread.mTid: ";
+	LOG << log4cpp::Priority::INFO << "bdThread::join() Called! Waiting for Thread.mTid: ";
 
 #if defined(_WIN32) || defined(__MINGW32__)
-    LOG << log4cpp::Priority::INFO << "WIN32: Cannot print mTid ";
+	LOG << log4cpp::Priority::INFO << "WIN32: Cannot print mTid ";
 #else
-    LOG << log4cpp::Priority::INFO << mTid;
+	LOG << log4cpp::Priority::INFO << mTid;
 #endif
 
 #endif
 
-    mMutex.lock();
-    {
+	mMutex.lock();
+	{
 #if defined(_WIN32) || defined(__MINGW32__)
-	/* Its a struct in Windows compile and the member .p ist checked in the pthreads library */
+		/* Its a struct in Windows compile and the member .p ist checked in the pthreads library */
 #else
-	if(mTid > 0)
+		if(mTid > 0)
 #endif
-		pthread_join(mTid, NULL);
+			pthread_join(mTid, NULL);
 
 #ifdef DEBUG_THREADS
-    LOG << log4cpp::Priority::INFO << "bdThread::join() Joined Thread.mTid: ";
+		LOG << log4cpp::Priority::INFO << "bdThread::join() Joined Thread.mTid: ";
 
 #if defined(_WIN32) || defined(__MINGW32__)
-    LOG << log4cpp::Priority::INFO << "WIN32: Cannot print mTid ";
+		LOG << log4cpp::Priority::INFO << "WIN32: Cannot print mTid ";
 #else
-    LOG << log4cpp::Priority::INFO << mTid;
+		LOG << log4cpp::Priority::INFO << mTid;
 #endif
 
-    LOG << log4cpp::Priority::INFO << "bdThread::join() Setting mTid = 0";
+		LOG << log4cpp::Priority::INFO << "bdThread::join() Setting mTid = 0";
 #endif
 
 #if defined(_WIN32) || defined(__MINGW32__)
-	memset (&mTid, 0, sizeof(mTid));
+		memset (&mTid, 0, sizeof(mTid));
 #else
-	mTid = 0;
+		mTid = 0;
 #endif
 
-    }
-    mMutex.unlock();
+	}
+	mMutex.unlock();
 
 }
 
 void bdThread::stop() 
 {
 #ifdef DEBUG_THREADS
-    	LOG << log4cpp::Priority::INFO << "bdThread::stop() Called!";
+	LOG << log4cpp::Priority::INFO << "bdThread::stop() Called!";
 #endif
 
 	pthread_exit(NULL);

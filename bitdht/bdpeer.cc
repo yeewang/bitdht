@@ -47,15 +47,43 @@ void bdSockAddrInit(struct sockaddr_in *addr)
 	addr->sin_family = AF_INET;
 }
 
-bdId::bdId()
+bdId::bdId() : type(GENERAL)
 {
 	/* blank everything */
 	bdSockAddrInit(&addr);
 	memset(&id.data, 0, BITDHT_KEY_LEN);
 }
 
+bdId::bdId(const bdId &bd_id) :
+		type(GENERAL)
+{
+	/* this bit is to ensure the address is valid for windows / osx */
+	bdSockAddrInit(&addr);
+	addr.sin_addr.s_addr = bd_id.addr.sin_addr.s_addr;
+	addr.sin_port = bd_id.addr.sin_port;
 
-bdId::bdId(bdNodeId in_id, struct sockaddr_in in_addr)
+	for(int i = 0; i < BITDHT_KEY_LEN; i++)
+	{
+		id.data[i] = bd_id.id.data[i];
+	}
+}
+
+bdId::bdId(const bdNodeId &in_id, const struct sockaddr_in &in_addr) :
+		type(GENERAL)
+{
+	/* this bit is to ensure the address is valid for windows / osx */
+	bdSockAddrInit(&addr);
+	addr.sin_addr.s_addr = in_addr.sin_addr.s_addr;
+	addr.sin_port = in_addr.sin_port;
+
+	for(int i = 0; i < BITDHT_KEY_LEN; i++)
+	{
+		id.data[i] = in_id.data[i];
+	}
+}
+
+bdId::bdId(const bdNodeId &in_id, const struct sockaddr_in &in_addr, int atype) :
+		type(atype)
 {
 	/* this bit is to ensure the address is valid for windows / osx */
 	bdSockAddrInit(&addr);
@@ -67,7 +95,6 @@ bdId::bdId(bdNodeId in_id, struct sockaddr_in in_addr)
 		id.data[i] = in_id.data[i];
 	}
 };
-
 
 void bdZeroNodeId(bdNodeId *id)
 {
@@ -529,7 +556,7 @@ int bdSpace::add_peer(const bdId *id, uint32_t peerflags)
 			buck.entries.push_back(peer);
 
 #ifdef DEBUG_BD_SPACE
-			LOG << log4cpp::Priority::INFO << "Peer already in bucket: moving to back of the list" << std::endl;
+			LOG.info("Peer already in bucket: moving to back of the list");
 #endif
 
 			return 1;
@@ -578,7 +605,7 @@ int bdSpace::add_peer(const bdId *id, uint32_t peerflags)
 			}
 
 #ifdef DEBUG_BD_SPACE
-			LOG << log4cpp::Priority::INFO << "Inserting due to Priority: minScore: " << minScore 
+			LOG << log4cpp::Priority::INFO << "Inserting due to Priority: minScore: " << minScore
 				<< " new Peer Score: " << peerscore <<  << std::endl;
 #endif
 		}
@@ -954,7 +981,6 @@ uint32_t  bdSpace::calcNetworkSizeWithFlag(uint32_t withFlag)
 	return NetSize;
 }
 
-
 uint32_t  bdSpace::calcSpaceSize()
 {
 	std::vector<bdBucket>::iterator it;
@@ -967,4 +993,3 @@ uint32_t  bdSpace::calcSpaceSize()
 	}
 	return totalcount;
 }
-

@@ -78,7 +78,7 @@ output -> call back to Udp().
 class bdNodeNetMsg
 {
 
-	public:
+public:
 	bdNodeNetMsg(char *data, int size, struct sockaddr_in *addr);
 	~bdNodeNetMsg();
 
@@ -92,10 +92,10 @@ class bdNodeNetMsg
 
 class bdNode
 {
-	public:
+public:
 
 	bdNode(bdNodeId *id, std::string dhtVersion, std::string bootfile, 
-		bdDhtFunctions *fns);	
+			bdDhtFunctions *fns, PacketCallback *packetCallback);
 
 	/* startup / shutdown node */
 	void restartNode();
@@ -112,6 +112,7 @@ class bdNode
 	void addQuery(const bdNodeId *id, uint32_t qflags);
 	void clearQuery(const bdNodeId *id);
 	void QueryStatus(std::map<bdNodeId, bdQueryStatus> &statusMap);
+	bool getIdFromQuery(const bdNodeId *id, std::list<bdId> &idList, int mask);
 
 	void iterationOff();
 	void iteration();
@@ -120,12 +121,12 @@ class bdNode
 
 
 	/* interaction with outside world */
-int 	outgoingMsg(struct sockaddr_in *addr, char *msg, int *len);
-void 	incomingMsg(struct sockaddr_in *addr, char *msg, int len);
+	int 	outgoingMsg(struct sockaddr_in *addr, char *msg, int *len);
+	void 	incomingMsg(struct sockaddr_in *addr, char *msg, int len);
 
 	/* internal interaction with network */
-void	sendPkt(char *msg, int len, struct sockaddr_in addr);
-void	recvPkt(char *msg, int len, struct sockaddr_in addr);
+	void	sendPkt(char *msg, int len, struct sockaddr_in addr);
+	void	recvPkt(char *msg, int len, struct sockaddr_in addr);
 
 
 	/* output functions (send msg) */
@@ -133,17 +134,19 @@ void	recvPkt(char *msg, int len, struct sockaddr_in addr);
 	void msgout_pong(bdId *id, bdToken *transId);
 	void msgout_find_node(bdId *id, bdToken *transId, bdNodeId *query);
 	void msgout_reply_find_node(bdId *id, bdToken *transId, 
-						std::list<bdId> &peers);
+			std::list<bdId> &peers);
 	void msgout_get_hash(bdId *id, bdToken *transId, bdNodeId *info_hash);
 	void msgout_reply_hash(bdId *id, bdToken *transId, 
-				bdToken *token, std::list<std::string> &values);
+			bdToken *token, std::list<std::string> &values);
 	void msgout_reply_nearest(bdId *id, bdToken *transId, 
-				bdToken *token, std::list<bdId> &peers);
+			bdToken *token, std::list<bdId> &peers);
 
 	void msgout_post_hash(bdId *id, bdToken *transId, bdNodeId *info_hash, 
-				uint32_t port, bdToken *token);
+			uint32_t port, bdToken *token);
 	void msgout_reply_post(bdId *id, bdToken *transId);
 
+	void msgout_newconn(bdId *tunnelId, bdId *dhtId, bdToken *transId); // this function defines in tunnel class
+	void msgout_reply_newconn(bdId *tunnelId, bdId *dhtId, bdToken *transId);
 
 	/* input functions (once mesg is parsed) */
 	void msgin_ping(bdId *id, bdToken *token);
@@ -151,19 +154,20 @@ void	recvPkt(char *msg, int len, struct sockaddr_in addr);
 
 	void msgin_find_node(bdId *id, bdToken *transId, bdNodeId *query);
 	void msgin_reply_find_node(bdId *id, bdToken *transId, 
-						std::list<bdId> &entries);
+			std::list<bdId> &entries);
 
 	void msgin_get_hash(bdId *id, bdToken *transId, bdNodeId *nodeid);
 	void msgin_reply_hash(bdId *id, bdToken *transId, 
-				bdToken *token, std::list<std::string> &values);
+			bdToken *token, std::list<std::string> &values);
 	void msgin_reply_nearest(bdId *id, bdToken *transId, 
-				bdToken *token, std::list<bdId> &nodes);
+			bdToken *token, std::list<bdId> &nodes);
 
 	void msgin_post_hash(bdId *id,  bdToken *transId,  
-				bdNodeId *info_hash,  uint32_t port, bdToken *token);
+			bdNodeId *info_hash,  uint32_t port, bdToken *token);
 	void msgin_reply_post(bdId *id, bdToken *transId);
 
-
+	void msgin_newconn(bdId *tunnelId, bdId *dhtId, bdToken *transId);
+	void msgin_reply_newconn(bdId *tunnelId, bdId *dhtId, bdToken *transId);
 
 	/* token handling */
 	void genNewToken(bdToken *token);
@@ -184,22 +188,21 @@ void	recvPkt(char *msg, int len, struct sockaddr_in addr);
 	void resetCounters();
 	void resetStats();
 
-	protected:
-
-
+protected:
 	bdNodeId mOwnId;
 	bdId 	mLikelyOwnId; // Try to workout own id address.
 	bdSpace mNodeSpace;
 
-	private:
+private:
 
 	bdStore mStore;
 	std::string mDhtVersion;
 
 	bdDhtFunctions *mFns;
+	PacketCallback *mPacketCallback;
 
 	bdHashSpace mHashSpace;
-	
+
 	bdHistory mHistory; /* for understanding the DHT */
 
 	std::list<bdQuery *> mLocalQueries;
@@ -211,38 +214,35 @@ void	recvPkt(char *msg, int len, struct sockaddr_in addr);
 	std::list<bdNodeNetMsg *> mIncomingMsgs;
 
 	// Statistics.
-	 double mCounterOutOfDatePing;
-	 double mCounterPings;
-	 double mCounterPongs;
-	 double mCounterQueryNode;
-	 double mCounterQueryHash;
-	 double mCounterReplyFindNode;
-	 double mCounterReplyQueryHash;
+	double mCounterOutOfDatePing;
+	double mCounterPings;
+	double mCounterPongs;
+	double mCounterQueryNode;
+	double mCounterQueryHash;
+	double mCounterReplyFindNode;
+	double mCounterReplyQueryHash;
 
-	 double mCounterRecvPing;
-	 double mCounterRecvPong;
-	 double mCounterRecvQueryNode;
-	 double mCounterRecvQueryHash;
-	 double mCounterRecvReplyFindNode;
-	 double mCounterRecvReplyQueryHash;
+	double mCounterRecvPing;
+	double mCounterRecvPong;
+	double mCounterRecvQueryNode;
+	double mCounterRecvQueryHash;
+	double mCounterRecvReplyFindNode;
+	double mCounterRecvReplyQueryHash;
 
-	 double mLpfOutOfDatePing;
-	 double mLpfPings;
-	 double mLpfPongs;
-	 double mLpfQueryNode;
-	 double mLpfQueryHash;
-	 double mLpfReplyFindNode;
-	 double mLpfReplyQueryHash;
+	double mLpfOutOfDatePing;
+	double mLpfPings;
+	double mLpfPongs;
+	double mLpfQueryNode;
+	double mLpfQueryHash;
+	double mLpfReplyFindNode;
+	double mLpfReplyQueryHash;
 
-	 double mLpfRecvPing;
-	 double mLpfRecvPong;
-	 double mLpfRecvQueryNode;
-	 double mLpfRecvQueryHash;
-	 double mLpfRecvReplyFindNode;
-	 double mLpfRecvReplyQueryHash;
-
+	double mLpfRecvPing;
+	double mLpfRecvPong;
+	double mLpfRecvQueryNode;
+	double mLpfRecvQueryHash;
+	double mLpfRecvReplyFindNode;
+	double mLpfRecvReplyQueryHash;
 };
-
-
 
 #endif // BITDHT_NODE_H

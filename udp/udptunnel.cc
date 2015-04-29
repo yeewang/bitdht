@@ -1,5 +1,5 @@
 /*
- * bitdht/udpbitdht.cc
+ * bitdht/UdpTunnel.cc
  *
  * BitDHT: An Flexible DHT library.
  *
@@ -24,11 +24,12 @@
  */
 
 
-#include "udp/udpbitdht.h"
+#include "udp/udptunnel.h"
 #include "bitdht/bdpeer.h"
 #include "bitdht/bdstore.h"
 #include "bitdht/bdmsgs.h"
 #include "bitdht/bencode.h"
+#include "bitdht/bdtunnelmanager.h"
 
 #include <stdlib.h>
 #include <iostream>
@@ -51,129 +52,72 @@
 //#define BITDHT_VERSION_IDENTIFER	1
 /*************************************/
 
-UdpBitDht::UdpBitDht(UdpPublisher *pub, bdNodeId *id, std::string appVersion,
-		std::string bootstrapfile, bdDhtFunctions *fns, PacketCallback *packetCallback) :
+UdpTunnel::UdpTunnel(UdpPublisher *pub, bdDhtFunctions *fns) :
 		UdpSubReceiver(pub), mFns(fns)
 {
-	std::string usedVersion;
-
-#ifdef BITDHT_VERSION_IDENTIFER
-	usedVersion = "BD";
-#endif
-	usedVersion += appVersion;
-
-#ifdef BITDHT_VERSION_ANONYMOUS
-	usedVersion = ""; /* blank it */
-#endif
-
-	/* setup nodeManager */
-	mBitDhtManager = new bdNodeManager(id, usedVersion, bootstrapfile, fns, packetCallback);
+	mTunnelManager = new bdTunnelManager(fns);
 }
 
-
-UdpBitDht::~UdpBitDht() 
+UdpTunnel::~UdpTunnel()
 { 
 	return; 
 }
 
-
 /*********** External Interface to the World ************/
 
 /***** Functions to Call down to bdNodeManager ****/
-/* Request DHT Peer Lookup */
-/* Request Keyword Lookup */
-void UdpBitDht::addFindNode(bdNodeId *id, uint32_t mode)
+
+void UdpTunnel::connectNode(const bdId *id)
 {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
-	mBitDhtManager->addFindNode(id, mode);
+	startTunnel();
+
+	mTunnelManager->connectNode(id);
 }
 
-void UdpBitDht::removeFindNode(bdNodeId *id)
+void UdpTunnel::disconnectNode(const bdId *id)
 {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
-	mBitDhtManager->removeFindNode(id);
-}
-
-void UdpBitDht::removeAllFindNode()
-{
-	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
-
-	mBitDhtManager->removeAllFindNode();
-}
-
-void UdpBitDht::findDhtValue(bdNodeId *id, std::string key, uint32_t mode)
-{
-	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
-
-	mBitDhtManager->findDhtValue(id, key, mode);
+	mTunnelManager->disconnectNode(id);
 }
 
 /***** Add / Remove Callback Clients *****/
-void UdpBitDht::addCallback(BitDhtCallback *cb)
+void UdpTunnel::addCallback(BitDhtCallback *cb)
 {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
-	mBitDhtManager->addCallback(cb);
+	mTunnelManager->addCallback(cb);
 }
 
-void UdpBitDht::removeCallback(BitDhtCallback *cb)
+void UdpTunnel::removeCallback(BitDhtCallback *cb)
 {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
-	mBitDhtManager->removeCallback(cb);
+	mTunnelManager->removeCallback(cb);
 }
-
-int UdpBitDht::getDhtPeerAddress(const bdNodeId *id, struct sockaddr_in &from)
-{
-	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
-
-	return mBitDhtManager->getDhtPeerAddress(id, from);
-}
-
-int 	UdpBitDht::getDhtValue(const bdNodeId *id, std::string key, std::string &value)
-{
-	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
-
-	return mBitDhtManager->getDhtValue(id, key, value);
-}
-
 
 /* stats and Dht state */
-int UdpBitDht:: startDht()
+int UdpTunnel::startTunnel()
 {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
-	return mBitDhtManager->startDht();
+	return mTunnelManager->startTunnel();
 }
 
-int UdpBitDht:: stopDht()
+int UdpTunnel:: stopTunnel()
 {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
-	return mBitDhtManager->stopDht();
+	return mTunnelManager->stopTunnel();
 }
 
-int UdpBitDht::stateDht() 
+int UdpTunnel::stateDht()
 {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
-	return mBitDhtManager->stateDht();
-}
-
-uint32_t UdpBitDht::statsNetworkSize()
-{
-	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
-
-	return mBitDhtManager->statsNetworkSize();
-}
-
-uint32_t UdpBitDht::statsBDVersionSize()
-{
-	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
-
-	return mBitDhtManager->statsBDVersionSize();
+	return mTunnelManager->stateDht();
 }
 
 /******************* Internals *************************/
@@ -181,25 +125,19 @@ uint32_t UdpBitDht::statsBDVersionSize()
 /***** Iteration / Loop Management *****/
 
 /*** Overloaded from UdpSubReceiver ***/
-int UdpBitDht::recvPkt(void *data, int size, struct sockaddr_in &from)
+int UdpTunnel::recvPkt(void *data, int size, struct sockaddr_in &from)
 {
 	/* pass onto bitdht */
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
-	/* check packet suitability */
-	if (mBitDhtManager->isBitDhtPacket((char *) data, size, from))
-	{
-
-		mBitDhtManager->incomingMsg(&from, (char *) data, size);
-		return 1;
-	}
+	mTunnelManager->incomingMsg(&from, (char *) data, size);
 
 	return 0;
 }
 
-int UdpBitDht::status(std::ostream &out)
+int UdpTunnel::status(std::ostream &out)
 {
-	out << "UdpBitDht::status()" << std::endl;
+	out << "UdpTunnel::status()" << std::endl;
 
 	return 1;
 }
@@ -208,7 +146,7 @@ int UdpBitDht::status(std::ostream &out)
 #define MAX_MSG_PER_TICK	100
 #define TICK_PAUSE_USEC		20000  /* 20ms secs .. max messages = 50 x 100 = 5000 */
 
-void UdpBitDht::run()
+void UdpTunnel::run()
 {
 	while(1)
 	{
@@ -217,12 +155,12 @@ void UdpBitDht::run()
 			usleep(TICK_PAUSE_USEC);
 		}
 
-		mBitDhtManager->iteration();
+		mTunnelManager->iteration();
 		sleep(1);
 	}
 }
 
-int UdpBitDht::tick()
+int UdpTunnel::tick()
 {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
@@ -232,10 +170,10 @@ int UdpBitDht::tick()
 	struct sockaddr_in toAddr;
 	int size = BITDHT_MAX_PKTSIZE;
 
-	while((i < MAX_MSG_PER_TICK) && (mBitDhtManager->outgoingMsg(&toAddr, data, &size)))
+	while((i < MAX_MSG_PER_TICK) && (mTunnelManager->outgoingMsg(&toAddr, data, &size)))
 	{
 #ifdef DEBUG_UDP_BITDHT 
-		LOG << log4cpp::Priority::INFO << "UdpBitDht::tick() outgoing msg(" << size << ") to " << toAddr;
+		LOG << log4cpp::Priority::INFO << "UdpTunnel::tick() outgoing msg(" << size << ") to " << toAddr;
 		LOG << log4cpp::Priority::INFO << std::endl;
 #endif
 

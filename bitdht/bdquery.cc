@@ -32,6 +32,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
+#include <sstream>
 
 /**
  * #define DEBUG_QUERY 1
@@ -105,6 +106,28 @@ bool bdQuery::result(std::list<bdId> &answer)
 	return (i > 0);
 }
 
+bool bdQuery::matchResult(std::list<bdId> &idList, int typeMask)
+{
+#ifdef DEBUG_QUERY
+	LOG.info("bdQuery::fullResult()");
+#endif
+
+	int i = 0;
+	std::multimap<bdMetric, bdPeer>::iterator it;
+	for(it = mClosest.begin(); it != mClosest.end(); it++) {
+		if (it->second.mPeerId.id == mId /*&& (it->second.mPeerId.type & typeMask) != 0*/) {
+			i++;
+			idList.push_back(it->second.mPeerId);
+		}
+	}
+	for(it = mPotentialClosest.begin(); it != mPotentialClosest.end(); it++, i++) {
+		if (it->second.mPeerId.id == mId /*&& (it->second.mPeerId.type & typeMask) != 0*/) {
+			i++;
+			idList.push_back(it->second.mPeerId);
+		}
+	}
+	return (i > 0);
+}
 
 int bdQuery::nextQuery(bdId &id, bdNodeId &targetNodeId)
 {
@@ -393,7 +416,6 @@ int bdQuery::addPeer(const bdId *id, uint32_t mode)
 	return 1;
 }
 
-
 /* we also want to track unreachable node ... this allows us
  * to detect if peer are online - but uncontactible by dht.
  * 
@@ -551,45 +573,65 @@ int bdQuery::addPotentialPeer(const bdId *id, uint32_t mode)
 
 int bdQuery::printQuery()
 {
+	std::ostringstream debug;
+	char debugBuf[80];
+
 #ifdef DEBUG_QUERY 
-	LOG.info("bdQuery::printQuery()\n");
+	LOG.info("bdQuery::printQuery()");
 #endif
 	
 	time_t ts = time(NULL);
-	LOG.info("Query for: " + mFns->bdPrintNodeId(&mId));
+	debug << ("Query for: " + mFns->bdPrintNodeId(&mId));
 
-	LOG.info(" Query State: %d", mState);
-	LOG.info(" Query Age %ld secs", ts-mQueryTS);
+	snprintf(debugBuf, sizeof(debugBuf), " Query State: %d", mState);
+	debug << debugBuf;
+
+	snprintf(debugBuf, sizeof(debugBuf), " Query Age %ld secs", ts-mQueryTS);
+	debug << debugBuf;
 	if (mState >= BITDHT_QUERY_FAILURE)
 	{
-		LOG.info(" Search Time: %d secs", mSearchTime);
+		snprintf(debugBuf, sizeof(debugBuf), " Search Time: %d secs", mSearchTime);
+		debug << debugBuf;
 	}
-	LOG.info("\n");
+	LOG.info(debug.str());
+	debug.str("");
 
 #ifdef DEBUG_QUERY
-	LOG.info("Closest Available Peers:\n");
+	LOG.info("Closest Available Peers:");
 	std::multimap<bdMetric, bdPeer>::iterator it;
 	for(it = mClosest.begin(); it != mClosest.end(); it++)
 	{
-		LOG.info("Id:  ");
-		mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &(it->second.mPeerId));
-		LOG.info("  Bucket: %d ", mFns->bdBucketDistance(&(it->first)));
-		LOG.info(" Found: %ld ago", ts-it->second.mFoundTime);
-		LOG.info(" LastSent: %ld ago", ts-it->second.mLastSendTime);
-		LOG.info(" LastRecv: %ld ago", ts-it->second.mLastRecvTime);
-		LOG.info("\n");
+
+		snprintf(debugBuf, sizeof(debugBuf), "Id:  %s",
+				mFns->bdPrintId&(it->second.mPeerId).c_str());
+		debug << debugBuf;
+		snprintf(debugBuf, sizeof(debugBuf), "  Bucket: %d ", mFns->bdBucketDistance(&(it->first)));
+		debug << debugBuf;
+		snprintf(debugBuf, sizeof(debugBuf), " Found: %ld ago", ts-it->second.mFoundTime);
+		debug << debugBuf;
+		snprintf(debugBuf, sizeof(debugBuf), " LastSent: %ld ago", ts-it->second.mLastSendTime);
+		debug << debugBuf;
+		snprintf(debugBuf, sizeof(debugBuf), " LastRecv: %ld ago", ts-it->second.mLastRecvTime);
+		LOG.info(debug.str());
+		debug.str("");
 	}
 
-	LOG.info("\nClosest Potential Peers:\n");
+	LOG.info("\nClosest Potential Peers:");
 	for(it = mPotentialClosest.begin(); it != mPotentialClosest.end(); it++)
 	{
-		LOG.info("Id:  ");
-		mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &(it->second.mPeerId));
-		LOG.info("  Bucket: %d ", mFns->bdBucketDistance(&(it->first)));
-		LOG.info(" Found: %ld ago", ts-it->second.mFoundTime);
-		LOG.info(" LastSent: %ld ago", ts-it->second.mLastSendTime);
-		LOG.info(" LastRecv: %ld ago", ts-it->second.mLastRecvTime);
-		LOG.info("\n");
+		snprintf(debugBuf, sizeof(debugBuf), "Id:  %s",
+				mFns->bdPrintId(&(it->second.mPeerId).c_str());
+		debug << debugBuf;
+		snprintf(debugBuf, sizeof(debugBuf), "  Bucket: %d ", mFns->bdBucketDistance(&(it->first)));
+		debug << debugBuf;
+		snprintf(debugBuf, sizeof(debugBuf), " Found: %ld ago", ts-it->second.mFoundTime);
+		debug << debugBuf;
+		snprintf(debugBuf, sizeof(debugBuf), " LastSent: %ld ago", ts-it->second.mLastSendTime);
+		debug << debugBuf;
+		snprintf(debugBuf, sizeof(debugBuf), " LastRecv: %ld ago", ts-it->second.mLastRecvTime);
+		debug << debugBuf;
+		LOG.info(debug.str());
+		debug.str("");
 	}
 #else
 	// shortened version.
@@ -597,32 +639,41 @@ int bdQuery::printQuery()
 	std::multimap<bdMetric, bdPeer>::iterator it = mClosest.begin(); 
 	if (it != mClosest.end())
 	{
-		LOG.info(mFns->bdPrintId(&(it->second.mPeerId)));
-		LOG.info("  Bucket: %d ", mFns->bdBucketDistance(&(it->first)));
-		LOG.info(" Found: %ld ago", ts-it->second.mFoundTime);
-		LOG.info(" LastSent: %ld ago", ts-it->second.mLastSendTime);
-		LOG.info(" LastRecv: %ld ago", ts-it->second.mLastRecvTime);
+		snprintf(debugBuf, sizeof(debugBuf), "%s", mFns->bdPrintId(&(it->second.mPeerId)).c_str());
+		debug << debugBuf;
+		snprintf(debugBuf, sizeof(debugBuf), "  Bucket: %d ", mFns->bdBucketDistance(&(it->first)));
+		debug << debugBuf;
+		snprintf(debugBuf, sizeof(debugBuf), " Found: %ld ago", ts-it->second.mFoundTime);
+		debug << debugBuf;
+		snprintf(debugBuf, sizeof(debugBuf), " LastSent: %ld ago", ts-it->second.mLastSendTime);
+		debug << debugBuf;
+		snprintf(debugBuf, sizeof(debugBuf), " LastRecv: %ld ago", ts-it->second.mLastRecvTime);
+		debug << debugBuf;
 	}
-	LOG.info("\n");
+	LOG.info(debug.str());
+	debug.str("");
 
 	LOG.info("Closest Potential Peer: ");
 	it = mPotentialClosest.begin(); 
 	if (it != mPotentialClosest.end())
 	{
-		LOG.info(mFns->bdPrintId(&(it->second.mPeerId)));
-		LOG.info("  Bucket: %d ", mFns->bdBucketDistance(&(it->first)));
-		LOG.info(" Found: %ld ago", ts-it->second.mFoundTime);
-		LOG.info(" LastSent: %ld ago", ts-it->second.mLastSendTime);
-		LOG.info(" LastRecv: %ld ago", ts-it->second.mLastRecvTime);
+		snprintf(debugBuf, sizeof(debugBuf), "%s", mFns->bdPrintId(&(it->second.mPeerId)).c_str());
+		debug << debugBuf;
+		snprintf(debugBuf, sizeof(debugBuf), "  Bucket: %d ", mFns->bdBucketDistance(&(it->first)));
+		debug << debugBuf;
+		snprintf(debugBuf, sizeof(debugBuf), " Found: %ld ago", ts-it->second.mFoundTime);
+		debug << debugBuf;
+		snprintf(debugBuf, sizeof(debugBuf), " LastSent: %ld ago", ts-it->second.mLastSendTime);
+		debug << debugBuf;
+		snprintf(debugBuf, sizeof(debugBuf), " LastRecv: %ld ago", ts-it->second.mLastRecvTime);
+		debug << debugBuf;
 	}
-	LOG.info("\n");
+	LOG.info(debug.str());
+	debug.str("");
 #endif
 
 	return 1;
 }
-
-
-
 
 /********************************* Remote Query **************************************/
 bdRemoteQuery::bdRemoteQuery(bdId *id, bdNodeId *query, bdToken *transId, uint32_t query_type)

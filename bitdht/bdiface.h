@@ -62,12 +62,16 @@ class bdMetric: public bdNodeId {};
 class bdId
 {
 public:
+	enum { GENERAL = 0x01, TUNNEL = 0x02 };
 
 	bdId();
-	bdId(bdNodeId in_id, struct sockaddr_in in_addr);
+	bdId(const bdNodeId &in_id, const struct sockaddr_in &in_addr);
+	bdId(const bdNodeId &in_id, const struct sockaddr_in &in_addr, int type);
+	bdId(const bdId &id);
 
 	struct sockaddr_in addr;
 	bdNodeId id;
+	int type;
 };
 
 #define BITDHT_LIKELY_SAME_NO			0x00000000
@@ -153,6 +157,12 @@ public:
 	virtual int dhtValueCallback(const bdNodeId *id, std::string key, uint32_t status) = 0;
 };
 
+class PacketCallback
+{
+public:
+	// receive a dht packet
+	virtual void onRecvCallback(const bdId *id, int type) {};
+};
 
 class BitDhtInterface
 {

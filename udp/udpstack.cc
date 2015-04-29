@@ -42,8 +42,8 @@
 //#define DEBUG_UDP_RECV	1
 
 
-UdpStack::UdpStack(struct sockaddr_in &local)
-	:udpLayer(NULL), laddr(local)
+UdpStack::UdpStack(struct sockaddr_in &local) :
+udpLayer(NULL), laddr(local)
 {
 	openSocket();
 	return;
@@ -53,7 +53,6 @@ bool UdpStack::resetAddress(struct sockaddr_in &local)
 {
 	LOG.info("UdpStack::resetAddress():%s:%d",
 			inet_ntoa(local.sin_addr), htons(local.sin_port));
-
 	return udpLayer->reset(local);
 }
 
@@ -62,20 +61,20 @@ int UdpStack::recvPkt(void *data, int size, struct sockaddr_in &from)
 {
 	/* print packet information */
 #ifdef DEBUG_UDP_RECV
-	LOG << log4cpp::Priority::INFO << "UdpStack::recvPkt(" << size << ") from: " << from;
+	LOG.info("UdpStack::recvPkt(" << size << ") from: " << from;
 #endif
 
-        bdStackMutex stack(stackMtx);   /********** LOCK MUTEX *********/
+	bdStackMutex stack(stackMtx);   /********** LOCK MUTEX *********/
 
-        std::list<UdpReceiver *>::iterator it;
+	std::list<UdpReceiver *>::iterator it;
 	for(it = mReceivers.begin(); it != mReceivers.end(); it++)
 	{
 		// See if they want the packet.
 		if ((*it)->recvPkt(data, size, from))
 		{
 #ifdef DEBUG_UDP_RECV
-			LOG << log4cpp::Priority::INFO << "UdpStack::recvPkt(" << size << ") from: " << from;
-			LOG << log4cpp::Priority::INFO << std::endl;
+			LOG.info("UdpStack::recvPkt(" << size << ") from: " << from;
+			LOG.info(std::endl;
 #endif
 			break;
 		}
@@ -87,24 +86,24 @@ int  UdpStack::sendPkt(const void *data, int size, struct sockaddr_in &to, int t
 {
 	/* print packet information */
 #ifdef DEBUG_UDP_RECV
-	LOG << log4cpp::Priority::INFO << "UdpStack::sendPkt(" << size << ") ttl: " << ttl;
-	LOG << log4cpp::Priority::INFO << " to: " << to;
-	LOG << log4cpp::Priority::INFO << std::endl;
+	LOG.info("UdpStack::sendPkt(" << size << ") ttl: " << ttl;
+	LOG.info(" to: " << to;
+	LOG.info(std::endl;
 #endif
 
 	/* send to udpLayer */
 	return udpLayer->sendPkt(data, size, to, ttl);
 }
 
-int     UdpStack::status(std::ostream &out)
+int UdpStack::status(std::ostream &out)
 {
 	{
-	        bdStackMutex stack(stackMtx);   /********** LOCK MUTEX *********/
-	
+		bdStackMutex stack(stackMtx);   /********** LOCK MUTEX *********/
+
 		out << "UdpStack::status()" << std::endl;
 		out << "localaddr: " << laddr << std::endl;
 		out << "UdpStack::SubReceivers:" << std::endl;
-        	std::list<UdpReceiver *>::iterator it;
+		std::list<UdpReceiver *>::iterator it;
 		int i = 0;
 		for(it = mReceivers.begin(); it != mReceivers.end(); it++, i++)
 		{
@@ -140,13 +139,13 @@ int UdpStack::close()
 }
 
 
-        /* add a TCPonUDP stream */
+/* add a TCPonUDP stream */
 int UdpStack::addReceiver(UdpReceiver *recv)
 {
-        bdStackMutex stack(stackMtx);   /********** LOCK MUTEX *********/
+	bdStackMutex stack(stackMtx);   /********** LOCK MUTEX *********/
 
 	/* check for duplicate */
-        std::list<UdpReceiver *>::iterator it;
+	std::list<UdpReceiver *>::iterator it;
 	it = std::find(mReceivers.begin(), mReceivers.end(), recv);
 	if (it == mReceivers.end())
 	{
@@ -157,8 +156,8 @@ int UdpStack::addReceiver(UdpReceiver *recv)
 	/* otherwise its already there! */
 
 #ifdef DEBUG_UDP_RECV
-	LOG << log4cpp::Priority::INFO << "UdpStack::addReceiver() Recv already exists!" << std::endl;
-	LOG << log4cpp::Priority::INFO << "UdpStack::addReceiver() ERROR" << std::endl;
+	LOG.info("UdpStack::addReceiver() Recv already exists!" << std::endl;
+	LOG.info("UdpStack::addReceiver() ERROR" << std::endl;
 #endif
 
 	return 0;
@@ -166,10 +165,10 @@ int UdpStack::addReceiver(UdpReceiver *recv)
 
 int UdpStack::removeReceiver(UdpReceiver *recv)
 {
-        bdStackMutex stack(stackMtx);   /********** LOCK MUTEX *********/
+	bdStackMutex stack(stackMtx);   /********** LOCK MUTEX *********/
 
 	/* check for duplicate */
-        std::list<UdpReceiver *>::iterator it;
+	std::list<UdpReceiver *>::iterator it;
 	it = std::find(mReceivers.begin(), mReceivers.end(), recv);
 	if (it != mReceivers.end())
 	{
@@ -180,8 +179,8 @@ int UdpStack::removeReceiver(UdpReceiver *recv)
 	/* otherwise its not there! */
 
 #ifdef DEBUG_UDP_RECV
-	LOG << log4cpp::Priority::INFO << "UdpStack::removeReceiver() Recv dont exist!" << std::endl;
-	LOG << log4cpp::Priority::INFO << "UdpStack::removeReceiver() ERROR" << std::endl;
+	LOG.info("UdpStack::removeReceiver() Recv dont exist!");
+	LOG.info("UdpStack::removeReceiver() ERROR");
 #endif
 
 	return 0;
@@ -191,8 +190,8 @@ int UdpStack::removeReceiver(UdpReceiver *recv)
 
 /*****************************************************************************************/
 
-UdpSubReceiver::UdpSubReceiver(UdpPublisher *pub)
-	:mPublisher(pub) 
+UdpSubReceiver::UdpSubReceiver(UdpPublisher *pub) :
+		mPublisher(pub)
 { 
 	return; 
 }
@@ -201,9 +200,9 @@ int  UdpSubReceiver::sendPkt(const void *data, int size, struct sockaddr_in &to,
 {
 	/* print packet information */
 #ifdef DEBUG_UDP_RECV
-	LOG << log4cpp::Priority::INFO << "UdpSubReceiver::sendPkt(" << size << ") ttl: " << ttl;
-	LOG << log4cpp::Priority::INFO << " to: " << to;
-	LOG << log4cpp::Priority::INFO << std::endl;
+	LOG.info("UdpSubReceiver::sendPkt(" << size << ") ttl: " << ttl;
+	LOG.info(" to: " << to;
+	LOG.info(std::endl;
 #endif
 
 	/* send to udpLayer */

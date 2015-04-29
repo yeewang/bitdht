@@ -38,19 +38,20 @@
 
 class bdQuery
 {
-	public:
+public:
 	bdQuery(const bdNodeId *id, std::list<bdId> &startList, uint32_t queryFlags, 
-		bdDhtFunctions *fns);
+			bdDhtFunctions *fns);
 
 	// get the answer.
-bool	result(std::list<bdId> &answer);
+	bool	result(std::list<bdId> &answer);
+	bool 	matchResult(std::list<bdId> &idList, int type);
 
 	// returning results get passed to all queries.
-//void 	addNode(const bdId *id, int mode);		
-int 	nextQuery(bdId &id, bdNodeId &targetId);
-int 	addPeer(const bdId *id, uint32_t mode);
-int 	addPotentialPeer(const bdId *id, uint32_t mode);
-int 	printQuery();
+	//void 	addNode(const bdId *id, int mode);
+	int 	nextQuery(bdId &id, bdNodeId &targetId);
+	int 	addPeer(const bdId *id, uint32_t mode);
+	int 	addPotentialPeer(const bdId *id, uint32_t mode);
+	int 	printQuery();
 
 	// searching for
 	bdNodeId mId;
@@ -62,7 +63,7 @@ int 	printQuery();
 
 	int32_t mQueryIdlePeerRetryPeriod; // seconds between retries.
 
-	private:
+private:
 
 	// closest peers
 	std::multimap<bdMetric, bdPeer>  mClosest;
@@ -73,20 +74,18 @@ int 	printQuery();
 
 class bdQueryStatus
 {
-	public:
+public:
 	uint32_t mStatus;
 	uint32_t mQFlags;
 	std::list<bdId> mResults;
 };
-
-
 
 /* this is just a container class.
  * we locally seach for this, once then discard.
  */
 class bdRemoteQuery
 {
-	public:
+public:
 	bdRemoteQuery(bdId *id, bdNodeId *query, bdToken *transId, uint32_t query_type);
 
 	bdId mId;

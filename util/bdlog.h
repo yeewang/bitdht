@@ -19,10 +19,10 @@
 #include "log4cpp/BasicLayout.hh"
 #include "log4cpp/Priority.hh"
 
-class BDLog {
+class TDLog {
 public:
-	BDLog();
-	virtual ~BDLog();
+	TDLog();
+	virtual ~TDLog();
 
 	log4cpp::Category& log();
 
@@ -31,6 +31,6 @@ private:
 	void setProperties();
 };
 
-#define LOG 			BDLog().log()
+#define LOG 			TDLog().log()
 
 #endif /* UTIL_BDLOG_H_ */

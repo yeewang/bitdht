@@ -81,10 +81,12 @@ public:
 #define MAX_STARTUP_TIME 10
 #define MAX_REFRESH_TIME 10
 
-#define BITDHT_MGR_QUERY_FAILURE		1
+#define BITDHT_MGR_QUERY_FAILURE			1
 #define BITDHT_MGR_QUERY_PEER_OFFLINE		2
 #define BITDHT_MGR_QUERY_PEER_UNREACHABLE	3
 #define BITDHT_MGR_QUERY_PEER_ONLINE		4
+#define BITDHT_MGR_QUERY_PEER_NEWCONN		5
+#define BITDHT_MGR_QUERY_PEER_REPLY_NEWCONN	6
 
 
 /*** NB: Nothing in here is protected by mutexes 
@@ -94,8 +96,8 @@ public:
 class bdNodeManager: public bdNode, public BitDhtInterface
 {
 public:
-	bdNodeManager(bdNodeId *id, std::string dhtVersion, std::string bootfile, bdDhtFunctions *fns);
-
+	bdNodeManager(bdNodeId *id, std::string dhtVersion, std::string bootfile,
+			bdDhtFunctions *fns, PacketCallback *packetCallback);
 
 	void iteration();
 
@@ -166,6 +168,5 @@ public:
 	virtual int dhtValueCallback(const bdNodeId *id, std::string key, uint32_t status);
 
 };
-
 
 #endif
