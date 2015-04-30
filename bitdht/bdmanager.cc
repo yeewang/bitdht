@@ -411,7 +411,7 @@ int bdNodeManager::checkStatus()
 
 	QueryStatus(queryStatus);
 
-	for(it = queryStatus.begin(); it != queryStatus.end(); it++)
+	for (it = queryStatus.begin(); it != queryStatus.end(); it++)
 	{
 		bool doPing = false;
 		bool doRemove = false;
@@ -523,9 +523,11 @@ int bdNodeManager::checkStatus()
 			{
 				/* status is unchanged */
 				doPing = false;
-				doCallback = false;
+				// always callback
+				doCallback = true;
+
 #ifdef DEBUG_MGR
-				LOG.info("bdNodeManager::checkStatus() Status unchanged for :%s  status: %d",
+				LOG.info("bdNodeManager::checkStatus() Status unchanged for :%s status: %d",
 						mFns->bdPrintNodeId(&(it->first)).c_str(), it->second.mStatus);
 #endif
 			}
@@ -574,13 +576,21 @@ int bdNodeManager::checkStatus()
 			LOG.info("bdNodeManager::checkStatus() Doing Callback: id: %s",
 					mFns->bdPrintNodeId(&(it->first)).c_str());
 #endif
-			if (it->second.mResults.size() > 0)
-			{
-				doPeerCallback(&(it->first), callbackStatus, true, &(it->second.mResults.front()).addr);
+
+			std::list<bdPeer> list;
+			if (getIdFromQuery(&(it->first), list, bdId::TUNNEL)) {
+				std::list<bdPeer>::iterator it;
+				for (it = list.begin(); it != list.end(); it++) {
+					doPeerCallback(&(*it), callbackStatus);
+				}
 			}
-			else {
-				doPeerCallback(&(it->first), callbackStatus, false, NULL);
-			}
+//			if (it->second.mResults.size() > 0)
+//			{
+//				doPeerCallback(&(it->first), callbackStatus, true, &(it->second.mResults.front()).addr);
+//			}
+//			else {
+//				doPeerCallback(&(it->first), callbackStatus, false, NULL);
+//			}
 		}
 	}
 	return 1;
@@ -718,7 +728,6 @@ int bdNodeManager::getDhtPeerAddress(const bdNodeId *id, struct sockaddr_in &fro
 		}
 	}
 	return 0;
-
 }
 
 int bdNodeManager::getDhtValue(const bdNodeId *id, std::string key, std::string & /*value*/)
@@ -796,19 +805,18 @@ void bdNodeManager::doNodeCallback(const bdId *id, uint32_t peerflags)
 	return;
 }
 
-void bdNodeManager::doPeerCallback(const bdNodeId *id, uint32_t status,
-		bool hasAddr, const struct sockaddr_in *addr)
+void bdNodeManager::doPeerCallback(const bdPeer *peer, uint32_t status)
 {
 #ifdef DEBUG_MGR
 	LOG.info("bdNodeManager::doPeerCallback()) %s status: %d",
-			mFns->bdPrintNodeId(id).c_str(), status);
+			mFns->bdPrintNodeId(&peer->mPeerId.id).c_str(), status);
 #endif
 
 	/* search list */
 	std::list<BitDhtCallback *>::iterator it;
 	for(it = mCallbacks.begin(); it != mCallbacks.end(); it++)
 	{
-		(*it)->dhtPeerCallback(id, status, hasAddr, addr);
+		(*it)->dhtPeerCallback(peer, status);
 	}
 	return;
 }

@@ -74,6 +74,17 @@ public:
 	int type;
 };
 
+class bdPeer
+{
+public:
+
+	bdId   mPeerId;
+	uint32_t mPeerFlags;
+	time_t mLastSendTime;
+	time_t mLastRecvTime;
+	time_t mFoundTime;     /* time stamp that peer was found */
+};
+
 #define BITDHT_LIKELY_SAME_NO			0x00000000
 #define BITDHT_LIKELY_SAME_YES			0x00000001
 #define BITDHT_LIKELY_SAME_PORT_CHANGED		0x00000002
@@ -153,8 +164,7 @@ public:
 	virtual int dhtNodeCallback(const bdId *  /*id*/, uint32_t /*peerflags*/)  { return 0; }
 
 	// must be implemented.
-	virtual int dhtPeerCallback(const bdNodeId *id, uint32_t status,
-			bool hasAddr, const struct sockaddr_in *addr) = 0;
+	virtual int dhtPeerCallback(const bdPeer *peer, uint32_t status) = 0;
 	virtual int dhtValueCallback(const bdNodeId *id, std::string key, uint32_t status) = 0;
 };
 

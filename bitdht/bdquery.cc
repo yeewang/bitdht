@@ -106,7 +106,7 @@ bool bdQuery::result(std::list<bdId> &answer)
 	return (i > 0);
 }
 
-bool bdQuery::matchResult(std::list<bdId> &idList, int typeMask)
+bool bdQuery::matchResult(std::list<bdPeer> &idList, int typeMask)
 {
 #ifdef DEBUG_QUERY
 	LOG.info("bdQuery::fullResult()");
@@ -115,15 +115,15 @@ bool bdQuery::matchResult(std::list<bdId> &idList, int typeMask)
 	int i = 0;
 	std::multimap<bdMetric, bdPeer>::iterator it;
 	for(it = mClosest.begin(); it != mClosest.end(); it++) {
-		if (it->second.mPeerId.id == mId /*&& (it->second.mPeerId.type & typeMask) != 0*/) {
+		if (it->second.mPeerId.id == mId && it->second.mPeerFlags != 0 /*&& (it->second.mPeerId.type & typeMask) != 0*/) {
 			i++;
-			idList.push_back(it->second.mPeerId);
+			idList.push_back(it->second);
 		}
 	}
 	for(it = mPotentialClosest.begin(); it != mPotentialClosest.end(); it++, i++) {
-		if (it->second.mPeerId.id == mId /*&& (it->second.mPeerId.type & typeMask) != 0*/) {
+		if (it->second.mPeerId.id == mId && it->second.mPeerFlags != 0 /*&& (it->second.mPeerId.type & typeMask) != 0*/) {
 			i++;
-			idList.push_back(it->second.mPeerId);
+			idList.push_back(it->second);
 		}
 	}
 	return (i > 0);

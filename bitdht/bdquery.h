@@ -44,7 +44,7 @@ public:
 
 	// get the answer.
 	bool	result(std::list<bdId> &answer);
-	bool 	matchResult(std::list<bdId> &idList, int type);
+	bool 	matchResult(std::list<bdPeer> &idList, int type);
 
 	// returning results get passed to all queries.
 	//void 	addNode(const bdId *id, int mode);

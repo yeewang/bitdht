@@ -134,8 +134,7 @@ private:
 
 
 	void 	doNodeCallback(const bdId *id, uint32_t peerflags);
-	void 	doPeerCallback(const bdNodeId *id, uint32_t status,
-				bool hasAddr, const struct sockaddr_in *addr);
+	void 	doPeerCallback(const bdPeer *peer, uint32_t status);
 	void 	doValueCallback(const bdNodeId *id, std::string key, uint32_t status);
 
 	int		status();

@@ -590,7 +590,7 @@ void bdNode::QueryStatus(std::map<bdNodeId, bdQueryStatus> &statusMap)
 	}
 }
 
-bool bdNode::getIdFromQuery(const bdNodeId *id, std::list<bdId> &idList, int type)
+bool bdNode::getIdFromQuery(const bdNodeId *id, std::list<bdPeer> &idList, int type)
 {
 	LOG.info("bdNode::getIdFromQuery(" + mFns->bdPrintNodeId(id) + ")\n");
 
@@ -1377,22 +1377,22 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 		break;
 	}
 	case BITDHT_MSG_TYPE_NEWCONN: {
-		std::list<bdId> list;
+		std::list<bdPeer> list;
 		if (getIdFromQuery(&id, list, bdId::TUNNEL)) {
-			std::list<bdId>::iterator it;
+			std::list<bdPeer>::iterator it;
 			for(it = list.begin(); it != list.end(); it++) {
-				msgin_newconn(&srcId, &(*it), &transId);
+				msgin_newconn(&srcId, &it->mPeerId, &transId);
 			}
 		}
 		break;
 	}
 
 	case BITDHT_MSG_TYPE_REPLY_NEWCONN: {
-		std::list<bdId> list;
+		std::list<bdPeer> list;
 		if (getIdFromQuery(&id, list, bdId::TUNNEL)) {
-			std::list<bdId>::iterator it;
+			std::list<bdPeer>::iterator it;
 			for(it = list.begin(); it != list.end(); it++) {
-				msgin_reply_newconn(&srcId,  &(*it), &transId);
+				msgin_reply_newconn(&srcId,  &it->mPeerId, &transId);
 			}
 		}
 		break;

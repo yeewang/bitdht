@@ -116,20 +116,6 @@ int operator==(const bdId &a, const bdId &b);
 
 //std::string bdConvertToPrintable(std::string input);
 
-class bdPeer
-{
-	public:
-
-	bdId   mPeerId;
-	uint32_t mPeerFlags;
-	time_t mLastSendTime;
-	time_t mLastRecvTime;
-	time_t mFoundTime;     /* time stamp that peer was found */
-};
-
-
-
-
 class bdBucket
 {
 	public:
