@@ -153,7 +153,8 @@ public:
 	virtual int dhtNodeCallback(const bdId *  /*id*/, uint32_t /*peerflags*/)  { return 0; }
 
 	// must be implemented.
-	virtual int dhtPeerCallback(const bdNodeId *id, uint32_t status) = 0;
+	virtual int dhtPeerCallback(const bdNodeId *id, uint32_t status,
+			bool hasAddr, const struct sockaddr_in *addr) = 0;
 	virtual int dhtValueCallback(const bdNodeId *id, std::string key, uint32_t status) = 0;
 };
 

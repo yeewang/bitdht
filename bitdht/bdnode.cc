@@ -174,7 +174,7 @@ void bdNode::iteration()
 	bdId id;
 	bdNodeId targetNodeId;
 	std::list<bdQuery>::iterator it;
-	std::list<bdId>::iterator bit;
+	//	std::list<bdId>::iterator bit;
 
 	/* process incoming msgs */
 	while(mIncomingMsgs.size() > 0)
@@ -315,6 +315,10 @@ void bdNode::iteration()
 
 			msgout_find_node(&id, &transId, &targetNodeId);
 
+			// invoke callback for this bdId
+			// mPacketCallback->onRecvCallback();
+
+
 #ifdef DEBUG_NODE_MSGS 
 			LOG.info("bdNode::iteration() Find Node Req for : %s searching for : %s",
 					mFns->bdPrintId(&id).c_str(),
@@ -392,7 +396,6 @@ void bdNode::doStats()
 	mLpfRecvReplyFindNode += (1.0 - LPF_FACTOR) * mCounterRecvReplyFindNode;	
 	mLpfRecvReplyQueryHash *= (LPF_FACTOR);  	
 	mLpfRecvReplyQueryHash += (1.0 - LPF_FACTOR) * mCounterRecvReplyQueryHash;	
-
 
 	resetCounters();
 }

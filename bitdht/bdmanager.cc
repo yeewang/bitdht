@@ -494,7 +494,7 @@ int bdNodeManager::checkStatus()
 			}
 		}
 
-		if (doRemove) 
+		if (doRemove)
 		{
 #ifdef DEBUG_MGR
 			LOG.info("bdNodeManager::checkStatus() Removing query: id: %s",
@@ -545,6 +545,8 @@ int bdNodeManager::checkStatus()
 				if (it->second.mResults.size() > 0)
 				{
 					pit->second.mDhtAddr = it->second.mResults.front().addr;
+
+					//doNodeCallback(&(it->second.mResults.front()), 0);
 				}
 				else
 				{
@@ -572,7 +574,13 @@ int bdNodeManager::checkStatus()
 			LOG.info("bdNodeManager::checkStatus() Doing Callback: id: %s",
 					mFns->bdPrintNodeId(&(it->first)).c_str());
 #endif
-			doPeerCallback(&(it->first), callbackStatus);
+			if (it->second.mResults.size() > 0)
+			{
+				doPeerCallback(&(it->first), callbackStatus, true, &(it->second.mResults.front()).addr);
+			}
+			else {
+				doPeerCallback(&(it->first), callbackStatus, false, NULL);
+			}
 		}
 	}
 	return 1;
@@ -788,7 +796,8 @@ void bdNodeManager::doNodeCallback(const bdId *id, uint32_t peerflags)
 	return;
 }
 
-void bdNodeManager::doPeerCallback(const bdNodeId *id, uint32_t status)
+void bdNodeManager::doPeerCallback(const bdNodeId *id, uint32_t status,
+		bool hasAddr, const struct sockaddr_in *addr)
 {
 #ifdef DEBUG_MGR
 	LOG.info("bdNodeManager::doPeerCallback()) %s status: %d",
@@ -799,7 +808,7 @@ void bdNodeManager::doPeerCallback(const bdNodeId *id, uint32_t status)
 	std::list<BitDhtCallback *>::iterator it;
 	for(it = mCallbacks.begin(); it != mCallbacks.end(); it++)
 	{
-		(*it)->dhtPeerCallback(id, status);
+		(*it)->dhtPeerCallback(id, status, hasAddr, addr);
 	}
 	return;
 }
@@ -818,8 +827,6 @@ void bdNodeManager::doValueCallback(const bdNodeId *id, std::string key, uint32_
 	std::list<BitDhtCallback *>::iterator it;
 	for(it = mCallbacks.begin(); it != mCallbacks.end(); it++)
 	{
-		(*it)->dhtPeerCallback(id, status);
-
 		// TODO:: by wangyi
 		(*it)->dhtValueCallback(id, key, status);
 	}
