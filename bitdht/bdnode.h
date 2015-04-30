@@ -112,7 +112,7 @@ public:
 	void addQuery(const bdNodeId *id, uint32_t qflags);
 	void clearQuery(const bdNodeId *id);
 	void QueryStatus(std::map<bdNodeId, bdQueryStatus> &statusMap);
-	bool getIdFromQuery(const bdNodeId *id, std::list<bdPeer> &idList, int mask);
+	bool getIdFromQuery(const bdNodeId *id, std::list<bdPeer> &idList);
 
 	void iterationOff();
 	void iteration();

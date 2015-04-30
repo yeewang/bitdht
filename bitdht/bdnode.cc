@@ -590,7 +590,7 @@ void bdNode::QueryStatus(std::map<bdNodeId, bdQueryStatus> &statusMap)
 	}
 }
 
-bool bdNode::getIdFromQuery(const bdNodeId *id, std::list<bdPeer> &idList, int type)
+bool bdNode::getIdFromQuery(const bdNodeId *id, std::list<bdPeer> &idList)
 {
 	LOG.info("bdNode::getIdFromQuery(" + mFns->bdPrintNodeId(id) + ")\n");
 
@@ -599,7 +599,7 @@ bool bdNode::getIdFromQuery(const bdNodeId *id, std::list<bdPeer> &idList, int t
 	for(it = mLocalQueries.begin(); it != mLocalQueries.end(); it++, i++)
 	{
 		if ((*it)->mId == *id) {
-			(*it)->matchResult(idList, type);
+			(*it)->matchResult(idList);
 			return true;
 		}
 	}
@@ -1377,19 +1377,33 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 		break;
 	}
 	case BITDHT_MSG_TYPE_NEWCONN: {
+//#ifdef DEBUG_NODE_MSGS
+		LOG.info("bdNode::recvPkt() NewConn from: %s",
+				mFns->bdPrintId(&srcId).c_str());
+//#endif
+
+		// it have not a dhtId!!!
+		msgin_newconn(&srcId, &srcId, &transId);
+		/*
 		std::list<bdPeer> list;
-		if (getIdFromQuery(&id, list, bdId::TUNNEL)) {
+		if (getIdFromQuery(&id, list)) {
 			std::list<bdPeer>::iterator it;
 			for(it = list.begin(); it != list.end(); it++) {
 				msgin_newconn(&srcId, &it->mPeerId, &transId);
 			}
 		}
+		*/
 		break;
 	}
 
 	case BITDHT_MSG_TYPE_REPLY_NEWCONN: {
+//#ifdef DEBUG_NODE_MSGS
+		LOG.info("bdNode::recvPkt() Reply NewConn from: %s",
+				mFns->bdPrintId(&srcId).c_str());
+//#endif
+
 		std::list<bdPeer> list;
-		if (getIdFromQuery(&id, list, bdId::TUNNEL)) {
+		if (getIdFromQuery(&id, list)) {
 			std::list<bdPeer>::iterator it;
 			for(it = list.begin(); it != list.end(); it++) {
 				msgin_reply_newconn(&srcId,  &it->mPeerId, &transId);
@@ -1444,7 +1458,7 @@ void bdNode::msgin_pong(bdId *id, bdToken *transId, bdToken *versionId)
 {
 #ifdef DEBUG_NODE_MSGIN
 	LOG.info("bdNode::msgin_pong() TransId: ";
-	bdPrintTransId(LOG << log4cpp::Priority::INFO, transId);
+	bdPrintTransId(transId);
 	LOG.info(" Version: TODO!"; // << version;
 	LOG.info(" To: ";
 	mFns->bdPrintId(LOG << log4cpp::Priority::INFO, id);

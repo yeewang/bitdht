@@ -62,21 +62,18 @@ class bdMetric: public bdNodeId {};
 class bdId
 {
 public:
-	enum { GENERAL = 0x01, TUNNEL = 0x02 };
-
 	bdId();
 	bdId(const bdNodeId &in_id, const struct sockaddr_in &in_addr);
-	bdId(const bdNodeId &in_id, const struct sockaddr_in &in_addr, int type);
 	bdId(const bdId &id);
 
 	struct sockaddr_in addr;
 	bdNodeId id;
-	int type;
 };
 
 class bdPeer
 {
 public:
+	bdPeer() : mPeerFlags(0), mLastSendTime(0), mLastRecvTime(0), mFoundTime(0) {};
 
 	bdId   mPeerId;
 	uint32_t mPeerFlags;

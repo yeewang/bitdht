@@ -278,8 +278,8 @@ void bdNodeManager::iteration()
 		uint32_t nodeSpaceSize = mNodeSpace.calcSpaceSize();
 
 #ifdef DEBUG_MGR
-#endif
 		LOG.info("bdNodeManager::iteration() Finding Oneself: NodeSpace Size:%d", nodeSpaceSize);
+#endif
 
 		if (nodeSpaceSize > TRANSITION_OP_SPACE_SIZE)
 		{
@@ -578,19 +578,12 @@ int bdNodeManager::checkStatus()
 #endif
 
 			std::list<bdPeer> list;
-			if (getIdFromQuery(&(it->first), list, bdId::TUNNEL)) {
+			if (getIdFromQuery(&(it->first), list)) {
 				std::list<bdPeer>::iterator it;
 				for (it = list.begin(); it != list.end(); it++) {
 					doPeerCallback(&(*it), callbackStatus);
 				}
 			}
-//			if (it->second.mResults.size() > 0)
-//			{
-//				doPeerCallback(&(it->first), callbackStatus, true, &(it->second.mResults.front()).addr);
-//			}
-//			else {
-//				doPeerCallback(&(it->first), callbackStatus, false, NULL);
-//			}
 		}
 	}
 	return 1;

@@ -71,8 +71,6 @@ void UdpTunnel::connectNode(const bdId *id)
 {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
-	startTunnel();
-
 	mTunnelManager->connectNode(id);
 }
 
@@ -106,7 +104,7 @@ int UdpTunnel::startTunnel()
 	return mTunnelManager->startTunnel();
 }
 
-int UdpTunnel:: stopTunnel()
+int UdpTunnel::stopTunnel()
 {
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
@@ -154,8 +152,10 @@ void UdpTunnel::run()
 		{
 			usleep(TICK_PAUSE_USEC);
 		}
-
-		mTunnelManager->iteration();
+		{
+			bdStackMutex stack(dhtMtx);
+			mTunnelManager->iteration();
+		}
 		sleep(1);
 	}
 }

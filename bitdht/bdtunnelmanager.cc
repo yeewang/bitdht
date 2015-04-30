@@ -56,6 +56,7 @@
  * #define DEBUG_MGR_PKT 1
  ***/
 
+#define DEBUG_MGR 1
 
 bdTunnelManager::bdTunnelManager(bdDhtFunctions *fns)
 : bdTunnelNode(fns)
@@ -121,7 +122,7 @@ void bdTunnelManager::connectNode(const bdId *id)
 	if (it != mTunnelPeers.end())
 	{
 #ifdef DEBUG_MGR
-		LOG.info("bdTunnelManager::connectNode() Found existing....");
+		LOG.info("bdTunnelManager::connectNode() Found existing (%d)....", mTunnelPeers.size());
 #endif
 		return;
 	}
@@ -144,7 +145,7 @@ void bdTunnelManager::connectNode(const bdId *id)
 void bdTunnelManager::disconnectNode(const bdId *id)
 {
 #ifdef DEBUG_MGR
-	LOG.info("bdTunnelManager::removeFindNode() %s",
+	LOG.info("bdTunnelManager::disconnectNode() %s",
 			mFns->bdPrintNodeId(&id->id).c_str());
 #endif
 	std::map<bdId, bdTunnelPeer>::iterator it;
@@ -181,9 +182,9 @@ void bdTunnelManager::iteration()
 		if (modeAge > MAX_STARTUP_TIME)
 		{
 #ifdef DEBUG_MGR
-			LOG.info("bdTunnelManager::iteration(): UNACTIVE -> STARTUP");
+			LOG.info("bdTunnelManager::iteration(): UNACTIVE -> STARTUP(%d)", mTunnelPeers.size());
 #endif
-			if (mTunnelPeers.size() > 0) {
+			if (!mTunnelPeers.empty()) {
 				mMode = BITDHT_TUN_MGR_STATE_NEWCONN;
 			}
 			mModeTS = now;
@@ -194,15 +195,17 @@ void bdTunnelManager::iteration()
 		if (modeAge > MAX_REFRESH_TIME)
 		{
 #ifdef DEBUG_MGR
-			LOG.info("bdTunnelManager::iteration(): STARTUP -> NEWCONN");
+			LOG.info("bdTunnelManager::iteration(): STARTUP -> NEWCONN(%d)", mTunnelPeers.size());
 #endif
-			mMode = BITDHT_TUN_MGR_STATE_OFF;
+			mMode = BITDHT_TUN_MGR_STATE_STARTUP;
 			mModeTS = now;
 
 			// make udp call
 			bdId id;
-			getPriorityPeer(&id);
-			addTunnel(&id);
+			std::map<bdId, bdTunnelPeer>::iterator it;
+			for (it = mTunnelPeers.begin(); it != mTunnelPeers.end(); it++) {
+				addTunnel(&(it->first));
+			}
 		}
 		break;
 
@@ -275,22 +278,4 @@ void bdTunnelManager::removeCallback(BitDhtCallback *cb)
 		return;
 	}
 	it = mCallbacks.erase(it);
-}
-
-bool bdTunnelManager::getPriorityPeer(bdId *id)
-{
-	std::map<bdId, bdTunnelPeer>::iterator it;
-
-	if (mTunnelPeers.size() > 0)
-	{
-#ifdef DEBUG_MGR
-		LOG.info("bdTunnelManager::getPriorityPeer() Found existing....");
-#endif
-		it = mTunnelPeers.begin();
-		*id = it->first;
-
-		return true;
-	}
-
-	return false;
 }

@@ -106,7 +106,7 @@ bool bdQuery::result(std::list<bdId> &answer)
 	return (i > 0);
 }
 
-bool bdQuery::matchResult(std::list<bdPeer> &idList, int typeMask)
+bool bdQuery::matchResult(std::list<bdPeer> &idList)
 {
 #ifdef DEBUG_QUERY
 	LOG.info("bdQuery::fullResult()");
@@ -115,13 +115,13 @@ bool bdQuery::matchResult(std::list<bdPeer> &idList, int typeMask)
 	int i = 0;
 	std::multimap<bdMetric, bdPeer>::iterator it;
 	for(it = mClosest.begin(); it != mClosest.end(); it++) {
-		if (it->second.mPeerId.id == mId && it->second.mPeerFlags != 0 /*&& (it->second.mPeerId.type & typeMask) != 0*/) {
+		if (it->second.mPeerId.id == mId /*&& it->second.mPeerFlags != 0 /*&& (it->second.mPeerId.type & typeMask) != 0*/) {
 			i++;
 			idList.push_back(it->second);
 		}
 	}
 	for(it = mPotentialClosest.begin(); it != mPotentialClosest.end(); it++, i++) {
-		if (it->second.mPeerId.id == mId && it->second.mPeerFlags != 0 /*&& (it->second.mPeerId.type & typeMask) != 0*/) {
+		if (it->second.mPeerId.id == mId /*&& it->second.mPeerFlags != 0 /*&& (it->second.mPeerId.type & typeMask) != 0*/) {
 			i++;
 			idList.push_back(it->second);
 		}
@@ -355,8 +355,8 @@ int bdQuery::addPeer(const bdId *id, uint32_t mode)
 #ifdef DEBUG_QUERY 
         	LOG.info("Dropping Peer that dont reply\n");
 #endif
-		bool removed = false;
-		for(it = mClosest.begin(); it != mClosest.end(); ++it)
+
+        for(it = mClosest.begin(); it != mClosest.end(); ++it)
 		{
 			time_t sendts = ts - it->second.mLastSendTime;
 			bool hasSent = (it->second.mLastSendTime != 0);
@@ -370,7 +370,6 @@ int bdQuery::addPeer(const bdId *id, uint32_t mode)
         			LOG.info("\n");
 #endif
 				mClosest.erase(it);
-				removed = true;
 				break ;
 			}
 		}

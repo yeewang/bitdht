@@ -93,14 +93,15 @@ void bdTunnelNode::iterationOff()
 
 void bdTunnelNode::iteration()
 {
-#ifdef DEBUG_NODE_MULTIPEER 
-	LOG.info("bdTunnelNode::iteration()");
-#endif
-	/* iterate through queries */
-
 	/* allow each query to send up to one query... until maxMsgs has been reached */
 	int numQueries = mTunnelRequests.size();
 	int i = 0;
+
+//#ifdef DEBUG_NODE_MULTIPEER
+	LOG.info("bdTunnelNode::iteration():%d", numQueries);
+//#endif
+
+	/* iterate through queries */
 	while(i < numQueries)
 	{
 		bdTunnelReq *query = mTunnelRequests.front();
@@ -112,12 +113,6 @@ void bdTunnelNode::iteration()
 		genNewTransId(&transId);
 
 		msgout_newconn(&query->mId, &transId);
-
-#ifdef DEBUG_NODE_MSGS
-		LOG.info("bdNode::iteration() Find Node Req for : %s searching for : %s",
-				mFns->bdPrintId(&id).c_str(),
-				mFns->bdPrintNodeId(&targetNodeId).c_str());
-#endif
 		i++;
 	}
 }
@@ -125,6 +120,13 @@ void bdTunnelNode::iteration()
 /************************************ Tunnel Details        *************************/
 void bdTunnelNode::addTunnel(const bdId *id)
 {
+	std::list<bdTunnelReq *>::iterator it;
+	for(it = mTunnelRequests.begin(); it != mTunnelRequests.end(); it++) {
+		if ((*it)->mId == *id) {
+			return;
+		}
+	}
+
 	bdTunnelReq *req = new bdTunnelReq(*id);
 	mTunnelRequests.push_back(req);
 }
@@ -208,7 +210,7 @@ void bdTunnelNode::msgout_newconn(bdId *dhtId, bdToken *transId)
 	// #ifdef DEBUG_NODE_MSGOUT
 	std::ostringstream ss;
 	bdPrintTransId(ss, transId);
-	LOG.info("bdTunnelNode::msgout_reply_newconn() TransId: %s To: %s",
+	LOG.info("bdTunnelNode::msgout_newconn() TransId: %s To: %s",
 			ss.str().c_str(), mFns->bdPrintId(dhtId).c_str());
 	// #endif
 

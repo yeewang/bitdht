@@ -51,8 +51,6 @@ public:
 
 	/******************* Internals *************************/
 
-	bool getPriorityPeer(bdId *id);
-
 private:
 	int		status();
 	int		checkStatus();

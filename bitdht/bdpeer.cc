@@ -47,15 +47,14 @@ void bdSockAddrInit(struct sockaddr_in *addr)
 	addr->sin_family = AF_INET;
 }
 
-bdId::bdId() : type(GENERAL)
+bdId::bdId()
 {
 	/* blank everything */
 	bdSockAddrInit(&addr);
 	memset(&id.data, 0, BITDHT_KEY_LEN);
 }
 
-bdId::bdId(const bdId &bd_id) :
-		type(GENERAL)
+bdId::bdId(const bdId &bd_id)
 {
 	/* this bit is to ensure the address is valid for windows / osx */
 	bdSockAddrInit(&addr);
@@ -68,8 +67,7 @@ bdId::bdId(const bdId &bd_id) :
 	}
 }
 
-bdId::bdId(const bdNodeId &in_id, const struct sockaddr_in &in_addr) :
-		type(GENERAL)
+bdId::bdId(const bdNodeId &in_id, const struct sockaddr_in &in_addr)
 {
 	/* this bit is to ensure the address is valid for windows / osx */
 	bdSockAddrInit(&addr);
@@ -81,20 +79,6 @@ bdId::bdId(const bdNodeId &in_id, const struct sockaddr_in &in_addr) :
 		id.data[i] = in_id.data[i];
 	}
 }
-
-bdId::bdId(const bdNodeId &in_id, const struct sockaddr_in &in_addr, int atype) :
-		type(atype)
-{
-	/* this bit is to ensure the address is valid for windows / osx */
-	bdSockAddrInit(&addr);
-	addr.sin_addr.s_addr = in_addr.sin_addr.s_addr;
-	addr.sin_port = in_addr.sin_port;
-
-	for(int i = 0; i < BITDHT_KEY_LEN; i++)
-	{
-		id.data[i] = in_id.data[i];
-	}
-};
 
 void bdZeroNodeId(bdNodeId *id)
 {
@@ -629,10 +613,10 @@ int bdSpace::add_peer(const bdId *id, uint32_t peerflags)
 		buck.entries.push_back(newPeer);
 
 #ifdef DEBUG_BD_SPACE
-#endif
 		/* useful debug */
 		LOG.info("bdSpace::add_peer() Added Bucket[%d] Entry: %s",
 				bucket, mFns->bdPrintId(id).c_str());
+#endif
 	}
 	return add;
 }

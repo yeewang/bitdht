@@ -217,7 +217,10 @@ void UdpBitDht::run()
 			usleep(TICK_PAUSE_USEC);
 		}
 
-		mBitDhtManager->iteration();
+		{
+			bdStackMutex stack(dhtMtx);
+			mBitDhtManager->iteration();
+		}
 		sleep(1);
 	}
 }
