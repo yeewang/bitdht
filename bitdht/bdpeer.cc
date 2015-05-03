@@ -43,6 +43,7 @@
 
 void bdSockAddrInit(struct sockaddr_in *addr)
 {
+	/* this bit is to ensure the address is valid for windows / osx */
 	memset(addr, 0, sizeof(struct sockaddr_in));
 	addr->sin_family = AF_INET;
 }
@@ -57,27 +58,14 @@ bdId::bdId()
 bdId::bdId(const bdId &bd_id)
 {
 	/* this bit is to ensure the address is valid for windows / osx */
-	bdSockAddrInit(&addr);
-	addr.sin_addr.s_addr = bd_id.addr.sin_addr.s_addr;
-	addr.sin_port = bd_id.addr.sin_port;
-
-	for(int i = 0; i < BITDHT_KEY_LEN; i++)
-	{
-		id.data[i] = bd_id.id.data[i];
-	}
+	addr = bd_id.addr;
+	id = bd_id.id;
 }
 
 bdId::bdId(const bdNodeId &in_id, const struct sockaddr_in &in_addr)
 {
-	/* this bit is to ensure the address is valid for windows / osx */
-	bdSockAddrInit(&addr);
-	addr.sin_addr.s_addr = in_addr.sin_addr.s_addr;
-	addr.sin_port = in_addr.sin_port;
-
-	for(int i = 0; i < BITDHT_KEY_LEN; i++)
-	{
-		id.data[i] = in_id.data[i];
-	}
+	addr = in_addr;
+	id = in_id;
 }
 
 void bdZeroNodeId(bdNodeId *id)
@@ -707,13 +695,13 @@ int     bdSpace::printDHT()
 		if (doPrint)
 		{
 			if (size) {
-				char buf[80];
+				char buf[200];
 				snprintf(buf, sizeof(buf), "Bucket %d: %d peers: ", i, size);
 				debug << buf;
 			}
 #ifdef BITDHT_DEBUG
 			else {
-				char buf[80];
+				char buf[200];
 				snprintf(buf, sizeof(buf), "Bucket %d: %d peers: ", i, size);
 				debug << buf;
 			}
@@ -724,7 +712,7 @@ int     bdSpace::printDHT()
 			if (size)
 			{
 				if (doPrint) {
-					char buf[80];
+					char buf[200];
 					snprintf(buf, sizeof(buf), "Estimated NetSize >> %llu", no_nets);
 					debug << buf;
 				}
@@ -733,7 +721,7 @@ int     bdSpace::printDHT()
 			{
 #ifdef BITDHT_DEBUG
 				if (doPrint) {
-					char buf[80];
+					char buf[200];
 					snprintf(buf, sizeof(buf), " Bucket = Net / >> %llu", no_nets);
 					debug << buf;
 				}
@@ -746,7 +734,7 @@ int     bdSpace::printDHT()
 			if (size)
 			{	
 				if (doPrint) {
-					char buf[80];
+					char buf[200];
 					snprintf(buf, sizeof(buf), "Estimated NetSize = %llu", no_peers);
 					debug << buf;
 				}
@@ -756,7 +744,7 @@ int     bdSpace::printDHT()
 
 #ifdef BITDHT_DEBUG
 				if (doPrint) {
-					char buf[80];
+					char buf[200];
 					snprintf(buf, sizeof(buf), " Bucket = Net / %llu\n", no_nets);
 					debug << buf;
 				}
@@ -775,7 +763,7 @@ int     bdSpace::printDHT()
 				sum += no_peers;
 				count++;	
 #ifdef BITDHT_DEBUG
-				char buf[80];
+				char buf[200];
 				snprintf(buf, sizeof(buf), "Est: %d: %llu => %llu / %d\n",
 					i, no_peers, sum, count);
 				debug << buf;
@@ -783,7 +771,7 @@ int     bdSpace::printDHT()
 			}
 		}
 
-		LOG.info(debug.str());
+		LOG.info(debug.str().c_str());
 	}
 	if (count == 0)
 	{

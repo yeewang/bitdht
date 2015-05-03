@@ -113,16 +113,24 @@ int bdTunnelManager::stateDht()
 
 void bdTunnelManager::connectNode(const bdId *id)
 {
-#ifdef DEBUG_MGR
+#if 0 //def DEBUG_MGR
 	LOG.info("bdTunnelManager::connectNode() " + mFns->bdPrintNodeId(&id->id));
+
+	std::map<bdId, bdTunnelPeer>::iterator it0;
+	for (it0 = mTunnelPeers.begin(); it0 != mTunnelPeers.end(); it0++) {
+		std::ostringstream ss;
+		bdStdPrintId(ss, &it0->first);
+		LOG.info("bdTunnelManager::connectNode():%s ", ss.str().c_str());
+	}
 #endif
 	/* check if exists already */
 	std::map<bdId, bdTunnelPeer>::iterator it;
 	it = mTunnelPeers.find(*id);
-	if (it != mTunnelPeers.end())
-	{
+	if (it != mTunnelPeers.end()) {
 #ifdef DEBUG_MGR
-		LOG.info("bdTunnelManager::connectNode() Found existing (%d)....", mTunnelPeers.size());
+		std::ostringstream ss;
+		bdStdPrintId(ss, id);
+		LOG.info("bdTunnelManager::connectNode() Found existing (total %d):%s....", mTunnelPeers.size(), ss.str().c_str());
 #endif
 		return;
 	}
@@ -131,13 +139,14 @@ void bdTunnelManager::connectNode(const bdId *id)
 	bdTunnelPeer peer;
 	peer.mId = (*id);
 	peer.mStatus = bdTunnelPeer::CONNECTING;
-
 	peer.mTunnelAddr.sin_addr.s_addr = 0;
 	peer.mTunnelAddr.sin_port = 0;
-
 	mTunnelPeers[*id] = peer;
+
 #ifdef DEBUG_MGR
-	LOG.info("bdTunnelManager::connectNode() Added QueryPeer as READY....");
+	std::ostringstream ss;
+	bdStdPrintId(ss, id);
+	LOG.info("bdTunnelManager::connectNode() Added QueryPeer as READY (total %d)...:%s....", mTunnelPeers.size(), ss.str().c_str());
 #endif
 	return;
 }

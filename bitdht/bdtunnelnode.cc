@@ -97,13 +97,16 @@ void bdTunnelNode::iteration()
 	int numQueries = mTunnelRequests.size();
 	int i = 0;
 
-//#ifdef DEBUG_NODE_MULTIPEER
+#ifdef DEBUG_NODE_MULTIPEER
 	LOG.info("bdTunnelNode::iteration():%d", numQueries);
-//#endif
+#endif
 
 	/* iterate through queries */
 	while(i < numQueries)
 	{
+#if 1//def DEBUG_NODE_MULTIPEER
+		LOG.info("bdTunnelNode::iteration():num %d, index.%d", numQueries, i);
+#endif
 		bdTunnelReq *query = mTunnelRequests.front();
 		mTunnelRequests.pop_front();
 		mTunnelRequests.push_back(query);
@@ -123,10 +126,15 @@ void bdTunnelNode::addTunnel(const bdId *id)
 	std::list<bdTunnelReq *>::iterator it;
 	for(it = mTunnelRequests.begin(); it != mTunnelRequests.end(); it++) {
 		if ((*it)->mId == *id) {
+//#ifdef DEBUG_NODE_MULTIPEER
+			LOG.info("bdTunnelNode::addTunnel(): skip");
+//#endif
 			return;
 		}
 	}
-
+//#ifdef DEBUG_NODE_MULTIPEER
+	LOG.info("bdTunnelNode::addTunnel(): add");
+//#endif
 	bdTunnelReq *req = new bdTunnelReq(*id);
 	mTunnelRequests.push_back(req);
 }
@@ -283,7 +291,7 @@ void bdTunnelNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 
 	/* find message type */
 	uint32_t beType = beMsgType(node);
-	bool     beQuery = (BE_Y_Q == beMsgGetY(node));
+	bool beQuery = (BE_Y_Q == beMsgGetY(node));
 
 	if (!beType)
 	{

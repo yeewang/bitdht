@@ -28,6 +28,7 @@ TDLog::~TDLog()
 
 void TDLog::init()
 {
+#if 0
 	log4cpp::Appender *appender1 = new log4cpp::OstreamAppender("console", &std::cout);
 	appender1->setLayout(new log4cpp::BasicLayout());
 
@@ -40,12 +41,15 @@ void TDLog::init()
 
 	log4cpp::Category& sub1 = log4cpp::Category::getInstance(std::string("sub1"));
 	sub1.addAppender(appender2);
+#endif
 }
 
 void TDLog::setProperties()
 {
+#if 0
 	std::string initFileName = "log4cpp.properties";
 	log4cpp::PropertyConfigurator::configure(initFileName);
+#endif
 }
 
 log4cpp::Category& TDLog::log()
