@@ -612,7 +612,7 @@ int bdSpace::add_peer(const bdId *id, uint32_t peerflags)
 /* print tables.
  */
 
-int     bdSpace::printDHT()
+int bdSpace::printDHT()
 {
 	std::map<bdMetric, bdId> closest;
 	std::map<bdMetric, bdId>::iterator mit;
@@ -661,7 +661,6 @@ int     bdSpace::printDHT()
 	i = 0;
 	for(it = buckets.begin(); it != buckets.end(); it++, i++)
 	{
-		std::ostringstream debug;
 		int size = it->entries.size();
 		int shift = BITDHT_KEY_BITLEN - i;
 		bool toBig = false;
@@ -695,15 +694,11 @@ int     bdSpace::printDHT()
 		if (doPrint)
 		{
 			if (size) {
-				char buf[200];
-				snprintf(buf, sizeof(buf), "Bucket %d: %d peers: ", i, size);
-				debug << buf;
+				LOG.info("Bucket %d: %d peers: ", i, size);
 			}
 #ifdef BITDHT_DEBUG
 			else {
-				char buf[200];
-				snprintf(buf, sizeof(buf), "Bucket %d: %d peers: ", i, size);
-				debug << buf;
+				LOG.info("Bucket %d: %d peers: ", i, size);
 			}
 #endif
 		}
@@ -712,18 +707,14 @@ int     bdSpace::printDHT()
 			if (size)
 			{
 				if (doPrint) {
-					char buf[200];
-					snprintf(buf, sizeof(buf), "Estimated NetSize >> %llu", no_nets);
-					debug << buf;
+					LOG.info("Estimated NetSize >> %llu", no_nets);
 				}
 			}
 			else
 			{
 #ifdef BITDHT_DEBUG
 				if (doPrint) {
-					char buf[200];
-					snprintf(buf, sizeof(buf), " Bucket = Net / >> %llu", no_nets);
-					debug << buf;
+					LOG.info(" Bucket = Net / >> %llu", no_nets);
 				}
 #endif
 			}
@@ -734,9 +725,7 @@ int     bdSpace::printDHT()
 			if (size)
 			{	
 				if (doPrint) {
-					char buf[200];
-					snprintf(buf, sizeof(buf), "Estimated NetSize = %llu", no_peers);
-					debug << buf;
+					LOG.info("Estimated NetSize = %llu", no_peers);
 				}
 			}
 			else
@@ -744,9 +733,7 @@ int     bdSpace::printDHT()
 
 #ifdef BITDHT_DEBUG
 				if (doPrint) {
-					char buf[200];
-					snprintf(buf, sizeof(buf), " Bucket = Net / %llu\n", no_nets);
-					debug << buf;
+					LOG.info(" Bucket = Net / %llu\n", no_nets);
 				}
 #endif
 			}
@@ -763,15 +750,11 @@ int     bdSpace::printDHT()
 				sum += no_peers;
 				count++;	
 #ifdef BITDHT_DEBUG
-				char buf[200];
-				snprintf(buf, sizeof(buf), "Est: %d: %llu => %llu / %d\n",
-					i, no_peers, sum, count);
-				debug << buf;
+				LOG.info("Est: %d: %llu => %llu / %d",
+						i, no_peers, sum, count);
 #endif
 			}
 		}
-
-		LOG.info(debug.str().c_str());
 	}
 	if (count == 0)
 	{

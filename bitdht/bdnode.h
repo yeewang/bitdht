@@ -145,7 +145,7 @@ public:
 			uint32_t port, bdToken *token);
 	void msgout_reply_post(bdId *id, bdToken *transId);
 
-	void msgout_newconn(bdId *tunnelId, bdId *dhtId, bdToken *transId); // this function defines in tunnel class
+	void msgout_newconn(bdId *dhtId, bdToken *transId); // this function defines in tunnel class
 	void msgout_reply_newconn(bdId *tunnelId, bdId *dhtId, bdToken *transId);
 
 	/* input functions (once mesg is parsed) */

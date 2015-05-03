@@ -37,6 +37,7 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include <atomic>
 
 
 #define BITDHT_QUERY_START_PEERS    10
@@ -537,7 +538,7 @@ void bdTunnelNode::genNewToken(bdToken *token)
 	token->len = len;
 }
 
-extern uint32_t transIdCounter;
+extern std::atomic_ulong transIdCounter;
 
 void bdTunnelNode::genNewTransId(bdToken *token)
 {

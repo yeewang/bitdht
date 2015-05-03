@@ -113,24 +113,22 @@ int bdTunnelManager::stateDht()
 
 void bdTunnelManager::connectNode(const bdId *id)
 {
-#if 0 //def DEBUG_MGR
+#if 1 //def DEBUG_MGR
 	LOG.info("bdTunnelManager::connectNode() " + mFns->bdPrintNodeId(&id->id));
 
 	std::map<bdId, bdTunnelPeer>::iterator it0;
 	for (it0 = mTunnelPeers.begin(); it0 != mTunnelPeers.end(); it0++) {
 		std::ostringstream ss;
 		bdStdPrintId(ss, &it0->first);
-		LOG.info("bdTunnelManager::connectNode():%s ", ss.str().c_str());
+		LOG.info("bdTunnelManager::connectNode(%s)", ss.str().c_str());
 	}
 #endif
 	/* check if exists already */
-	std::map<bdId, bdTunnelPeer>::iterator it;
-	it = mTunnelPeers.find(*id);
-	if (it != mTunnelPeers.end()) {
+	if (mTunnelPeers.count(*id) > 0) {
 #ifdef DEBUG_MGR
 		std::ostringstream ss;
 		bdStdPrintId(ss, id);
-		LOG.info("bdTunnelManager::connectNode() Found existing (total %d):%s....", mTunnelPeers.size(), ss.str().c_str());
+		LOG.info("bdTunnelManager::connectNode() Found existing:%s....", ss.str().c_str());
 #endif
 		return;
 	}
@@ -146,7 +144,8 @@ void bdTunnelManager::connectNode(const bdId *id)
 #ifdef DEBUG_MGR
 	std::ostringstream ss;
 	bdStdPrintId(ss, id);
-	LOG.info("bdTunnelManager::connectNode() Added QueryPeer as READY (total %d)...:%s....", mTunnelPeers.size(), ss.str().c_str());
+	LOG.info("bdTunnelManager::connectNode() Added QueryPeer as READY (total %d)...:%s....",
+			mTunnelPeers.size(), ss.str().c_str());
 #endif
 	return;
 }

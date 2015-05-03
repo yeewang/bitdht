@@ -37,6 +37,7 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include <atomic>
 
 
 #define BITDHT_QUERY_START_PEERS    10
@@ -282,6 +283,9 @@ void bdNode::iteration()
 			genNewTransId(&transId);
 			//registerOutgoingMsg(&pid, &transId, BITDHT_MSG_TYPE_PING);
 			msgout_ping(&pid, &transId);
+
+			genNewTransId(&transId);
+			msgout_newconn(&pid, &transId);
 
 			sentMsgs++;
 			sentPings++;
@@ -592,7 +596,9 @@ void bdNode::QueryStatus(std::map<bdNodeId, bdQueryStatus> &statusMap)
 
 bool bdNode::getIdFromQuery(const bdNodeId *id, std::list<bdPeer> &idList)
 {
+#ifdef DEBUG_NODE_MSGS
 	LOG.info("bdNode::getIdFromQuery(" + mFns->bdPrintNodeId(id) + ")\n");
+#endif
 
 	int i = 0;
 	std::list<bdQuery *>::iterator it;
@@ -688,10 +694,6 @@ void bdNode::processRemoteQuery()
 		mRemoteQueries.pop_front();
 	}
 }
-
-
-
-
 
 /************************************ Message Buffering ****************************/
 
@@ -982,6 +984,23 @@ void bdNode::msgout_reply_post(bdId *id, bdToken *transId)
 	sendPkt(msg, blen, id->addr);
 }
 
+void bdNode::msgout_newconn(bdId *dhtId, bdToken *transId)
+{
+	// #ifdef DEBUG_NODE_MSGOUT
+	std::ostringstream ss;
+	bdPrintTransId(ss, transId);
+	LOG.info("bdTunnelNode::msgout_newconn() TransId: %s To: %s",
+			ss.str().c_str(), mFns->bdPrintId(dhtId).c_str());
+	// #endif
+
+	/* create string */
+	char msg[10240];
+	int avail = 10240;
+
+	int blen = bitdht_new_conn_msg(transId, &(mOwnId), msg, avail-1);
+	sendPkt(msg, blen, dhtId->addr);
+}
+
 void bdNode::msgout_reply_newconn(bdId *tunnelId, bdId *dhtId, bdToken *transId)
 {
 	// #ifdef DEBUG_NODE_MSGOUT
@@ -1023,25 +1042,28 @@ void bdNode::sendPkt(char *msg, int len, struct sockaddr_in addr)
 void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 {
 #ifdef DEBUG_NODE_PARSE
-	LOG.info("bdNode::recvPkt() msg[" << len << "] = ";
+	std::ostringstream ss;
+	char buf[100];
+	snprintf(buf, sizeof(buf) - 1, "bdNode::recvPkt() msg[%d] = ", len);
+	ss << buf;
 	for(int i = 0; i < len; i++)
 	{
 		if ((msg[i] > 31) && (msg[i] < 127))
 		{
-			LOG.info(msg[i];
+			ss << (char)msg[i];
 		}
 		else
 		{
-			LOG.info("[" << (int) msg[i] << "]";
+			ss << "[" << (int) msg[i] << "]";
 		}
 	}
-	LOG.info(std::endl;
+	LOG.info(ss.str().c_str());
 #endif
 
 	/* convert to a be_node */
 	be_node *node = be_decoden(msg, len);
 	if (!node)
-	{
+	{LOG.info("bdNode::recvPkt() Failure to decode. Dropping Msg");
 		/* invalid decode */
 #ifdef DEBUG_NODE_PARSE
 		LOG.info("bdNode::recvPkt() Failure to decode. Dropping Msg");
@@ -1747,7 +1769,7 @@ void bdNode::genNewToken(bdToken *token)
 	token->len = len;
 }
 
-uint32_t transIdCounter = 0;
+std::atomic_ulong transIdCounter(0);
 void bdNode::genNewTransId(bdToken *token)
 {
 	/* generate message, send to udp */
