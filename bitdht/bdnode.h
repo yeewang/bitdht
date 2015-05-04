@@ -194,7 +194,6 @@ protected:
 	bdSpace mNodeSpace;
 
 private:
-
 	bdStore mStore;
 	std::string mDhtVersion;
 
@@ -207,8 +206,8 @@ private:
 
 	std::list<bdQuery *> mLocalQueries;
 	std::list<bdRemoteQuery> mRemoteQueries;
-
 	std::list<bdId> mPotentialPeers;
+//	std::list<bdId> mArpPeers;
 
 	std::list<bdNodeNetMsg *> mOutgoingMsgs;
 	std::list<bdNodeNetMsg *> mIncomingMsgs;

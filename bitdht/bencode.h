@@ -74,7 +74,6 @@ extern be_node *be_create_str(const char *str);
 extern be_node *be_create_str_wlen(const char *str, int len); /* not including \0 */
 extern be_node *be_create_dict();
 
-
 #ifdef __cplusplus
 }
 #endif

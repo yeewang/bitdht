@@ -838,10 +838,8 @@ void bdNodeManager::doValueCallback(const bdNodeId *id, std::string key, uint32_
 int  bdNodeManager::isBitDhtPacket(char *data, int size, struct sockaddr_in & from)
 {
 #ifdef DEBUG_MGR_PKT
-	LOG.info("bdNodeManager::isBitDhtPacket() *******************************";
-	LOG.info(" from " << inet_ntoa(from.sin_addr);
-	LOG.info(":" << ntohs(from.sin_port);
-	LOG << std::endl;
+	LOG.info("bdNodeManager::isBitDhtPacket() ******************************* from %s:%d",
+			inet_ntoa(from.sin_addr), ntohs(from.sin_port));
 	{
 		/* print the fucker... only way to catch bad ones */
 		std::ostringstream out;

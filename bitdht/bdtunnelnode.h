@@ -41,7 +41,6 @@
 class bdTunnelNodeNetMsg
 {
 public:
-
 	bdTunnelNodeNetMsg(char *data, int size, struct sockaddr_in *addr);
 	~bdTunnelNodeNetMsg();
 
@@ -50,7 +49,6 @@ public:
 	char *data;
 	int mSize;
 	struct sockaddr_in addr;
-
 };
 
 class bdTunnelReq {
@@ -71,7 +69,6 @@ public:
 class bdTunnelNode
 {
 public:
-
 	bdTunnelNode(bdDhtFunctions *fns);
 
 	/* startup / shutdown node */
@@ -90,12 +87,12 @@ public:
 	void iteration();
 
 	/* interaction with outside world */
-	int 	outgoingMsg(struct sockaddr_in *addr, char *msg, int *len);
-	void 	incomingMsg(struct sockaddr_in *addr, char *msg, int len);
+	int outgoingMsg(struct sockaddr_in *addr, char *msg, int *len);
+	void incomingMsg(struct sockaddr_in *addr, char *msg, int len);
 
 	/* internal interaction with network */
-	void	sendPkt(char *msg, int len, struct sockaddr_in addr);
-	void	recvPkt(char *msg, int len, struct sockaddr_in addr);
+	void sendPkt(char *msg, int len, struct sockaddr_in addr);
+	void recvPkt(char *msg, int len, struct sockaddr_in addr);
 
 	/* output functions (send msg) */
 	void msgout_newconn(bdId *dhtId, bdToken *transId);
@@ -116,13 +113,10 @@ public:
 protected:
 	bdNodeId 	mOwnId;
 	bdId 		mLikelyOwnId; // Try to workout own id address.
-	bdNodeId 	mPeerId; // For to udp call
 
 private:
 	bdDhtFunctions *mFns;
-
 	std::list<bdTunnelReq *> mTunnelRequests;
-
 	std::list<bdTunnelNodeNetMsg *> mOutgoingMsgs;
 };
 

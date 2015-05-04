@@ -40,9 +40,9 @@
 #include <atomic>
 
 
-#define BITDHT_QUERY_START_PEERS    10
-#define BITDHT_QUERY_NEIGHBOUR_PEERS    8
-#define BITDHT_MAX_REMOTE_QUERY_AGE	10
+#define BITDHT_QUERY_START_PEERS			10
+#define BITDHT_QUERY_NEIGHBOUR_PEERS		8
+#define BITDHT_MAX_REMOTE_QUERY_AGE			10
 
 /****
  * #define USE_HISTORY	1
@@ -60,8 +60,7 @@
 // #define DEBUG_NODE_MSGS 1
 
 
-bdTunnelNode::bdTunnelNode(bdDhtFunctions *fns)
-: mFns(fns)
+bdTunnelNode::bdTunnelNode(bdDhtFunctions *fns) : mFns(fns)
 {
 }
 

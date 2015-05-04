@@ -596,7 +596,3 @@ int be_add_list(be_node *list, be_node *node)
 
 	return 1;
 }
-
-
-
-

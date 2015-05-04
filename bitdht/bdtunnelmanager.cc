@@ -273,7 +273,6 @@ void bdTunnelManager::addCallback(BitDhtCallback *cb)
 
 void bdTunnelManager::removeCallback(BitDhtCallback *cb)
 {
-
 #ifdef DEBUG_MGR
 	LOG.info("bdTunnelManager::removeCallback()");
 #endif

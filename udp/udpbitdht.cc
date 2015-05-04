@@ -39,6 +39,7 @@
 #endif
 #include <string.h>
 #include "util/bdnet.h"
+#include "util/bdlog.h"
 
 /*
  * #define DEBUG_UDP_BITDHT 1
@@ -186,10 +187,12 @@ int UdpBitDht::recvPkt(void *data, int size, struct sockaddr_in &from)
 	/* pass onto bitdht */
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
+	LOG.info("UdpBitDht::recvPkt() ******************************* Address:%s:%d",
+			inet_ntoa(from.sin_addr), htons(from.sin_port));
+
 	/* check packet suitability */
 	if (mBitDhtManager->isBitDhtPacket((char *) data, size, from))
 	{
-
 		mBitDhtManager->incomingMsg(&from, (char *) data, size);
 		return 1;
 	}
@@ -238,8 +241,7 @@ int UdpBitDht::tick()
 	while((i < MAX_MSG_PER_TICK) && (mBitDhtManager->outgoingMsg(&toAddr, data, &size)))
 	{
 #ifdef DEBUG_UDP_BITDHT 
-		LOG << log4cpp::Priority::INFO << "UdpBitDht::tick() outgoing msg(" << size << ") to " << toAddr;
-		LOG << log4cpp::Priority::INFO << std::endl;
+		LOG.info("UdpBitDht::tick() outgoing msg(%d) to %s", size, toAddr);
 #endif
 
 		sendPkt(data, size, toAddr, BITDHT_TTL);

@@ -124,8 +124,7 @@ void bdNode::updateStore()
 
 void bdNode::printState()
 {
-	LOG.info("bdNode::printState() for Peer: " +
-			mFns->bdPrintNodeId(&mOwnId));
+	LOG.info("bdNode::printState() for Peer: %s", mFns->bdPrintNodeId(&mOwnId).c_str());
 	mNodeSpace.printDHT();
 
 	printQueries();
@@ -178,7 +177,7 @@ void bdNode::iteration()
 	//	std::list<bdId>::iterator bit;
 
 	/* process incoming msgs */
-	while(mIncomingMsgs.size() > 0)
+	while (mIncomingMsgs.size() > 0)
 	{
 		bdNodeNetMsg *msg = mIncomingMsgs.front();
 		mIncomingMsgs.pop_front();
@@ -260,7 +259,6 @@ void bdNode::iteration()
 		bdId pid = mPotentialPeers.front();	
 		mPotentialPeers.pop_front();
 
-
 		/* don't send too many queries ... check history first */
 #ifdef USE_HISTORY
 		if (mHistory.validPeer(&pid))
@@ -272,7 +270,6 @@ void bdNode::iteration()
 			mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &pid);
 			LOG.info(std::endl;
 #endif
-
 		}
 #endif
 
@@ -481,20 +478,17 @@ void bdNode::addPotentialPeer(bdId *id)
 	mPotentialPeers.push_back(*id);
 }
 
-
-
 // virtual so manager can do callback.
 // peer flags defined in bdiface.h
 void bdNode::addPeer(const bdId *id, uint32_t peerflags)
 {
 #ifdef DEBUG_NODE_ACTIONS 
-	LOG.info("bdNode::addPeer(%s)",
-			mFns->bdPrintId(id).c_str());
+	LOG.info("bdNode::addPeer(%s)", mFns->bdPrintId(id).c_str());
 #endif
 
 	/* iterate through queries */
 	std::list<bdQuery *>::iterator it;
-	for(it = mLocalQueries.begin(); it != mLocalQueries.end(); it++)
+	for (it = mLocalQueries.begin(); it != mLocalQueries.end(); it++)
 	{
 		(*it)->addPeer(id, peerflags);
 	}
@@ -507,7 +501,6 @@ void bdNode::addPeer(const bdId *id, uint32_t peerflags)
 	peer.mLastRecvTime = time(NULL);
 	mStore.addStore(&peer);
 }
-
 
 #if 0
 // virtual so manager can do callback.
@@ -678,9 +671,6 @@ void bdNode::processRemoteQuery()
 				break;
 			}
 			}
-
-
-
 		}
 		else
 		{
@@ -794,7 +784,6 @@ void bdNode::msgout_pong(bdId *id, bdToken *transId)
 	int blen = bitdht_response_ping_msg(transId, &(mOwnId), &vid, msg, avail-1);
 
 	sendPkt(msg, blen, id->addr);
-
 }
 
 
@@ -989,7 +978,7 @@ void bdNode::msgout_newconn(bdId *dhtId, bdToken *transId)
 	// #ifdef DEBUG_NODE_MSGOUT
 	std::ostringstream ss;
 	bdPrintTransId(ss, transId);
-	LOG.info("bdTunnelNode::msgout_newconn() TransId: %s To: %s",
+	LOG.info("bdNode::msgout_newconn() TransId: %s To: %s",
 			ss.str().c_str(), mFns->bdPrintId(dhtId).c_str());
 	// #endif
 

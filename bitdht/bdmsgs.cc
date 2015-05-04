@@ -512,6 +512,51 @@ int bitdht_reply_new_conn_msg(bdToken *tid, bdNodeId *id, char *msg, bool starte
 	return blen;
 }
 
+/*
+Response = {"t":"aa", "y":"r", "n":"y", "r": {"id":"mnopqrstuvwxyz123456"}}
+bencoded = d1:rd2:id20:mnopqrstuvwxyz123456e1:t2:aa1:y1:re
+ */
+int bitdht_reply_new_conn_msg(bdToken *tid, bdNodeId *id, bdNodeId *peerId,
+		sockaddr_in *peerAddr, char *msg, bool started, int avail)
+{
+#ifdef DEBUG_MSGS
+	LOG.info("bitdht_reply_conn_msg()\n");
+#endif
+
+	be_node *dict = be_create_dict();
+
+	be_node *iddict = be_create_dict();
+	be_node *idnode = be_create_str_wlen((char *) id->data, BITDHT_KEY_LEN);
+
+	be_node *tidnode = be_create_str_wlen((char *) tid->data, tid->len);
+	be_node *yqrnode = be_create_str("r");
+
+	be_node *nqrnode = be_create_str(started ? "y" : "n");
+	be_node *vpnnode = be_create_str("hello");
+	be_node *pidnode = be_create_str_wlen((char *) peerId->data, BITDHT_KEY_LEN);
+	be_node *ipnode = be_create_str(encodeCompactPeerId(peerAddr).c_str());
+
+	be_add_keypair(iddict, "id", idnode);
+	be_add_keypair(iddict, "newconn", vpnnode);
+	be_add_keypair(iddict, "pid", pidnode);
+	be_add_keypair(iddict, "ip", ipnode);
+	be_add_keypair(dict, "r", iddict);
+
+	be_add_keypair(dict, "t", tidnode);
+	be_add_keypair(dict, "y", yqrnode);
+	be_add_keypair(dict, "n", nqrnode);
+
+#ifdef DEBUG_MSG_DUMP
+	/* dump answer */
+	be_dump(dict);
+#endif
+
+	int blen = be_encode(dict, msg, avail);
+	be_free(dict);
+
+	return blen;
+}
+
 /************************ Parsing Messages *********************
  *
  */

@@ -58,13 +58,13 @@ static const int UDP_DEF_TTL = 64;
 
 class   udpPacket
 {
-	public:
+public:
 	udpPacket(struct sockaddr_in *addr, void *dta, int dlen)
-	:raddr(*addr), len(dlen)
-	{
+:raddr(*addr), len(dlen)
+{
 		data = malloc(len);
 		memcpy(data, dta, len);
-	}
+}
 
 	~udpPacket()
 	{
@@ -90,7 +90,7 @@ std::ostream &operator<<(std::ostream &out, struct sockaddr_in &addr)
 }
 
 bool operator==(const struct sockaddr_in &addr, const struct sockaddr_in &addr2)
-{
+		{
 	if (addr.sin_family != addr2.sin_family)
 		return false;
 	if (addr.sin_addr.s_addr != addr2.sin_addr.s_addr)
@@ -98,7 +98,7 @@ bool operator==(const struct sockaddr_in &addr, const struct sockaddr_in &addr2)
 	if (addr.sin_port != addr2.sin_port)
 		return false;
 	return true;
-}
+		}
 
 
 bool operator<(const struct sockaddr_in &addr, const struct sockaddr_in &addr2)
@@ -140,13 +140,13 @@ std::string printPktOffset(unsigned int offset, void *d, unsigned int size)
 	unsigned int j = offset % 16;
 	if (j != 0)
 	{
-	  out << std::endl;
-	  out << std::hex << std::setw(6) << (unsigned int) offset - j;
-	  out << ": ";
-	  for(unsigned int i = 0; i < j; i++)
-	  {
-		out << "xx ";
-	  }
+		out << std::endl;
+		out << std::hex << std::setw(6) << (unsigned int) offset - j;
+		out << ": ";
+		for(unsigned int i = 0; i < j; i++)
+		{
+			out << "xx ";
+		}
 	}
 	for(unsigned int i = offset; i < offset + size; i++)
 	{
@@ -166,7 +166,7 @@ std::string printPktOffset(unsigned int offset, void *d, unsigned int size)
 
 
 UdpLayer::UdpLayer(UdpReceiver *udpr, struct sockaddr_in &local)
-	:recv(udpr), laddr(local), errorState(0), ttl(UDP_DEF_TTL)
+:recv(udpr), laddr(local), errorState(0), ttl(UDP_DEF_TTL)
 {
 	openSocket();
 	return;
@@ -229,7 +229,7 @@ int UdpLayer::closeSocket()
 
 	if (sockfd > 0)
 	{
-       		bdnet_close(sockfd);
+		bdnet_close(sockfd);
 	}
 
 	sockMtx.unlock(); /******** UNLOCK MUTEX *********/
@@ -247,13 +247,13 @@ void UdpLayer::recv_loop()
 	int maxsize = 16000;
 	void *inbuf = malloc(maxsize);
 
-        int status;
-        struct timeval timeout;
+	int status;
+	struct timeval timeout;
 
 	while(1)
 	{
-                fd_set rset;
-                for(;;) 
+		fd_set rset;
+		for(;;)
 		{
 			/* check if we need to stop */
 			bool toStop = false;
@@ -261,7 +261,7 @@ void UdpLayer::recv_loop()
 				bdStackMutex stack(sockMtx);   /********** LOCK MUTEX *********/
 				toStop = stopThread;
 			}
-			
+
 			if (toStop)
 			{
 #ifdef DEBUG_UDP_LAYER
@@ -270,22 +270,22 @@ void UdpLayer::recv_loop()
 				stop();
 			}
 
-                        FD_ZERO(&rset);
-                        FD_SET(sockfd, &rset);
-                        timeout.tv_sec = 0;
-                        timeout.tv_usec = 500000;       /* 500 ms timeout */
-                        status = select(sockfd+1, &rset, NULL, NULL, &timeout);
-                        if (status > 0)
+			FD_ZERO(&rset);
+			FD_SET(sockfd, &rset);
+			timeout.tv_sec = 0;
+			timeout.tv_usec = 500000;       /* 500 ms timeout */
+			status = select(sockfd+1, &rset, NULL, NULL, &timeout);
+			if (status > 0)
 			{
-                                break;  /* data available, go read it */
-                        } 
+				break;  /* data available, go read it */
+			}
 			else if (status < 0) 
 			{
 #ifdef DEBUG_UDP_LAYER
-                                LOG << log4cpp::Priority::INFO << "UdpLayer::recv_loop() Error: " << bdnet_errno() << std::endl;
+				LOG << log4cpp::Priority::INFO << "UdpLayer::recv_loop() Error: " << bdnet_errno() << std::endl;
 #endif
-                        }
-                };      
+			}
+		};
 
 		int nsize = maxsize;
 		struct sockaddr_in from;
@@ -333,7 +333,7 @@ int UdpLayer::openSocket()
 	sockMtx.lock();   /********** LOCK MUTEX *********/
 
 	/* make a socket */
-       	sockfd = bdnet_socket(PF_INET, SOCK_DGRAM, 0);
+	sockfd = bdnet_socket(PF_INET, SOCK_DGRAM, 0);
 #ifdef DEBUG_UDP_LAYER
 	LOG << log4cpp::Priority::INFO << "UpdStreamer::openSocket()" << std::endl;
 #endif
@@ -341,27 +341,27 @@ int UdpLayer::openSocket()
 
 
 #ifdef UDP_LOOPBACK_TESTING
-        bdnet_inet_aton("127.0.0.1", &(laddr.sin_addr));
+	bdnet_inet_aton("127.0.0.1", &(laddr.sin_addr));
 #endif
 
 #ifdef OPEN_UNIVERSAL_PORT
-        struct sockaddr_in tmpaddr = laddr;
-        tmpaddr.sin_addr.s_addr = 0;
+	struct sockaddr_in tmpaddr = laddr;
+	tmpaddr.sin_addr.s_addr = 0;
 	if (0 != bdnet_bind(sockfd, (struct sockaddr *) (&tmpaddr), sizeof(tmpaddr)))
 #else
-	if (0 != bdnet_bind(sockfd, (struct sockaddr *) (&laddr), sizeof(laddr)))
+		if (0 != bdnet_bind(sockfd, (struct sockaddr *) (&laddr), sizeof(laddr)))
 #endif
-	{
+		{
 #ifdef DEBUG_UDP_LAYER
-		LOG << log4cpp::Priority::INFO << "Socket Failed to Bind to : " << laddr << std::endl;
-		LOG << log4cpp::Priority::INFO << "Error: " << bdnet_errno() << std::endl;
+			LOG << log4cpp::Priority::INFO << "Socket Failed to Bind to : " << laddr << std::endl;
+			LOG << log4cpp::Priority::INFO << "Error: " << bdnet_errno() << std::endl;
 #endif
-		errorState = EADDRINUSE;
-		//exit(1);
+			errorState = EADDRINUSE;
+			//exit(1);
 
-		sockMtx.unlock(); /******** UNLOCK MUTEX *********/
-		return -1;
-	}
+			sockMtx.unlock(); /******** UNLOCK MUTEX *********/
+			return -1;
+		}
 
 	if (-1 == bdnet_fcntl(sockfd, F_SETFL, O_NONBLOCK))
 	{
@@ -439,8 +439,8 @@ int UdpLayer::okay()
 	sockMtx.lock();   /********** LOCK MUTEX *********/
 
 	bool nonFatalError = ((errorState == 0) ||
-				(errorState == EAGAIN) ||
-				(errorState == EINPROGRESS));
+			(errorState == EAGAIN) ||
+			(errorState == EINPROGRESS));
 
 	sockMtx.unlock(); /******** UNLOCK MUTEX *********/
 
@@ -504,8 +504,8 @@ int UdpLayer::sendUdpPacket(const void *data, int size, struct sockaddr_in &to)
 	sockMtx.lock();   /********** LOCK MUTEX *********/
 
 	bdnet_sendto(sockfd, data, size, 0, 
-			   (struct sockaddr *) &(toaddr), 
-				sizeof(toaddr));
+			(struct sockaddr *) &(toaddr),
+			sizeof(toaddr));
 
 	sockMtx.unlock(); /******** UNLOCK MUTEX *********/
 	return 1;
@@ -516,8 +516,8 @@ int UdpLayer::sendUdpPacket(const void *data, int size, struct sockaddr_in &to)
 
 
 LossyUdpLayer::LossyUdpLayer(UdpReceiver *udpr, 
-			struct sockaddr_in &local, double frac)
-	:UdpLayer(udpr, local), lossFraction(frac)
+		struct sockaddr_in &local, double frac)
+:UdpLayer(udpr, local), lossFraction(frac)
 {
 	return;
 }
@@ -526,42 +526,42 @@ LossyUdpLayer::~LossyUdpLayer() { return; }
 int LossyUdpLayer::receiveUdpPacket(void *data, int *size, struct sockaddr_in &from)
 {
 	double prob = (1.0 * (rand() / (RAND_MAX + 1.0)));
-	
+
 	if (prob < lossFraction)
 	{
-	/* but discard */
+		/* but discard */
 		if (0 < UdpLayer::receiveUdpPacket(data, size, from))
 		{
 			LOG << log4cpp::Priority::INFO << "LossyUdpLayer::receiveUdpPacket() Dropping packet!";
 			LOG << log4cpp::Priority::INFO << printPkt(data, *size);
 			LOG << log4cpp::Priority::INFO << "LossyUdpLayer::receiveUdpPacket() Packet Dropped!";
 		}
-	
+
 		size = 0;
 		return -1;
-	
+
 	}
-	
+
 	// otherwise read normally;
 	return UdpLayer::receiveUdpPacket(data, size, from);
 }
-	
+
 int LossyUdpLayer::sendUdpPacket(const void *data, int size, struct sockaddr_in &to)
 {
 	double prob = (1.0 * (rand() / (RAND_MAX + 1.0)));
-	
+
 	if (prob < lossFraction)
 	{
 		/* discard */
-	
+
 		LOG << log4cpp::Priority::INFO << "LossyUdpLayer::sendUdpPacket() Dropping packet!";
 		LOG << log4cpp::Priority::INFO << printPkt((void *) data, size);
 		LOG << log4cpp::Priority::INFO << "LossyUdpLayer::sendUdpPacket() Packet Dropped!";
-	
+
 		return size;
 	}
-	
+
 	// otherwise read normally;
 	return UdpLayer::sendUdpPacket(data, size, to);
 }
-	
+
