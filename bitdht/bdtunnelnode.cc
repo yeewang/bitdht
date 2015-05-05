@@ -280,8 +280,8 @@ void bdTunnelNode::msgout_reply_newconn(bdId *tunnelId, bdToken *transId)
 	char msg[10240];
 	int avail = 10240;
 
-	int blen = bitdht_reply_new_conn_msg(transId, &(mOwnId), &tunnelId->id,
-			&tunnelId->addr, msg, true, avail-1);
+	int blen = bitdht_reply_new_conn_msg(transId, &(mOwnId), tunnelId,
+			msg, true, avail-1);
 	sendPkt(msg, blen, tunnelId->addr);
 }
 
@@ -563,6 +563,45 @@ void bdTunnelNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 		beMsgGetUInt32(be_port, &port);
 	}
 
+	/****************** handle reply newconn ***************************/
+
+	bdId peerId;
+	if (beType == BITDHT_MSG_TYPE_REPLY_NEWCONN)
+	{
+		be_node  *be_newconn = NULL;
+		be_node  *be_pid = NULL;
+
+		be_newconn = beMsgGetDictNode(be_data, "newconn");
+		if (!be_newconn)
+		{
+#ifdef DEBUG_NODE_PARSE
+			LOG.info("bdTunnelNode::recvPkt() REPLY_NEWCONN Missing newconn. Dropping Msg");
+#endif
+			be_free(node);
+			return;
+		}
+		LOG.info("bdTunnelNode::recvPkt() REPLY_NEWCONN dsssssssssssssssssssssssssssss2");
+		be_pid = beMsgGetDictNode(be_data, "pid");
+		if (!be_pid)
+		{
+//#ifdef DEBUG_NODE_PARSE
+			LOG.info("bdTunnelNode::recvPkt() REPLY_NEWCONN Missing pid. Dropping Msg");
+//#endif
+			be_free(node);
+			return;
+		}
+
+		LOG.info("bdTunnelNode::recvPkt() REPLY_NEWCONN dsssssssssssssssssssssssssssss3");
+		if (!beMsgGetBdId(be_pid, peerId)) {
+#ifdef DEBUG_NODE_PARSE
+			LOG.info("bdTunnelNode::recvPkt() REPLY_NEWCONN decode pid fail. Dropping Msg");
+#endif
+			be_free(node);
+			return;
+		}
+		LOG.info("bdTunnelNode::recvPkt() REPLY_NEWCONN vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv");
+	}
+
 	/****************** Bits Parsed Ok. Process Msg ***********************/
 	/* Construct Source Id */
 	bdId srcId(id, addr);
@@ -574,14 +613,15 @@ void bdTunnelNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 				mFns->bdPrintId(&srcId).c_str());
 		//#endif
 
-		// it have not a dhtId!!!
 		msgin_newconn(&srcId, &transId);
 	}
 	else if (beType == BITDHT_MSG_TYPE_REPLY_NEWCONN) {
 		//#ifdef DEBUG_NODE_MSGS
-		LOG.info("bdTunnelNode::recvPkt() Reply NewConn from: %s",
-				mFns->bdPrintId(&srcId).c_str());
+		LOG.info("bdTunnelNode::recvPkt() Reply NewConn from: %s for: %s",
+				mFns->bdPrintId(&srcId).c_str(), mFns->bdPrintId(&peerId).c_str());
 		//#endif
+
+		msgin_reply_newconn(&srcId, &transId);
 	}
 	else {
 		LOG.info("bdTunnelNode::recvPkt() unhandled Type %d from: %s",

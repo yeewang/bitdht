@@ -81,8 +81,8 @@ int bitdht_reply_announce_msg(bdToken *tid, bdNodeId *id,
                                         char *msg, int avail);
 int bitdht_new_conn_msg(bdToken *tid, bdNodeId *id, char *msg, int avail);
 int bitdht_reply_new_conn_msg(bdToken *tid, bdNodeId *id, char *msg, bool started, int avail);
-int bitdht_reply_new_conn_msg(bdToken *tid, bdNodeId *id, bdNodeId *peerId,
-		sockaddr_in *peerAddr, char *msg, bool started, int avail);
+int bitdht_reply_new_conn_msg(bdToken *tid, bdNodeId *id, bdId *peerId,
+		char *msg, bool started, int avail);
 
 //int response_peers_message()
 //int response_closestnodes_message()
@@ -95,11 +95,13 @@ uint32_t beMsgType(be_node *n);
 
 uint32_t convertBdVersionToVID(bdVersion *version);
 
+be_node *makeCompactBdIdString(bdId &id);
 be_node *makeCompactPeerIds(std::list<std::string> &values);
 be_node *makeCompactNodeIdString(std::list<bdId> &nodes);
 
 int beMsgGetToken(be_node *n, bdToken &token);
 int beMsgGetNodeId(be_node *n, bdNodeId &nodeId);
+int beMsgGetBdId(be_node *n, bdId &bdId);
 int beMsgGetListBdIds(be_node *n, std::list<bdId> &nodes);
 
 int beMsgGetListStrings(be_node *n, std::list<std::string> &values);

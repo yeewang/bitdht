@@ -516,8 +516,8 @@ int bitdht_reply_new_conn_msg(bdToken *tid, bdNodeId *id, char *msg, bool starte
 Response = {"t":"aa", "y":"r", "n":"y", "r": {"id":"mnopqrstuvwxyz123456"}}
 bencoded = d1:rd2:id20:mnopqrstuvwxyz123456e1:t2:aa1:y1:re
  */
-int bitdht_reply_new_conn_msg(bdToken *tid, bdNodeId *id, bdNodeId *peerId,
-		sockaddr_in *peerAddr, char *msg, bool started, int avail)
+int bitdht_reply_new_conn_msg(bdToken *tid, bdNodeId *id, bdId *peerId,
+		char *msg, bool started, int avail)
 {
 #ifdef DEBUG_MSGS
 	LOG.info("bitdht_reply_conn_msg()\n");
@@ -533,13 +533,11 @@ int bitdht_reply_new_conn_msg(bdToken *tid, bdNodeId *id, bdNodeId *peerId,
 
 	be_node *nqrnode = be_create_str(started ? "y" : "n");
 	be_node *vpnnode = be_create_str("hello");
-	be_node *pidnode = be_create_str_wlen((char *) peerId->data, BITDHT_KEY_LEN);
-	be_node *ipnode = be_create_str(encodeCompactPeerId(peerAddr).c_str());
+	be_node *pidnode = makeCompactBdIdString(*peerId);
 
 	be_add_keypair(iddict, "id", idnode);
 	be_add_keypair(iddict, "newconn", vpnnode);
 	be_add_keypair(iddict, "pid", pidnode);
-	be_add_keypair(iddict, "ip", ipnode);
 	be_add_keypair(dict, "r", iddict);
 
 	be_add_keypair(dict, "t", tidnode);
@@ -805,6 +803,26 @@ int beMsgGetNodeId(be_node *n, bdNodeId &nodeId)
 	return 1;
 }
 
+int beMsgGetBdId(be_node *n, bdId &bdId)
+{
+	if (n->type != BE_STR)
+	{
+		return 0;
+	}
+	int len = be_str_len(n);
+	return decodeCompactNodeId(&bdId, n->val.s, len);
+}
+
+be_node *makeCompactBdIdString(bdId &id)
+{
+	int len = BITDHT_COMPACTNODEID_LEN;
+	std::string cni;
+
+	cni = encodeCompactNodeId(&(id));
+	be_node *cninode = be_create_str_wlen((char *) cni.c_str(), len);
+	return cninode;
+}
+
 be_node *makeCompactNodeIdString(std::list<bdId> &nodes)
 {
 	int len = BITDHT_COMPACTNODEID_LEN * nodes.size();
@@ -814,7 +832,6 @@ be_node *makeCompactNodeIdString(std::list<bdId> &nodes)
 	{
 		cni += encodeCompactNodeId(&(*it));
 	}
-
 
 	be_node *cninode = be_create_str_wlen((char *) cni.c_str(), len);
 	return cninode;
@@ -845,8 +862,7 @@ int beMsgGetListBdIds(be_node *n, std::list<bdId> &nodes)
 
 	int len = be_str_len(n);
 	int count = len / BITDHT_COMPACTNODEID_LEN;
-	for(int i = 0; i < count; i++)
-	{
+	for (int i = 0; i < count; i++) {
 		bdId id;
 		if (decodeCompactNodeId(&id, &(n->val.s[i*BITDHT_COMPACTNODEID_LEN]), BITDHT_COMPACTNODEID_LEN))
 		{
@@ -875,7 +891,7 @@ int decodeCompactNodeId(bdId *id, char *enc, int len)
 		return 0;
 	}
 
-	for(int i = 0; i < BITDHT_KEY_LEN; i++)
+	for (int i = 0; i < BITDHT_KEY_LEN; i++)
 	{
 		id->id.data[i] = enc[i];
 	}
@@ -918,7 +934,6 @@ int decodeCompactPeerId(struct sockaddr_in *addr, char *enc, int len)
 	return 1;
 }
 
-
 int beMsgGetListStrings(be_node *n, std::list<std::string> &values)
 {
 	if (n->type != BE_LIST)
@@ -940,7 +955,6 @@ int beMsgGetListStrings(be_node *n, std::list<std::string> &values)
 	return 1;
 }
 
-
 int beMsgGetUInt32(be_node *n, uint32_t *port)
 {
 	if (n->type != BE_INT)	
@@ -950,5 +964,4 @@ int beMsgGetUInt32(be_node *n, uint32_t *port)
 	*port = n->val.i;
 	return 1;
 }
-
 
