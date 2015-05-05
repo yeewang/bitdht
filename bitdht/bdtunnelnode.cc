@@ -60,7 +60,8 @@
 // #define DEBUG_NODE_MSGS 1
 
 
-bdTunnelNode::bdTunnelNode(bdDhtFunctions *fns) : mFns(fns)
+bdTunnelNode::bdTunnelNode(const bdNodeId &ownId, bdDhtFunctions *fns) :
+	mOwnId(ownId), mFns(fns)
 {
 }
 
@@ -580,19 +581,17 @@ void bdTunnelNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 			be_free(node);
 			return;
 		}
-		LOG.info("bdTunnelNode::recvPkt() REPLY_NEWCONN dsssssssssssssssssssssssssssss2");
+
 		be_pid = beMsgGetDictNode(be_data, "pid");
 		if (!be_pid)
 		{
-//#ifdef DEBUG_NODE_PARSE
+#ifdef DEBUG_NODE_PARSE
 			LOG.info("bdTunnelNode::recvPkt() REPLY_NEWCONN Missing pid. Dropping Msg");
-//#endif
+#endif
 			be_free(node);
-			LOG.info("bdTunnelNode::recvPkt() REPLY_NEWCONN dsssssssssssssssssssssssssssssrrrrrr2");
 			return;
 		}
 
-		LOG.info("bdTunnelNode::recvPkt() REPLY_NEWCONN dsssssssssssssssssssssssssssss3");
 		if (!beMsgGetBdId(be_pid, peerId)) {
 #ifdef DEBUG_NODE_PARSE
 			LOG.info("bdTunnelNode::recvPkt() REPLY_NEWCONN decode pid fail. Dropping Msg");
@@ -600,7 +599,6 @@ void bdTunnelNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 			be_free(node);
 			return;
 		}
-		LOG.info("bdTunnelNode::recvPkt() REPLY_NEWCONN vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv");
 	}
 
 	/****************** Bits Parsed Ok. Process Msg ***********************/

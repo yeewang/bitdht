@@ -69,7 +69,7 @@ public:
 class bdTunnelNode
 {
 public:
-	bdTunnelNode(bdDhtFunctions *fns);
+	bdTunnelNode(const bdNodeId &ownId, bdDhtFunctions *fns);
 
 	/* startup / shutdown node */
 	void restartNode();

@@ -53,10 +53,10 @@
 //#define BITDHT_VERSION_IDENTIFER	1
 /*************************************/
 
-UdpTunnel::UdpTunnel(UdpPublisher *pub, bdDhtFunctions *fns) :
+UdpTunnel::UdpTunnel(const bdNodeId &ownId, UdpPublisher *pub, bdDhtFunctions *fns) :
 		UdpSubReceiver(pub), mFns(fns)
 {
-	mTunnelManager = new bdTunnelManager(fns);
+	mTunnelManager = new bdTunnelManager(ownId, fns);
 }
 
 UdpTunnel::~UdpTunnel()

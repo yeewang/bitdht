@@ -30,7 +30,7 @@ public:
 class bdTunnelManager: public bdTunnelNode
 {
 public:
-	bdTunnelManager(bdDhtFunctions *fns);
+	bdTunnelManager(const bdNodeId &ownId, bdDhtFunctions *fns);
 
 	void iteration();
 

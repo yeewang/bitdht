@@ -49,7 +49,7 @@ class UdpTunnel: public UdpSubReceiver, public bdThread
 {
 public:
 
-	UdpTunnel(UdpPublisher *pub, bdDhtFunctions *fns);
+	UdpTunnel(const bdNodeId &ownId, UdpPublisher *pub, bdDhtFunctions *fns);
 	virtual ~UdpTunnel();
 
 	/*********** External Interface to the World (BitDhtInterface) ************/

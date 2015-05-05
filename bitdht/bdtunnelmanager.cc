@@ -58,8 +58,8 @@
 
 #define DEBUG_MGR 1
 
-bdTunnelManager::bdTunnelManager(bdDhtFunctions *fns)
-: bdTunnelNode(fns)
+bdTunnelManager::bdTunnelManager(const bdNodeId &ownId, bdDhtFunctions *fns) :
+	bdTunnelNode(ownId, fns)
 {
 	mMode = BITDHT_TUN_MGR_STATE_OFF;
 	mFns = fns;
