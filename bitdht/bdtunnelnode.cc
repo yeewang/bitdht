@@ -272,7 +272,7 @@ void bdTunnelNode::msgout_reply_newconn(bdId *tunnelId, bdToken *transId)
 	// #ifdef DEBUG_NODE_MSGOUT
 	std::ostringstream ss;
 	bdPrintTransId(ss, transId);
-	LOG.info("bdTunnelNode::msgout_reply_newconn() TransId: %s To: %s",
+	LOG.info("BUGBUG: bdTunnelNode::msgout_reply_newconn() TransId: %s To: %s",
 			ss.str().c_str(), mFns->bdPrintId(tunnelId).c_str());
 	// #endif
 
@@ -588,6 +588,7 @@ void bdTunnelNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 			LOG.info("bdTunnelNode::recvPkt() REPLY_NEWCONN Missing pid. Dropping Msg");
 //#endif
 			be_free(node);
+			LOG.info("bdTunnelNode::recvPkt() REPLY_NEWCONN dsssssssssssssssssssssssssssssrrrrrr2");
 			return;
 		}
 

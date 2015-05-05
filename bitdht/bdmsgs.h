@@ -80,7 +80,6 @@ int bitdht_announce_peers_msg(bdToken *tid, bdNodeId *id, bdNodeId *info_hash,
 int bitdht_reply_announce_msg(bdToken *tid, bdNodeId *id,         
                                         char *msg, int avail);
 int bitdht_new_conn_msg(bdToken *tid, bdNodeId *id, char *msg, int avail);
-int bitdht_reply_new_conn_msg(bdToken *tid, bdNodeId *id, char *msg, bool started, int avail);
 int bitdht_reply_new_conn_msg(bdToken *tid, bdNodeId *id, bdId *peerId,
 		char *msg, bool started, int avail);
 

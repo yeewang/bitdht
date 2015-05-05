@@ -1003,7 +1003,8 @@ void bdNode::msgout_reply_newconn(bdId *tunnelId, bdId *dhtId, bdToken *transId)
 	char msg[10240];
 	int avail = 10240;
 
-	int blen = bitdht_reply_new_conn_msg(transId, &(mOwnId), msg, true, avail-1);
+	int blen = bitdht_reply_new_conn_msg(transId, &(mOwnId), tunnelId,
+			msg, true, avail-1);
 	sendPkt(msg, blen, dhtId->addr);
 }
 
