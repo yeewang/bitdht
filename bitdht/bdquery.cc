@@ -115,13 +115,13 @@ bool bdQuery::matchResult(std::list<bdPeer> &idList)
 	int i = 0;
 	std::multimap<bdMetric, bdPeer>::iterator it;
 	for(it = mClosest.begin(); it != mClosest.end(); it++) {
-		if (it->second.mPeerId.id == mId /*&& it->second.mPeerFlags != 0 /*&& (it->second.mPeerId.type & typeMask) != 0*/) {
+		if (it->second.mPeerId.id == mId /*&& it->second.mPeerFlags != 0 && (it->second.mPeerId.type & typeMask) != 0*/) {
 			i++;
 			idList.push_back(it->second);
 		}
 	}
 	for(it = mPotentialClosest.begin(); it != mPotentialClosest.end(); it++, i++) {
-		if (it->second.mPeerId.id == mId /*&& it->second.mPeerFlags != 0 /*&& (it->second.mPeerId.type & typeMask) != 0*/) {
+		if (it->second.mPeerId.id == mId /*&& it->second.mPeerFlags != 0 && (it->second.mPeerId.type & typeMask) != 0*/) {
 			i++;
 			idList.push_back(it->second);
 		}

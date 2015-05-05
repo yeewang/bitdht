@@ -118,7 +118,7 @@ int operator==(const bdId &a, const bdId &b);
 
 class bdBucket
 {
-	public:
+public:
 
 	bdBucket();
 
@@ -128,34 +128,31 @@ class bdBucket
 
 class bdSpace
 {
-	public:
-
+public:
 	bdSpace(bdNodeId *ownId, bdDhtFunctions *fns);
 
-int	clear();
+	int	clear();
 
 	/* accessors */
-int 	find_nearest_nodes(const bdNodeId *id, int number, 
-		std::list<bdId> excluding, std::multimap<bdMetric, bdId> &nearest);
+	int find_nearest_nodes(
+			const bdNodeId *id, int number,
+			std::list<bdId> excluding, std::multimap<bdMetric, bdId> &nearest);
 
-int	out_of_date_peer(bdId &id); // side-effect updates, send flag on peer.
-int     add_peer(const bdId *id, uint32_t mode);
-int     printDHT();
+	int	out_of_date_peer(bdId &id); // side-effect updates, send flag on peer.
+	int add_peer(const bdId *id, uint32_t mode);
+	int printDHT();
 
-uint32_t calcNetworkSize();
-uint32_t calcNetworkSizeWithFlag(uint32_t withFlag);
-uint32_t calcSpaceSize();
+	uint32_t calcNetworkSize();
+	uint32_t calcNetworkSizeWithFlag(uint32_t withFlag);
+	uint32_t calcSpaceSize();
 
 	/* to add later */
-int	updateOwnId(bdNodeId *newOwnId);
+	int	updateOwnId(bdNodeId *newOwnId);
 
-	private:
-
+private:
 	std::vector<bdBucket> buckets;
 	bdNodeId mOwnId;
 	bdDhtFunctions *mFns;
 };
 
-
 #endif
-

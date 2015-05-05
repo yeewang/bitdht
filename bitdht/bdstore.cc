@@ -120,7 +120,7 @@ int 	bdStore::getPeer(bdPeer *peer)
 	return 0;
 }
 
-#define MAX_ENTRIES 500
+#define MAX_ENTRIES 1000
 
 	/* maintain a sorted list */
 void	bdStore::addStore(bdPeer *peer)

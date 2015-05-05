@@ -89,10 +89,31 @@ void bdTunnelNode::shutdownNode()
 
 void bdTunnelNode::iterationOff()
 {
+	/* clean up any incoming messages */
+	while(mIncomingMsgs.size() > 0)
+	{
+		bdTunnelNodeNetMsg *msg = mIncomingMsgs.front();
+		mIncomingMsgs.pop_front();
+
+		/* cleanup message */
+		delete msg;
+	}
 }
 
 void bdTunnelNode::iteration()
 {
+	/* process incoming msgs */
+	while (mIncomingMsgs.size() > 0)
+	{
+		bdTunnelNodeNetMsg *msg = mIncomingMsgs.front();
+		mIncomingMsgs.pop_front();
+
+		recvPkt(msg->data, msg->mSize, msg->addr);
+
+		/* cleanup message */
+		delete msg;
+	}
+
 	/* allow each query to send up to one query... until maxMsgs has been reached */
 	int numQueries = mTunnelRequests.size();
 	int i = 0;
@@ -104,7 +125,7 @@ void bdTunnelNode::iteration()
 	/* iterate through queries */
 	while(i < numQueries)
 	{
-#if 1//def DEBUG_NODE_MULTIPEER
+#ifdef DEBUG_NODE_MULTIPEER
 		LOG.info("bdTunnelNode::iteration():num %d, index.%d", numQueries, i);
 #endif
 		bdTunnelReq *query = mTunnelRequests.front();
@@ -207,9 +228,25 @@ int bdTunnelNode::outgoingMsg(struct sockaddr_in *addr, char *msg, int *len)
 
 void bdTunnelNode::incomingMsg(struct sockaddr_in *addr, char *msg, int len)
 {
+	LOG.info("bdTunnelNode::incomingMsg() ******************************* Address:%s:%d",
+			inet_ntoa(addr->sin_addr), htons(addr->sin_port));
+
+	bdTunnelNodeNetMsg *bdmsg = new bdTunnelNodeNetMsg(msg, len, addr);
+	mIncomingMsgs.push_back(bdmsg);
 }
 
 /************************************ Message Handling *****************************/
+
+
+void bdTunnelNode::msgin_newconn(bdId *tunnelId, bdToken *transId)
+{
+	msgout_reply_newconn(tunnelId, transId);
+}
+
+void bdTunnelNode::msgin_reply_newconn(bdId *tunnelId, bdToken *transId)
+{
+
+}
 
 /* Outgoing Messages */
 
@@ -230,6 +267,24 @@ void bdTunnelNode::msgout_newconn(bdId *dhtId, bdToken *transId)
 	sendPkt(msg, blen, dhtId->addr);
 }
 
+void bdTunnelNode::msgout_reply_newconn(bdId *tunnelId, bdToken *transId)
+{
+	// #ifdef DEBUG_NODE_MSGOUT
+	std::ostringstream ss;
+	bdPrintTransId(ss, transId);
+	LOG.info("bdTunnelNode::msgout_reply_newconn() TransId: %s To: %s",
+			ss.str().c_str(), mFns->bdPrintId(tunnelId).c_str());
+	// #endif
+
+	/* create string */
+	char msg[10240];
+	int avail = 10240;
+
+	int blen = bitdht_reply_new_conn_msg(transId, &(mOwnId), &tunnelId->id,
+			&tunnelId->addr, msg, true, avail-1);
+	sendPkt(msg, blen, tunnelId->addr);
+}
+
 void bdTunnelNode::sendPkt(char *msg, int len, struct sockaddr_in addr)
 {
 	bdTunnelNodeNetMsg *bdmsg = new bdTunnelNodeNetMsg(msg, len, &addr);
@@ -246,6 +301,9 @@ void bdTunnelNode::sendPkt(char *msg, int len, struct sockaddr_in addr)
 
 void bdTunnelNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 {
+	LOG.info("bdTunnelNode::recvPkt() ******************************* Address:%s:%d",
+			inet_ntoa(addr.sin_addr), htons(addr.sin_port));
+
 #ifdef DEBUG_NODE_PARSE
 	LOG.info("bdTunnelNode::recvPkt() msg[" << len << "] = ";
 	for(int i = 0; i < len; i++)
@@ -510,6 +568,25 @@ void bdTunnelNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	bdId srcId(id, addr);
 
 	checkIncomingMsg(&srcId, &transId, beType);
+	if (beType == BITDHT_MSG_TYPE_NEWCONN) {
+		//#ifdef DEBUG_NODE_MSGS
+		LOG.info("bdTunnelNode::recvPkt() NewConn from: %s",
+				mFns->bdPrintId(&srcId).c_str());
+		//#endif
+
+		// it have not a dhtId!!!
+		msgin_newconn(&srcId, &transId);
+	}
+	else if (beType == BITDHT_MSG_TYPE_REPLY_NEWCONN) {
+		//#ifdef DEBUG_NODE_MSGS
+		LOG.info("bdTunnelNode::recvPkt() Reply NewConn from: %s",
+				mFns->bdPrintId(&srcId).c_str());
+		//#endif
+	}
+	else {
+		LOG.info("bdTunnelNode::recvPkt() unhandled Type %d from: %s",
+				beType, mFns->bdPrintId(&srcId).c_str());
+	}
 
 	be_free(node);
 	return;

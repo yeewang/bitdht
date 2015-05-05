@@ -111,9 +111,14 @@ int bdTunnelManager::stateDht()
 	return mMode;
 }
 
+void bdTunnelManager::ask(const bdId *id)
+{
+
+}
+
 void bdTunnelManager::connectNode(const bdId *id)
 {
-#if 1 //def DEBUG_MGR
+#if 0 //def DEBUG_MGR
 	LOG.info("bdTunnelManager::connectNode() " + mFns->bdPrintNodeId(&id->id));
 
 	std::map<bdId, bdTunnelPeer>::iterator it0;
@@ -285,4 +290,101 @@ void bdTunnelManager::removeCallback(BitDhtCallback *cb)
 		return;
 	}
 	it = mCallbacks.erase(it);
+}
+
+// BUGBUG: why not find isascii() in ctype.h?
+extern "C" int isascii(int c);
+
+/******************* Internals *************************/
+int  bdTunnelManager::isBitDhtPacket(char *data, int size, struct sockaddr_in & from)
+{
+#ifdef DEBUG_MGR_PKT
+	LOG.info("bdNodeManager::isBitDhtPacket() ******************************* from %s:%d",
+			inet_ntoa(from.sin_addr), ntohs(from.sin_port));
+	{
+		/* print the fucker... only way to catch bad ones */
+		std::ostringstream out;
+		for(int i = 0; i < size; i++)
+		{
+			if (isascii(data[i]))
+			{
+				out << data[i];
+			}
+			else
+			{
+				out << "[";
+				out << std::setw(2) << std::setfill('0')
+				<< std::hex << (uint32_t) data[i];
+				out << "]";
+			}
+			if ((i % 16 == 0) && (i != 0))
+			{
+				out << std::endl;
+			}
+		}
+		LOG << out.str();
+	}
+	LOG.info("bdNodeManager::isBitDhtPacket() *******************************";
+	LOG << std::endl;
+#else
+	(void) from;
+#endif
+
+	/* try to parse it! */
+	/* convert to a be_node */
+	be_node *node = be_decoden(data, size);
+	if (!node)
+	{
+		/* invalid decode */
+#ifdef DEBUG_MGR
+		LOG.info("bdNodeManager::isBitDhtPacket() be_decode failed. dropping");
+		LOG.info("bdNodeManager::BadPacket ****************************** from %s:%d",
+				inet_ntoa(from.sin_addr), ntohs(from.sin_port));
+		{
+			/* print the fucker... only way to catch bad ones */
+			std::ostringstream out;
+			for(int i = 0; i < size; i++)
+			{
+				if (isascii(data[i]))
+				{
+					out << data[i];
+				}
+				else
+				{
+					out << "[";
+					out << std::setw(2) << std::setfill('0')
+					<< std::hex << (uint32_t) data[i];
+					out << "]";
+				}
+				if ((i % 16 == 0) && (i != 0))
+				{
+					out << std::endl;
+				}
+			}
+			LOG.info(out.str());
+		}
+		LOG.info("bdNodeManager::BadPacket ******************************");
+#endif
+		return 0;
+	}
+
+	/* find message type */
+	uint32_t beType = beMsgType(node);
+	int ans = (beType != BITDHT_MSG_TYPE_UNKNOWN);
+	be_free(node);
+
+#ifdef DEBUG_MGR_PKT
+	if (ans)
+	{
+		LOG.info("bdNodeManager::isBitDhtPacket() YES";
+		LOG << std::endl;
+	}
+	else
+	{
+		LOG.info("bdNodeManager::isBitDhtPacket() NO: Unknown Type";
+		LOG << std::endl;
+	}
+
+#endif
+	return ans;
 }

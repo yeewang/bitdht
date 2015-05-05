@@ -54,7 +54,9 @@ public:
 
 	/*********** External Interface to the World (BitDhtInterface) ************/
 
-	/***** Functions to Call down to bdNodeManager ****/
+	/***** Functions to Call down to bdTunnelManager ****/
+	void ask(const bdId *id);
+
 	/* Request DHT Peer Lookup */
 	/* Request Keyword Lookup */
 	virtual	void connectNode(const bdId *id);

@@ -57,7 +57,7 @@
  * #define DEBUG_NODE_MSGOUT 1
  ***/
 
-// #define DEBUG_NODE_MSGS 1
+#define DEBUG_NODE_MSGS 1
 
 
 bdNode::bdNode(bdNodeId *ownId,
@@ -281,13 +281,10 @@ void bdNode::iteration()
 			//registerOutgoingMsg(&pid, &transId, BITDHT_MSG_TYPE_PING);
 			msgout_ping(&pid, &transId);
 
-			genNewTransId(&transId);
-			msgout_newconn(&pid, &transId);
-
 			sentMsgs++;
 			sentPings++;
 
-#ifdef DEBUG_NODE_MSGS 
+#ifdef DEBUG_NODE_MSGS
 			LOG.info("bdNode::iteration() Pinging Potential Peer : %s",
 					mFns->bdPrintId(&pid).c_str());
 #endif
@@ -315,10 +312,6 @@ void bdNode::iteration()
 			//registerOutgoingMsg(&id, &transId, BITDHT_MSG_TYPE_FIND_NODE);
 
 			msgout_find_node(&id, &transId, &targetNodeId);
-
-			// invoke callback for this bdId
-			// mPacketCallback->onRecvCallback();
-
 
 #ifdef DEBUG_NODE_MSGS 
 			LOG.info("bdNode::iteration() Find Node Req for : %s searching for : %s",
@@ -452,7 +445,6 @@ void bdNode::resetStats()
 	resetCounters();
 }
 
-
 void bdNode::checkPotentialPeer(bdId *id)
 {
 	bool isWorthyPeer = false;
@@ -471,7 +463,6 @@ void bdNode::checkPotentialPeer(bdId *id)
 		addPotentialPeer(id);
 	}
 }
-
 
 void bdNode::addPotentialPeer(bdId *id)
 {
@@ -500,6 +491,13 @@ void bdNode::addPeer(const bdId *id, uint32_t peerflags)
 	peer.mPeerFlags = peerflags;
 	peer.mLastRecvTime = time(NULL);
 	mStore.addStore(&peer);
+
+
+	/*
+	bdToken transId;
+	genNewTransId(&transId);
+	msgout_newconn(id, &transId);
+	*/
 }
 
 #if 0
@@ -973,7 +971,7 @@ void bdNode::msgout_reply_post(bdId *id, bdToken *transId)
 	sendPkt(msg, blen, id->addr);
 }
 
-void bdNode::msgout_newconn(bdId *dhtId, bdToken *transId)
+void bdNode::msgout_newconn(const bdId *dhtId, bdToken *transId)
 {
 	// #ifdef DEBUG_NODE_MSGOUT
 	std::ostringstream ss;
@@ -1336,7 +1334,7 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	case BITDHT_MSG_TYPE_REPLY_NODE: /* r: id, transId, nodes  */
 	{
 #ifdef DEBUG_NODE_MSGS 
-		LOG.info("bdNode::recvPkt() Received Reply Node from : %s",
+		LOG.info("bdNode::recvPkt() Received Reply Node from: %s",
 				mFns->bdPrintId(&srcId).c_str());
 #endif
 		msgin_reply_find_node(&srcId, &transId, nodes);
@@ -1459,6 +1457,8 @@ void bdNode::msgin_ping(bdId *id, bdToken *transId)
 
 	/* reply */
 	msgout_pong(id, transId);
+
+	mPacketCallback->onRecvCallback(id, BITDHT_MSG_TYPE_PING);
 }
 
 /* Input: id, token, (+optional version)
@@ -1543,6 +1543,8 @@ void bdNode::msgin_pong(bdId *id, bdToken *transId, bdToken *versionId)
 	}
 
 	addPeer(id, peerflags);
+
+	mPacketCallback->onRecvCallback(id, BITDHT_MSG_TYPE_PONG);
 }
 
 /* Input: id, token, queryId */
@@ -1567,6 +1569,8 @@ void bdNode::msgin_find_node(bdId *id, bdToken *transId, bdNodeId *query)
 
 	uint32_t peerflags = 0; /* no id, and no help! */
 	addPeer(id, peerflags);
+
+	mPacketCallback->onRecvCallback(id, BITDHT_MSG_TYPE_FIND_NODE);
 }
 
 void bdNode::msgin_reply_find_node(bdId *id, bdToken *transId, std::list<bdId> &nodes)
@@ -1580,7 +1584,7 @@ void bdNode::msgin_reply_find_node(bdId *id, bdToken *transId, std::list<bdId> &
 	bdPrintTransId(out, transId);
 	snprintf(buf, sizeof(buf), "bdNode::msgin_reply_find_node() TransId: %s From: %s Peers:",
 			out.str().c_str(), mFns->bdPrintId(id).c_str());
-	debug << out;
+	debug << buf;
 	for(it = nodes.begin(); it != nodes.end(); it++)
 	{
 		debug << " " << mFns->bdPrintId(&(*it));
@@ -1602,6 +1606,8 @@ void bdNode::msgin_reply_find_node(bdId *id, bdToken *transId, std::list<bdId> &
 	/* received reply - so peer must be good */
 	uint32_t peerflags = BITDHT_PEER_STATUS_RECV_NODES; /* no id ;( */
 	addPeer(id, peerflags);
+
+	mPacketCallback->onRecvCallback(id, BITDHT_MSG_TYPE_REPLY_NODE);
 }
 
 /********* THIS IS THE SECOND STAGE
@@ -1874,10 +1880,7 @@ void bdNodeNetMsg::print(std::ostream &out)
 	out << std::endl;
 }
 
-
 bdNodeNetMsg::~bdNodeNetMsg()
 {
 	free(data);
 }
-
-

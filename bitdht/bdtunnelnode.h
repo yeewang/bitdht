@@ -94,8 +94,12 @@ public:
 	void sendPkt(char *msg, int len, struct sockaddr_in addr);
 	void recvPkt(char *msg, int len, struct sockaddr_in addr);
 
+	void msgin_newconn(bdId *tunnelId, bdToken *transId);
+	void msgin_reply_newconn(bdId *tunnelId, bdToken *transId);
+
 	/* output functions (send msg) */
 	void msgout_newconn(bdId *dhtId, bdToken *transId);
+	void msgout_reply_newconn(bdId *tunnelId, bdToken *transId);
 
 	/* token handling */
 	void genNewToken(bdToken *token);
@@ -118,6 +122,7 @@ private:
 	bdDhtFunctions *mFns;
 	std::list<bdTunnelReq *> mTunnelRequests;
 	std::list<bdTunnelNodeNetMsg *> mOutgoingMsgs;
+	std::list<bdTunnelNodeNetMsg *> mIncomingMsgs;
 };
 
 #endif // BITDHT_TUNNEL_NODE_H

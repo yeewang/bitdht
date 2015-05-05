@@ -34,7 +34,8 @@ public:
 
 	void iteration();
 
-	/***** Functions to Call down to bdTunnelManager ****/
+	void ask(const bdId *id);
+
 	/* Request DHT Peer Lookup */
 	/* Request Keyword Lookup */
 	virtual void connectNode(const bdId *id);
@@ -50,6 +51,7 @@ public:
 	virtual int stateDht(); /* STOPPED, STARTING, ACTIVE, FAILED */
 
 	/******************* Internals *************************/
+	int isBitDhtPacket(char *data, int size, struct sockaddr_in &from);
 
 private:
 	int		status();

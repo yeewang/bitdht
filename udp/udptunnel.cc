@@ -40,6 +40,7 @@
 #endif
 #include <string.h>
 #include "util/bdnet.h"
+#include "util/bdlog.h"
 
 /*
  * #define DEBUG_UDP_BITDHT 1
@@ -65,7 +66,12 @@ UdpTunnel::~UdpTunnel()
 
 /*********** External Interface to the World ************/
 
-/***** Functions to Call down to bdNodeManager ****/
+/***** Functions to Call down to bdTunnelManager ****/
+
+void UdpTunnel::ask(const bdId *id)
+{
+	bdStackMutex stack(dhtMtx);
+}
 
 void UdpTunnel::connectNode(const bdId *id)
 {
@@ -128,7 +134,14 @@ int UdpTunnel::recvPkt(void *data, int size, struct sockaddr_in &from)
 	/* pass onto bitdht */
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
-	mTunnelManager->incomingMsg(&from, (char *) data, size);
+	LOG.info("UdpTunnel::recvPkt() ******************************* Address:%s:%d",
+			inet_ntoa(from.sin_addr), htons(from.sin_port));
+
+	if (mTunnelManager->isBitDhtPacket((char *) data, size, from)) {
+		mTunnelManager->incomingMsg(&from, (char *) data, size);
+
+		return 1;
+	}
 
 	return 0;
 }
