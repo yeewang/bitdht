@@ -14,6 +14,7 @@
 
 #include "bdlog.h"
 
+TDLog LOG;
 
 TDLog::TDLog()
 {
@@ -56,4 +57,17 @@ log4cpp::Category& TDLog::log()
 {
 	log4cpp::Category& root = log4cpp::Category::getRoot();
 	return root;
+}
+
+void TDLog::info(const char *str, ...)
+{
+	if (fp == NULL)
+		return;
+
+	fprintf(fp,"%10d : ", time(NULL));
+	va_list arglist;
+	va_start(arglist,str);
+	vfprintf(fp,str,arglist);
+	va_end(arglist);
+	fprintf(fp," \n");
 }

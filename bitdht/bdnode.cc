@@ -138,8 +138,8 @@ void bdNode::printState()
 
 void bdNode::printQueries()
 {
-	LOG.info("bdNode::printQueries() for Peer: " +
-			mFns->bdPrintNodeId(&mOwnId));
+	LOG.info(("bdNode::printQueries() for Peer: " +
+			mFns->bdPrintNodeId(&mOwnId)).c_str());
 
 	int i = 0;
 	std::list<bdQuery *>::iterator it;
@@ -542,7 +542,7 @@ void bdNode::addQuery(const bdNodeId *id, uint32_t qflags)
 
 	mNodeSpace.find_nearest_nodes(id, BITDHT_QUERY_START_PEERS, startList, nearest);
 
-	LOG.info("bdNode::addQuery(" + mFns->bdPrintNodeId(id) + ")\n");
+	LOG.info(("bdNode::addQuery(" + mFns->bdPrintNodeId(id) + ")").c_str());
 
 	for(it = nearest.begin(); it != nearest.end(); it++)
 	{
@@ -588,7 +588,7 @@ void bdNode::QueryStatus(std::map<bdNodeId, bdQueryStatus> &statusMap)
 bool bdNode::getIdFromQuery(const bdNodeId *id, std::list<bdPeer> &idList)
 {
 #ifdef DEBUG_NODE_MSGS
-	LOG.info("bdNode::getIdFromQuery(" + mFns->bdPrintNodeId(id) + ")\n");
+	LOG.info(("bdNode::getIdFromQuery(" + mFns->bdPrintNodeId(id) + ")\n").c_str());
 #endif
 
 	int i = 0;

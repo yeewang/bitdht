@@ -704,7 +704,7 @@ int bdNodeManager::getDhtPeerAddress(const bdNodeId *id, struct sockaddr_in &fro
 	std::map<bdNodeId, bdQueryPeer>::iterator pit;
 	pit = mActivePeers.find(*id);
 
-	LOG.info("bdNodeManager::getDhtPeerAddress() Id: " + mFns->bdPrintNodeId(id));
+	LOG.info(("bdNodeManager::getDhtPeerAddress() Id: " + mFns->bdPrintNodeId(id)).c_str());
 
 	if (pit != mActivePeers.end())
 	{

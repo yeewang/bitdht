@@ -361,7 +361,7 @@ int  bdTunnelManager::isBitDhtPacket(char *data, int size, struct sockaddr_in & 
 					out << std::endl;
 				}
 			}
-			LOG.info(out.str());
+			LOG.info(out.str().c_str());
 		}
 		LOG.info("bdNodeManager::BadPacket ******************************");
 #endif

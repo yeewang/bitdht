@@ -592,7 +592,7 @@ int bdQuery::printQuery()
 		snprintf(debugBuf, sizeof(debugBuf), " Search Time: %d secs", mSearchTime);
 		debug << debugBuf;
 	}
-	LOG.info(debug.str());
+	LOG.info(debug.str().c_str());
 	debug.str("");
 
 #ifdef DEBUG_QUERY
@@ -649,7 +649,7 @@ int bdQuery::printQuery()
 		snprintf(debugBuf, sizeof(debugBuf), " LastRecv: %ld ago", ts-it->second.mLastRecvTime);
 		debug << debugBuf;
 	}
-	LOG.info(debug.str());
+	LOG.info(debug.str().c_str());
 	debug.str("");
 
 	LOG.info("Closest Potential Peer: ");
@@ -667,7 +667,7 @@ int bdQuery::printQuery()
 		snprintf(debugBuf, sizeof(debugBuf), " LastRecv: %ld ago", ts-it->second.mLastRecvTime);
 		debug << debugBuf;
 	}
-	LOG.info(debug.str());
+	LOG.info(debug.str().c_str());
 	debug.str("");
 #endif
 

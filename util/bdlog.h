@@ -25,12 +25,17 @@ public:
 	virtual ~TDLog();
 
 	log4cpp::Category& log();
+	void info(const char *str, ...);
 
 private:
 	void init();
 	void setProperties();
+
+	FILE * fp;
 };
 
-#define LOG 			TDLog().log()
+// #define LOG TDLog().log()
+
+extern TDLog LOG;
 
 #endif /* UTIL_BDLOG_H_ */
