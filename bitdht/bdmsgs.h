@@ -81,6 +81,8 @@ int bitdht_reply_announce_msg(bdToken *tid, bdNodeId *id,
                                         char *msg, int avail);
 int bitdht_new_conn_msg(bdToken *tid, bdNodeId *id, char *msg, int avail);
 int bitdht_reply_new_conn_msg(bdToken *tid, bdNodeId *id, char *msg, bool started, int avail);
+int bitdht_reply_new_conn_msg(bdToken *tid, bdNodeId *id, bdNodeId *peerId,
+		sockaddr_in *peerAddr, char *msg, bool started, int avail);
 
 //int response_peers_message()
 //int response_closestnodes_message()
