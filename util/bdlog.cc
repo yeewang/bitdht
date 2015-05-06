@@ -64,10 +64,31 @@ void TDLog::info(const char *str, ...)
 	if (fp == NULL)
 		return;
 
-	fprintf(fp,"%10d : ", time(NULL));
+	fprintf(fp,"%10s: ", time().c_str());
 	va_list arglist;
 	va_start(arglist,str);
-	vfprintf(fp,str,arglist);
+	vfprintf(fp, str, arglist);
 	va_end(arglist);
-	fprintf(fp," \n");
+	fprintf(fp,"\n");
 }
+
+const std::string TDLog::time()
+{
+	char outstr[200];
+	time_t t;
+	struct tm *tmp;
+
+	t = ::time(NULL);
+	tmp = localtime(&t);
+	if (tmp == NULL) {
+		return "";
+	}
+
+	if (strftime(outstr, sizeof(outstr), "%D %H:%M:%S", tmp) == 0) {
+		fprintf(stderr, "strftime returned 0");
+		return "";
+	}
+
+	return outstr;
+}
+

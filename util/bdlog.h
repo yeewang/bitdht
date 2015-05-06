@@ -30,6 +30,7 @@ public:
 private:
 	void init();
 	void setProperties();
+	const std::string time();
 
 	FILE * fp;
 };

@@ -148,15 +148,15 @@ void bdTunnelNode::addTunnel(const bdId *id)
 	std::list<bdTunnelReq *>::iterator it;
 	for(it = mTunnelRequests.begin(); it != mTunnelRequests.end(); it++) {
 		if ((*it)->mId == *id) {
-//#ifdef DEBUG_NODE_MULTIPEER
+#ifdef DEBUG_NODE_MULTIPEER
 			LOG.info("bdTunnelNode::addTunnel(): skip");
-//#endif
+#endif
 			return;
 		}
 	}
-//#ifdef DEBUG_NODE_MULTIPEER
+#ifdef DEBUG_NODE_MULTIPEER
 	LOG.info("bdTunnelNode::addTunnel(): add");
-//#endif
+#endif
 	bdTunnelReq *req = new bdTunnelReq(*id);
 	mTunnelRequests.push_back(req);
 }
@@ -253,12 +253,12 @@ void bdTunnelNode::msgin_reply_newconn(bdId *tunnelId, bdToken *transId)
 
 void bdTunnelNode::msgout_newconn(bdId *dhtId, bdToken *transId)
 {
-	// #ifdef DEBUG_NODE_MSGOUT
+#ifdef DEBUG_NODE_MSGOUT
 	std::ostringstream ss;
 	bdPrintTransId(ss, transId);
 	LOG.info("bdTunnelNode::msgout_newconn() TransId: %s To: %s",
 			ss.str().c_str(), mFns->bdPrintId(dhtId).c_str());
-	// #endif
+#endif
 
 	/* create string */
 	char msg[10240];

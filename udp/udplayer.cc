@@ -56,15 +56,14 @@ static const int UDP_DEF_TTL = 64;
 #define OPEN_UNIVERSAL_PORT 1
 
 
-class   udpPacket
+class udpPacket
 {
 public:
-	udpPacket(struct sockaddr_in *addr, void *dta, int dlen)
-:raddr(*addr), len(dlen)
-{
+	udpPacket(struct sockaddr_in *addr, void *dta, int dlen) :
+		raddr(*addr), len(dlen) {
 		data = malloc(len);
 		memcpy(data, dta, len);
-}
+	}
 
 	~udpPacket()
 	{
@@ -90,7 +89,7 @@ std::ostream &operator<<(std::ostream &out, struct sockaddr_in &addr)
 }
 
 bool operator==(const struct sockaddr_in &addr, const struct sockaddr_in &addr2)
-		{
+				{
 	if (addr.sin_family != addr2.sin_family)
 		return false;
 	if (addr.sin_addr.s_addr != addr2.sin_addr.s_addr)
@@ -98,7 +97,7 @@ bool operator==(const struct sockaddr_in &addr, const struct sockaddr_in &addr2)
 	if (addr.sin_port != addr2.sin_port)
 		return false;
 	return true;
-		}
+				}
 
 
 bool operator<(const struct sockaddr_in &addr, const struct sockaddr_in &addr2)
@@ -166,7 +165,7 @@ std::string printPktOffset(unsigned int offset, void *d, unsigned int size)
 
 
 UdpLayer::UdpLayer(UdpReceiver *udpr, struct sockaddr_in &local) :
-		recv(udpr), laddr(local), errorState(0), ttl(UDP_DEF_TTL)
+				recv(udpr), laddr(local), errorState(0), ttl(UDP_DEF_TTL)
 {
 	openSocket();
 	return;
@@ -350,19 +349,19 @@ int UdpLayer::openSocket()
 	tmpaddr.sin_addr.s_addr = 0;
 	if (0 != bdnet_bind(sockfd, (struct sockaddr *) (&tmpaddr), sizeof(tmpaddr)))
 #else
-		if (0 != bdnet_bind(sockfd, (struct sockaddr *) (&laddr), sizeof(laddr)))
+	if (0 != bdnet_bind(sockfd, (struct sockaddr *) (&laddr), sizeof(laddr)))
 #endif
-		{
+	{
 #ifdef DEBUG_UDP_LAYER
-			debug << "Socket Failed to Bind to : " << laddr << std::endl;
-			debug << "Error: " << bdnet_errno() << std::endl;
+		debug << "Socket Failed to Bind to : " << laddr << std::endl;
+		debug << "Error: " << bdnet_errno() << std::endl;
 #endif
-			errorState = EADDRINUSE;
-			//exit(1);
+		errorState = EADDRINUSE;
+		//exit(1);
 
-			sockMtx.unlock(); /******** UNLOCK MUTEX *********/
-			return -1;
-		}
+		sockMtx.unlock(); /******** UNLOCK MUTEX *********/
+		return -1;
+	}
 
 	if (-1 == bdnet_fcntl(sockfd, F_SETFL, O_NONBLOCK))
 	{
@@ -400,10 +399,10 @@ int UdpLayer::openSocket()
 		bdStackMutex stack(sockMtx);   /********** LOCK MUTEX *********/
 		stopThread = false;
 	}
+
 	start();
 
 	return 1;
-
 }
 
 int UdpLayer::setTTL(int t)

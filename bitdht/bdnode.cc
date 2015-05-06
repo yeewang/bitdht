@@ -352,6 +352,9 @@ void bdNode::iteration()
 		//msgout_find_node(&id, &transId, &(id.id));
 	}
 
+	// handle
+
+
 	doStats();
 
 	//printStats(LOG << log4cpp::Priority::INFO);
@@ -491,7 +494,6 @@ void bdNode::addPeer(const bdId *id, uint32_t peerflags)
 	peer.mPeerFlags = peerflags;
 	peer.mLastRecvTime = time(NULL);
 	mStore.addStore(&peer);
-
 
 	/*
 	bdToken transId;

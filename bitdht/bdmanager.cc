@@ -223,9 +223,14 @@ void bdNodeManager::removeAllFindNode()
 		LOG.info("bdNodeManager::removeAllFindNode() %s",
 				mFns->bdPrintNodeId(&(it->first)).c_str());
 #endif
-		/* cleanup any actions */
-		clearQuery(&(it->first));
-		//clearPing(&(it->first));
+		if (it->first == mOwnId) {
+			// do nothing
+		}
+		else {
+			/* cleanup any actions */
+			clearQuery(&(it->first));
+			//clearPing(&(it->first));
+		}
 	}
 
 	/* remove all from map */
