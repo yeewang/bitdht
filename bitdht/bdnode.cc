@@ -1429,7 +1429,7 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 		break;
 	}
 	case BITDHT_MSG_TYPE_NEWCONN: {
-		bool valid = bitdht_verify(msg, len);
+		bool valid = bitdht_decrypt(msg, len);
 
 #ifdef DEBUG_NODE_MSGS
 		LOG.info("bdNode::recvPkt() NewConn from: %s is %s",
@@ -1453,7 +1453,7 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	}
 
 	case BITDHT_MSG_TYPE_REPLY_NEWCONN: {
-		bool valid = bitdht_verify(msg, len);
+		bool valid = bitdht_decrypt(msg, len);
 #ifdef DEBUG_NODE_MSGS
 		LOG.info("bdNode::recvPkt() Reply NewConn from: %s for: %s is %s",
 				mFns->bdPrintId(&srcId).c_str(), mFns->bdPrintId(&peerId).c_str(),

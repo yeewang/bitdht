@@ -63,12 +63,12 @@ uint32_t bitdht_ecrypt(char *msg, int size, int avail)
 	}
 	c.sum = c.sum % ((uint32_t)-1);
 	for (int j = 0; j < 4 && i + j < avail; i++, j++) {
-		msg[i] = c.byte[i];
+		msg[i] = c.byte[j];
 	}
 	return i;
 }
 
-bool bitdht_verify(char *msg, int size)
+bool bitdht_decrypt(char *msg, int size)
 {
 	union {
 		uint32_t sum;
