@@ -60,9 +60,10 @@
 #define DEBUG_NODE_MSGS 1
 
 
+
 bdNode::bdNode(bdNodeId *ownId,
-		std::string dhtVersion,
-		std::string bootfile,
+		const std::string dhtVersion,
+		const std::string bootfile,
 		bdDhtFunctions *fns,
 		PacketCallback *packetCallback) :
 		mOwnId(*ownId), mNodeSpace(ownId, fns), mStore(bootfile, fns),
@@ -230,7 +231,6 @@ void bdNode::iteration()
 
 	default:
 		break;
-
 	}
 
 	int allowedPings = 0.9 * maxMsgs;
@@ -318,6 +318,11 @@ void bdNode::iteration()
 					mFns->bdPrintId(&id).c_str(),
 					mFns->bdPrintNodeId(&targetNodeId).c_str());
 #endif
+
+			// report self
+//			if (id)
+//			query->result()
+
 			mCounterQueryNode++;
 			sentMsgs++;
 			sentQueries++;
@@ -353,7 +358,6 @@ void bdNode::iteration()
 	}
 
 	// handle
-
 
 	doStats();
 
@@ -495,11 +499,10 @@ void bdNode::addPeer(const bdId *id, uint32_t peerflags)
 	peer.mLastRecvTime = time(NULL);
 	mStore.addStore(&peer);
 
-	/*
+	// if addPeer was invoked, peer is active. so I can ask for own ip
 	bdToken transId;
 	genNewTransId(&transId);
 	msgout_newconn(id, &transId);
-	*/
 }
 
 #if 0
@@ -975,31 +978,30 @@ void bdNode::msgout_reply_post(bdId *id, bdToken *transId)
 
 void bdNode::msgout_newconn(const bdId *dhtId, bdToken *transId)
 {
-	// #ifdef DEBUG_NODE_MSGOUT
+#ifdef DEBUG_NODE_MSGOUT
 	std::ostringstream ss;
 	bdPrintTransId(ss, transId);
 	LOG.info("bdNode::msgout_newconn() TransId: %s To: %s",
 			ss.str().c_str(), mFns->bdPrintId(dhtId).c_str());
-	// #endif
+#endif
 
 	/* create string */
 	char msg[10240];
 	int avail = 10240;
 
 	int blen = bitdht_new_conn_msg(transId, &(mOwnId), msg, avail-1);
+	blen = bitdht_ecrypt(msg, blen, avail-1);
 	sendPkt(msg, blen, dhtId->addr);
 }
 
-void bdNode::msgout_reply_newconn(bdId *tunnelId, bdId *dhtId, bdToken *transId)
+void bdNode::msgout_reply_newconn(bdId *tunnelId, bdToken *transId)
 {
 	// #ifdef DEBUG_NODE_MSGOUT
 	std::ostringstream ss;
 	bdPrintTransId(ss, transId);
 	LOG.info("bdNode::msgout_reply_newconn() TransId: %s To: %s",
-			ss.str().c_str(), mFns->bdPrintId(dhtId).c_str());
+			ss.str().c_str(), mFns->bdPrintId(tunnelId).c_str());
 	// #endif
-
-	registerOutgoingMsg(dhtId, transId, BITDHT_MSG_TYPE_NEWCONN);
 
 	/* create string */
 	char msg[10240];
@@ -1007,7 +1009,8 @@ void bdNode::msgout_reply_newconn(bdId *tunnelId, bdId *dhtId, bdToken *transId)
 
 	int blen = bitdht_reply_new_conn_msg(transId, &(mOwnId), tunnelId,
 			msg, true, avail-1);
-	sendPkt(msg, blen, dhtId->addr);
+	blen = bitdht_ecrypt(msg, blen, avail-1);
+	sendPkt(msg, blen, tunnelId->addr);
 }
 
 void bdNode::sendPkt(char *msg, int len, struct sockaddr_in addr)
@@ -1053,7 +1056,7 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	/* convert to a be_node */
 	be_node *node = be_decoden(msg, len);
 	if (!node)
-	{LOG.info("bdNode::recvPkt() Failure to decode. Dropping Msg");
+	{
 		/* invalid decode */
 #ifdef DEBUG_NODE_PARSE
 		LOG.info("bdNode::recvPkt() Failure to decode. Dropping Msg");
@@ -1291,6 +1294,43 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 		beMsgGetUInt32(be_port, &port);
 	}
 
+	/****************** handle reply newconn ***************************/
+
+	bdId peerId;
+	if (beType == BITDHT_MSG_TYPE_REPLY_NEWCONN)
+	{
+		be_node  *be_newconn = NULL;
+		be_node  *be_pid = NULL;
+
+		be_newconn = beMsgGetDictNode(be_data, "newconn");
+		if (!be_newconn)
+		{
+#ifdef DEBUG_NODE_PARSE
+			LOG.info("bdTunnelNode::recvPkt() REPLY_NEWCONN Missing newconn. Dropping Msg");
+#endif
+			be_free(node);
+			return;
+		}
+
+		be_pid = beMsgGetDictNode(be_data, "pid");
+		if (!be_pid)
+		{
+#ifdef DEBUG_NODE_PARSE
+			LOG.info("bdTunnelNode::recvPkt() REPLY_NEWCONN Missing pid. Dropping Msg");
+#endif
+			be_free(node);
+			return;
+		}
+
+		if (!beMsgGetBdId(be_pid, peerId)) {
+#ifdef DEBUG_NODE_PARSE
+			LOG.info("bdTunnelNode::recvPkt() REPLY_NEWCONN decode pid fail. Dropping Msg");
+#endif
+			be_free(node);
+			return;
+		}
+	}
+
 	/****************** Bits Parsed Ok. Process Msg ***********************/
 	/* Construct Source Id */
 	bdId srcId(id, addr);
@@ -1389,13 +1429,17 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 		break;
 	}
 	case BITDHT_MSG_TYPE_NEWCONN: {
-//#ifdef DEBUG_NODE_MSGS
-		LOG.info("bdNode::recvPkt() NewConn from: %s",
-				mFns->bdPrintId(&srcId).c_str());
-//#endif
+		bool valid = bitdht_verify(msg, len);
+
+#ifdef DEBUG_NODE_MSGS
+		LOG.info("bdNode::recvPkt() NewConn from: %s is %s",
+				mFns->bdPrintId(&srcId).c_str(), valid ? "valid" : "invalid");
+#endif
 
 		// it have not a dhtId!!!
-		msgin_newconn(&srcId, &srcId, &transId);
+		if (valid) {
+			msgin_newconn(&srcId, &transId);
+		}
 		/*
 		std::list<bdPeer> list;
 		if (getIdFromQuery(&id, list)) {
@@ -1409,17 +1453,14 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	}
 
 	case BITDHT_MSG_TYPE_REPLY_NEWCONN: {
-//#ifdef DEBUG_NODE_MSGS
-		LOG.info("bdNode::recvPkt() Reply NewConn from: %s",
-				mFns->bdPrintId(&srcId).c_str());
-//#endif
-
-		std::list<bdPeer> list;
-		if (getIdFromQuery(&id, list)) {
-			std::list<bdPeer>::iterator it;
-			for(it = list.begin(); it != list.end(); it++) {
-				msgin_reply_newconn(&srcId,  &it->mPeerId, &transId);
-			}
+		bool valid = bitdht_verify(msg, len);
+#ifdef DEBUG_NODE_MSGS
+		LOG.info("bdNode::recvPkt() Reply NewConn from: %s for: %s is %s",
+				mFns->bdPrintId(&srcId).c_str(), mFns->bdPrintId(&peerId).c_str(),
+				valid ? "valid" : "invalid");
+#endif
+		if (valid) {
+			msgin_reply_newconn(&peerId, &transId);
 		}
 		break;
 	}
@@ -1504,28 +1545,27 @@ void bdNode::msgin_pong(bdId *id, bdToken *transId, bdToken *versionId)
 
 		/* check two bytes */
 		if ((versionId->len >= 2) && (mDhtVersion.size() >= 2) &&
-				(versionId->data[0] == mDhtVersion[0]) && (versionId->data[1] == mDhtVersion[1]))
+			(versionId->data[0] == mDhtVersion[0]) && (versionId->data[1] == mDhtVersion[1]))
 		{
 			sameDhtEngine = true;
 		}
 
 		/* check two bytes */
 		if ((versionId->len >= 4) && (mDhtVersion.size() >= 4) &&
-				(versionId->data[2] == mDhtVersion[2]) && (versionId->data[3] == mDhtVersion[3]))
+			(versionId->data[2] == mDhtVersion[2]) && (versionId->data[3] == mDhtVersion[3]))
 		{
 			sameAppl = true;
 		}
 
 		/* check two bytes */
 		if ((versionId->len >= 6) && (mDhtVersion.size() >= 6) &&
-				(versionId->data[4] == mDhtVersion[4]) && (versionId->data[5] == mDhtVersion[5]))
+			(versionId->data[4] == mDhtVersion[4]) && (versionId->data[5] == mDhtVersion[5]))
 		{
 			sameVersion = true;
 		}
 	}
 	else
 	{
-
 #ifdef DEBUG_NODE_MSGIN
 		LOG.info("bdNode::msgin_pong() No Version");
 #endif
@@ -1734,15 +1774,21 @@ void bdNode::msgin_reply_post(bdId *id, bdToken *transId)
 #endif
 }
 
-void bdNode::msgin_newconn(bdId *tunnelId, bdId *dhtId, bdToken *transId)
+void bdNode::msgin_newconn(bdId *tunnelId, bdToken *transId)
 {
-	msgout_reply_newconn(tunnelId, dhtId, transId);
+	msgout_reply_newconn(tunnelId, transId);
 	mPacketCallback->onRecvCallback(tunnelId, BITDHT_MSG_TYPE_NEWCONN);
 }
 
-void bdNode::msgin_reply_newconn(bdId *tunnelId, bdId *dhtId, bdToken *transId)
+void bdNode::msgin_reply_newconn(bdId *tunnelId, bdToken *transId)
 {
 	mPacketCallback->onRecvCallback(tunnelId, BITDHT_MSG_TYPE_REPLY_NEWCONN);
+
+	// my IP is here:tunnelId
+	msgout_ping(tunnelId, transId);
+	msgout_ping(tunnelId, transId);
+	msgout_ping(tunnelId, transId);
+	msgout_newconn(tunnelId, transId);
 }
 
 /****************** Other Functions ******************/

@@ -62,6 +62,8 @@
 #define BITDHT_VID_UT	2
 
 
+uint32_t bitdht_ecrypt(char *msg, int size, int avail);
+bool bitdht_verify(char *msg, int size);
 int bitdht_create_ping_msg(bdToken *tid, bdNodeId *id, char *msg, int avail);
 int bitdht_response_ping_msg(bdToken *tid, bdNodeId *id, bdToken *vid, char *msg, int avail); 
 int bitdht_find_node_msg(bdToken *tid, bdNodeId *id, bdNodeId *target, char *msg, int avail);

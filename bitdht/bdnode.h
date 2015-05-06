@@ -93,8 +93,9 @@ public:
 class bdNode
 {
 public:
-
-	bdNode(bdNodeId *id, std::string dhtVersion, std::string bootfile, 
+	bdNode(bdNodeId *id,
+			const std::string dhtVersion,
+			const std::string bootfile,
 			bdDhtFunctions *fns, PacketCallback *packetCallback);
 
 	/* startup / shutdown node */
@@ -119,7 +120,6 @@ public:
 	void processRemoteQuery();
 	void updateStore();
 
-
 	/* interaction with outside world */
 	int 	outgoingMsg(struct sockaddr_in *addr, char *msg, int *len);
 	void 	incomingMsg(struct sockaddr_in *addr, char *msg, int len);
@@ -127,7 +127,6 @@ public:
 	/* internal interaction with network */
 	void	sendPkt(char *msg, int len, struct sockaddr_in addr);
 	void	recvPkt(char *msg, int len, struct sockaddr_in addr);
-
 
 	/* output functions (send msg) */
 	void msgout_ping(bdId *id, bdToken *transId);
@@ -145,8 +144,8 @@ public:
 			uint32_t port, bdToken *token);
 	void msgout_reply_post(bdId *id, bdToken *transId);
 
-	void msgout_newconn(const bdId *dhtId, bdToken *transId); // this function defines in tunnel class
-	void msgout_reply_newconn(bdId *tunnelId, bdId *dhtId, bdToken *transId);
+	void msgout_newconn(const bdId *dhtId, bdToken *transId);
+	void msgout_reply_newconn(bdId *tunnelId, bdToken *transId);
 
 	/* input functions (once mesg is parsed) */
 	void msgin_ping(bdId *id, bdToken *token);
@@ -166,8 +165,8 @@ public:
 			bdNodeId *info_hash,  uint32_t port, bdToken *token);
 	void msgin_reply_post(bdId *id, bdToken *transId);
 
-	void msgin_newconn(bdId *tunnelId, bdId *dhtId, bdToken *transId);
-	void msgin_reply_newconn(bdId *tunnelId, bdId *dhtId, bdToken *transId);
+	void msgin_newconn(bdId *tunnelId, bdToken *transId);
+	void msgin_reply_newconn(bdId *tunnelId, bdToken *transId);
 
 	/* token handling */
 	void genNewToken(bdToken *token);
@@ -211,6 +210,8 @@ private:
 
 	std::list<bdNodeNetMsg *> mOutgoingMsgs;
 	std::list<bdNodeNetMsg *> mIncomingMsgs;
+
+	bdToken mSecureToken;
 
 	// Statistics.
 	double mCounterOutOfDatePing;

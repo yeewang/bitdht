@@ -50,6 +50,44 @@ bencoded = d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:y1:qe
  * #define DEBUG_MSGS 		1
  ****/
 
+uint32_t bitdht_ecrypt(char *msg, int size, int avail)
+{
+	union {
+		uint32_t sum;
+		uint8_t byte[4];
+	} c;
+	c.sum = size;
+	int i = 0;
+	for (; i < size; i++) {
+		c.sum += msg[i];
+	}
+	c.sum = c.sum % ((uint32_t)-1);
+	for (int j = 0; j < 4 && i + j < avail; i++, j++) {
+		msg[i] = c.byte[i];
+	}
+	return i;
+}
+
+bool bitdht_verify(char *msg, int size)
+{
+	union {
+		uint32_t sum;
+		uint8_t byte[4];
+	} c;
+
+	uint32_t sum = 0;
+	int i = 0;
+	for (; i < size - 4; i++) {
+		sum += msg[i];
+	}
+	sum += i;
+	sum = sum % ((uint32_t)-1);
+
+	for (int j = 0; j < 4; j++) {
+		c.byte[j] = msg[i + j];
+	}
+	return (c.sum == sum);
+}
 
 int bitdht_create_ping_msg(bdToken *tid, bdNodeId *id, char *msg, int avail)
 {
