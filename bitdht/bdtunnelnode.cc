@@ -264,7 +264,7 @@ void bdTunnelNode::msgout_newconn(bdId *dhtId, bdToken *transId)
 	char msg[10240];
 	int avail = 10240;
 
-	int blen = bitdht_new_conn_msg(transId, &(mOwnId), msg, avail-1);
+	int blen = bitdht_ask_myip_msg(transId, &(mOwnId), msg, avail-1);
 	sendPkt(msg, blen, dhtId->addr);
 }
 
@@ -281,7 +281,7 @@ void bdTunnelNode::msgout_reply_newconn(bdId *tunnelId, bdToken *transId)
 	char msg[10240];
 	int avail = 10240;
 
-	int blen = bitdht_reply_new_conn_msg(transId, &(mOwnId), tunnelId,
+	int blen = bitdht_reply_myip_msg(transId, &(mOwnId), tunnelId,
 			msg, true, avail-1);
 	sendPkt(msg, blen, tunnelId->addr);
 }

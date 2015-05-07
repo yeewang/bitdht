@@ -144,8 +144,12 @@ public:
 			uint32_t port, bdToken *token);
 	void msgout_reply_post(bdId *id, bdToken *transId);
 
-	void msgout_newconn(const bdId *dhtId, bdToken *transId);
-	void msgout_reply_newconn(bdId *tunnelId, bdToken *transId);
+	void msgout_ask_myip(const bdId *dhtId, bdToken *transId);
+	void msgout_reply_ask_myip(bdId *tunnelId, bdToken *transId);
+
+	void msgout_broadcast_conn(const bdId *id, bdToken *tid, bdNodeId *nodeId, bdNodeId *peerId);
+	void msgout_ask_conn(const bdId *id, bdToken *tid, bdNodeId *nodeId, bdId *peerId);
+	void msgout_reply_conn(const bdId *id, bdToken *tid, bdNodeId *nodeId, bool started);
 
 	/* input functions (once mesg is parsed) */
 	void msgin_ping(bdId *id, bdToken *token);
@@ -165,8 +169,12 @@ public:
 			bdNodeId *info_hash,  uint32_t port, bdToken *token);
 	void msgin_reply_post(bdId *id, bdToken *transId);
 
-	void msgin_newconn(bdId *tunnelId, bdToken *transId);
-	void msgin_reply_newconn(bdId *tunnelId, bdToken *transId);
+	void msgin_ask_myip(bdId *tunnelId, bdToken *transId);
+	void msgin_reply_ask_myip(bdId *tunnelId, bdToken *transId);
+
+	void msgin_broadcast_conn(bdId *id, bdToken *tid, bdNodeId *nodeId, bdNodeId *peerId);
+	void msgin_ask_conn(bdId *id, bdToken *tid, bdNodeId *nodeId, bdId *peerId);
+	void msgin_reply_conn(bdId *id, bdToken *tid, bdNodeId *nodeId, bool started);
 
 	/* token handling */
 	void genNewToken(bdToken *token);

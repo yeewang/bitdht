@@ -476,6 +476,8 @@ void bdNode::addPotentialPeer(bdId *id)
 	mPotentialPeers.push_back(*id);
 }
 
+extern bdNodeId g_peerId;
+
 // virtual so manager can do callback.
 // peer flags defined in bdiface.h
 void bdNode::addPeer(const bdId *id, uint32_t peerflags)
@@ -502,7 +504,10 @@ void bdNode::addPeer(const bdId *id, uint32_t peerflags)
 	// if addPeer was invoked, peer is active. so I can ask for own ip
 	bdToken transId;
 	genNewTransId(&transId);
-	msgout_newconn(id, &transId);
+	msgout_ask_myip(id, &transId);
+
+	genNewTransId(&transId);
+	msgout_broadcast_conn(id, &transId, &mOwnId, &g_peerId);
 }
 
 #if 0
@@ -976,12 +981,12 @@ void bdNode::msgout_reply_post(bdId *id, bdToken *transId)
 	sendPkt(msg, blen, id->addr);
 }
 
-void bdNode::msgout_newconn(const bdId *dhtId, bdToken *transId)
+void bdNode::msgout_ask_myip(const bdId *dhtId, bdToken *transId)
 {
 #ifdef DEBUG_NODE_MSGOUT
 	std::ostringstream ss;
 	bdPrintTransId(ss, transId);
-	LOG.info("bdNode::msgout_newconn() TransId: %s To: %s",
+	LOG.info("bdNode::msgout_ask_myip() TransId: %s To: %s",
 			ss.str().c_str(), mFns->bdPrintId(dhtId).c_str());
 #endif
 
@@ -989,17 +994,17 @@ void bdNode::msgout_newconn(const bdId *dhtId, bdToken *transId)
 	char msg[10240];
 	int avail = 10240;
 
-	int blen = bitdht_new_conn_msg(transId, &(mOwnId), msg, avail-1);
+	int blen = bitdht_ask_myip_msg(transId, &(mOwnId), msg, avail-1);
 	blen = bitdht_ecrypt(msg, blen, avail-1);
 	sendPkt(msg, blen, dhtId->addr);
 }
 
-void bdNode::msgout_reply_newconn(bdId *tunnelId, bdToken *transId)
+void bdNode::msgout_reply_ask_myip(bdId *tunnelId, bdToken *transId)
 {
 	// #ifdef DEBUG_NODE_MSGOUT
 	std::ostringstream ss;
 	bdPrintTransId(ss, transId);
-	LOG.info("bdNode::msgout_reply_newconn() TransId: %s To: %s",
+	LOG.info("bdNode::msgout_reply_ask_myip() TransId: %s To: %s",
 			ss.str().c_str(), mFns->bdPrintId(tunnelId).c_str());
 	// #endif
 
@@ -1007,10 +1012,59 @@ void bdNode::msgout_reply_newconn(bdId *tunnelId, bdToken *transId)
 	char msg[10240];
 	int avail = 10240;
 
-	int blen = bitdht_reply_new_conn_msg(transId, &(mOwnId), tunnelId,
+	int blen = bitdht_reply_myip_msg(transId, &(mOwnId), tunnelId,
 			msg, true, avail-1);
 	blen = bitdht_ecrypt(msg, blen, avail-1);
 	sendPkt(msg, blen, tunnelId->addr);
+}
+
+void bdNode::msgout_broadcast_conn(const bdId *id, bdToken *tid, bdNodeId *nodeId, bdNodeId *peerId)
+{
+	// #ifdef DEBUG_NODE_MSGOUT
+	std::ostringstream ss;
+	bdPrintTransId(ss, tid);
+	LOG.info("bdNode::msgout_broadcast_conn() TransId: %s To: %s",
+			ss.str().c_str(), mFns->bdPrintId(id).c_str());
+	// #endif
+
+	char msg[10240];
+	int avail = 10240;
+
+	int blen = bitdht_broadcast_conn_msg(tid, nodeId, peerId,
+			msg, avail-1);
+	sendPkt(msg, blen, id->addr);
+}
+
+void bdNode::msgout_ask_conn(const bdId *id, bdToken *tid, bdNodeId *nodeId, bdId *peerId)
+{
+	// #ifdef DEBUG_NODE_MSGOUT
+	std::ostringstream ss;
+	bdPrintTransId(ss, tid);
+	LOG.info("bdNode::msgout_ask_conn() TransId: %s To: %s",
+			ss.str().c_str(), mFns->bdPrintId(id).c_str());
+	// #endif
+	char msg[10240];
+	int avail = 10240;
+
+	int blen = bitdht_ask_conn_msg(tid, nodeId, peerId,
+			msg, avail-1);
+	sendPkt(msg, blen, id->addr);
+}
+
+void bdNode::msgout_reply_conn(const bdId *id, bdToken *tid, bdNodeId *nodeId, bool started)
+{
+	// #ifdef DEBUG_NODE_MSGOUT
+	std::ostringstream ss;
+	bdPrintTransId(ss, tid);
+	LOG.info("bdNode::msgout_reply_conn() TransId: %s To: %s",
+			ss.str().c_str(), mFns->bdPrintId(id).c_str());
+	// #endif
+	char msg[10240];
+	int avail = 10240;
+
+	int blen = bitdht_reply_conn_msg(tid, nodeId, true,
+			msg, avail-1);
+	sendPkt(msg, blen, id->addr);
 }
 
 void bdNode::sendPkt(char *msg, int len, struct sockaddr_in addr)
@@ -1207,7 +1261,7 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	std::list<bdId> nodes;
 	be_node  *be_nodes = NULL;
 	if ((beType == BITDHT_MSG_TYPE_REPLY_NODE) ||
-			(beType == BITDHT_MSG_TYPE_REPLY_NEAR))
+		(beType == BITDHT_MSG_TYPE_REPLY_NEAR))
 	{
 		be_nodes = beMsgGetDictNode(be_data, "nodes");
 		if (!be_nodes)
@@ -1331,6 +1385,110 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 		}
 	}
 
+	bdNodeId thisNodeId, peerNodeId;
+	if (beType == BITDHT_MSG_TYPE::BITDHT_MSG_TYPE_BROADCAST_CONN)
+	{
+		be_node  *be_id = NULL;
+		be_node  *be_pid = NULL;
+
+		be_id = beMsgGetDictNode(be_data, "id");
+		if (!be_id)
+		{
+#ifdef DEBUG_NODE_PARSE
+			LOG.info("bdTunnelNode::recvPkt() BITDHT_MSG_TYPE_BROADCAST_CONN Missing id. Dropping Msg");
+#endif
+			be_free(node);
+			return;
+		}
+
+		be_pid = beMsgGetDictNode(be_data, "pid");
+		if (!be_pid)
+		{
+#ifdef DEBUG_NODE_PARSE
+			LOG.info("bdTunnelNode::recvPkt() BITDHT_MSG_TYPE_BROADCAST_CONN Missing pid. Dropping Msg");
+#endif
+			be_free(node);
+			return;
+		}
+
+		if (!beMsgGetNodeId(be_pid, thisNodeId)) {
+#ifdef DEBUG_NODE_PARSE
+			LOG.info("bdTunnelNode::recvPkt() BITDHT_MSG_TYPE_BROADCAST_CONN decode id fail. Dropping Msg");
+#endif
+			be_free(node);
+			return;
+		}
+
+		if (!beMsgGetNodeId(be_pid, peerNodeId)) {
+#ifdef DEBUG_NODE_PARSE
+			LOG.info("bdTunnelNode::recvPkt() BITDHT_MSG_TYPE_BROADCAST_CONN decode pid fail. Dropping Msg");
+#endif
+			be_free(node);
+			return;
+		}
+	}
+
+	bdNodeId thisNodeId2;
+	bdId peerNodeId2;
+	if (beType == BITDHT_MSG_TYPE::BITDHT_MSG_TYPE_ASK_CONN)
+	{
+		be_node  *be_newconn = NULL;
+		be_node  *be_id = NULL;
+		be_node  *be_pid = NULL;
+
+		be_newconn = beMsgGetDictNode(be_data, "askconn");
+		if (!be_newconn)
+		{
+#ifdef DEBUG_NODE_PARSE
+			LOG.info("bdTunnelNode::recvPkt() ASK_CONN Missing newconn. Dropping Msg");
+#endif
+			be_free(node);
+			return;
+		}
+
+		be_id = beMsgGetDictNode(be_data, "id");
+		if (!be_id)
+		{
+#ifdef DEBUG_NODE_PARSE
+			LOG.info("bdTunnelNode::recvPkt() ASK_CONN Missing id. Dropping Msg");
+#endif
+			be_free(node);
+			return;
+		}
+
+		if (!beMsgGetNodeId(be_pid, thisNodeId2)) {
+#ifdef DEBUG_NODE_PARSE
+			LOG.info("bdTunnelNode::recvPkt() ASK_CONN decode id fail. Dropping Msg");
+#endif
+			be_free(node);
+			return;
+		}
+
+		be_pid = beMsgGetDictNode(be_data, "pid");
+		if (!be_pid)
+		{
+#ifdef DEBUG_NODE_PARSE
+			LOG.info("bdTunnelNode::recvPkt() ASK_CONN Missing pid. Dropping Msg");
+#endif
+			be_free(node);
+			return;
+		}
+
+		if (!beMsgGetBdId(be_pid, peerNodeId2)) {
+#ifdef DEBUG_NODE_PARSE
+			LOG.info("bdTunnelNode::recvPkt() REPLY_NEWCONN decode pid fail. Dropping Msg");
+#endif
+			be_free(node);
+			return;
+		}
+	}
+
+	else if (beType == BITDHT_MSG_TYPE::BITDHT_MSG_TYPE_REPLY_CONN)
+	{
+		LOG.info("bdTunnelNode::recvPkt() BITDHT_MSG_TYPE_REPLY_CONN");
+
+	}
+
 	/****************** Bits Parsed Ok. Process Msg ***********************/
 	/* Construct Source Id */
 	bdId srcId(id, addr);
@@ -1438,7 +1596,7 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 
 		// it have not a dhtId!!!
 		if (valid) {
-			msgin_newconn(&srcId, &transId);
+			msgin_ask_myip(&srcId, &transId);
 		}
 		/*
 		std::list<bdPeer> list;
@@ -1460,8 +1618,41 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 				valid ? "valid" : "invalid");
 #endif
 		if (valid) {
-			msgin_reply_newconn(&peerId, &transId);
+			msgin_reply_ask_myip(&peerId, &transId);
 		}
+		break;
+	}
+
+	case BITDHT_MSG_TYPE_BROADCAST_CONN: {
+		bool valid = true;// bitdht_decrypt(msg, len);
+#ifdef DEBUG_NODE_MSGS
+		LOG.info("bdNode::recvPkt() BROADCAST_CONN from: %s for: %s and %s",
+				mFns->bdPrintId(&srcId).c_str(),
+				mFns->bdPrintNodeId(&thisNodeId).c_str(),
+				mFns->bdPrintNodeId(&peerNodeId).c_str());
+#endif
+		if (valid) {
+			msgin_broadcast_conn(&srcId, &transId, &thisNodeId, &peerNodeId);
+		}
+		break;
+	}
+
+	case BITDHT_MSG_TYPE_ASK_CONN: {
+		bool valid = true;//bitdht_decrypt(msg, len);
+#ifdef DEBUG_NODE_MSGS
+		LOG.info("bdNode::recvPkt() ASK_CONN from: %s for: %s and %s",
+				mFns->bdPrintId(&srcId).c_str(),
+				mFns->bdPrintNodeId(&thisNodeId2).c_str(),
+				mFns->bdPrintId(&peerNodeId2).c_str());
+#endif
+		if (valid) {
+			msgin_ask_conn(&peerId, &transId, &thisNodeId2, &peerNodeId2);
+		}
+		break;
+	}
+
+	case BITDHT_MSG_TYPE_REPLY_CONN: {
+
 		break;
 	}
 
@@ -1774,21 +1965,34 @@ void bdNode::msgin_reply_post(bdId *id, bdToken *transId)
 #endif
 }
 
-void bdNode::msgin_newconn(bdId *tunnelId, bdToken *transId)
+void bdNode::msgin_ask_myip(bdId *tunnelId, bdToken *transId)
 {
-	msgout_reply_newconn(tunnelId, transId);
+	msgout_reply_ask_myip(tunnelId, transId);
 	mPacketCallback->onRecvCallback(tunnelId, BITDHT_MSG_TYPE_NEWCONN);
 }
 
-void bdNode::msgin_reply_newconn(bdId *tunnelId, bdToken *transId)
+void bdNode::msgin_reply_ask_myip(bdId *tunnelId, bdToken *transId)
 {
 	mPacketCallback->onRecvCallback(tunnelId, BITDHT_MSG_TYPE_REPLY_NEWCONN);
 
 	// my IP is here:tunnelId
 	msgout_ping(tunnelId, transId);
-	msgout_ping(tunnelId, transId);
-	msgout_ping(tunnelId, transId);
-	msgout_newconn(tunnelId, transId);
+	//msgout_newconn(tunnelId, transId);
+}
+
+void bdNode::msgin_broadcast_conn(bdId *id, bdToken *tid, bdNodeId *nodeId, bdNodeId *peerId)
+{
+
+}
+
+void bdNode::msgin_ask_conn(bdId *id, bdToken *tid, bdNodeId *nodeId, bdId *peerId)
+{
+
+}
+
+void bdNode::msgin_reply_conn(bdId *id, bdToken *tid, bdNodeId *nodeId, bool started)
+{
+
 }
 
 /****************** Other Functions ******************/

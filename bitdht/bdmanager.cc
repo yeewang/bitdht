@@ -159,6 +159,9 @@ void bdNodeManager::addFindNode(bdNodeId *id, uint32_t qflags)
 	LOG.info("bdNodeManager::addFindNode() Added QueryPeer as READY....");
 #endif
 	//addQuery(id, qflags | BITDHT_QFLAGS_DISGUISE);
+
+
+
 	return;
 }
 
@@ -941,7 +944,7 @@ int bdDebugCallback::dhtPeerCallback(const bdNodeId *id, uint32_t status)
 {
 	std::ostringstream ss;
 	bdStdPrintNodeId(ss, id);
-	LOG.info("bdDebugCallback::dhtPeerCallback() Id: %s  status: %x", ss.str().c_str(), status);
+	LOG.info("bdDebugCallback::dhtPeerCallback() Id: %s status: %x", ss.str().c_str(), status);
 	return 1;
 }
 

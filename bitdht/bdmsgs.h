@@ -34,19 +34,23 @@
 #include "bitdht/bdobj.h"
 #include "bitdht/bdpeer.h"
 
-#define BITDHT_MSG_TYPE_UNKNOWN         0
-#define BITDHT_MSG_TYPE_PING            1
-#define BITDHT_MSG_TYPE_PONG            2
-#define BITDHT_MSG_TYPE_FIND_NODE       3
-#define BITDHT_MSG_TYPE_REPLY_NODE      4
-#define BITDHT_MSG_TYPE_GET_HASH        5
-#define BITDHT_MSG_TYPE_REPLY_HASH      6
-#define BITDHT_MSG_TYPE_REPLY_NEAR      7
-#define BITDHT_MSG_TYPE_POST_HASH       8
-#define BITDHT_MSG_TYPE_REPLY_POST      9
-#define BITDHT_MSG_TYPE_NEWCONN        	10
-#define BITDHT_MSG_TYPE_REPLY_NEWCONN  	11
-
+enum BITDHT_MSG_TYPE {
+	BITDHT_MSG_TYPE_UNKNOWN =        0,
+	BITDHT_MSG_TYPE_PING =           1,
+	BITDHT_MSG_TYPE_PONG =           2,
+	BITDHT_MSG_TYPE_FIND_NODE =      3,
+	BITDHT_MSG_TYPE_REPLY_NODE =     4,
+	BITDHT_MSG_TYPE_GET_HASH =       5,
+	BITDHT_MSG_TYPE_REPLY_HASH =     6,
+	BITDHT_MSG_TYPE_REPLY_NEAR =     7,
+	BITDHT_MSG_TYPE_POST_HASH =      8,
+	BITDHT_MSG_TYPE_REPLY_POST =     9,
+	BITDHT_MSG_TYPE_NEWCONN =        10,
+	BITDHT_MSG_TYPE_REPLY_NEWCONN =  11,
+	BITDHT_MSG_TYPE_BROADCAST_CONN = 12,
+	BITDHT_MSG_TYPE_ASK_CONN =     	 13,
+	BITDHT_MSG_TYPE_REPLY_CONN =     14,
+};
 
 #define BITDHT_COMPACTNODEID_LEN 	26
 #define BITDHT_COMPACTPEERID_LEN 	6
@@ -81,9 +85,15 @@ int bitdht_announce_peers_msg(bdToken *tid, bdNodeId *id, bdNodeId *info_hash,
 			uint32_t port, bdToken *token, char *msg, int avail);
 int bitdht_reply_announce_msg(bdToken *tid, bdNodeId *id,         
                                         char *msg, int avail);
-int bitdht_new_conn_msg(bdToken *tid, bdNodeId *id, char *msg, int avail);
-int bitdht_reply_new_conn_msg(bdToken *tid, bdNodeId *id, bdId *peerId,
+int bitdht_ask_myip_msg(bdToken *tid, bdNodeId *id, char *msg, int avail);
+int bitdht_reply_myip_msg(bdToken *tid, bdNodeId *id, bdId *peerId,
 		char *msg, bool started, int avail);
+int bitdht_broadcast_conn_msg(bdToken *tid, bdNodeId *id, bdNodeId *peerId,
+		char *msg, int avail);
+int bitdht_ask_conn_msg(bdToken *tid, bdNodeId *id, bdId *peerId,
+		char *msg, int avail);
+int bitdht_reply_conn_msg(bdToken *tid, bdNodeId *id, bool started,
+		char *msg, int avail);
 
 //int response_peers_message()
 //int response_closestnodes_message()
@@ -98,7 +108,7 @@ uint32_t convertBdVersionToVID(bdVersion *version);
 
 be_node *makeCompactBdIdString(bdId &id);
 be_node *makeCompactPeerIds(std::list<std::string> &values);
-be_node *makeCompactNodeIdString(std::list<bdId> &nodes);
+be_node *makeCompactIdListString(std::list<bdId> &nodes);
 
 int beMsgGetToken(be_node *n, bdToken &token);
 int beMsgGetNodeId(be_node *n, bdNodeId &nodeId);
