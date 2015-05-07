@@ -88,9 +88,9 @@ int bitdht_reply_announce_msg(bdToken *tid, bdNodeId *id,
 int bitdht_ask_myip_msg(bdToken *tid, bdNodeId *id, char *msg, int avail);
 int bitdht_reply_myip_msg(bdToken *tid, bdNodeId *id, bdId *peerId,
 		char *msg, bool started, int avail);
-int bitdht_broadcast_conn_msg(bdToken *tid, bdNodeId *id, bdNodeId *peerId,
+int bitdht_broadcast_conn_msg(bdToken *tid, bdNodeId *id, bdNodeId *nodeId, bdNodeId *peerId,
 		char *msg, int avail);
-int bitdht_ask_conn_msg(bdToken *tid, bdNodeId *id, bdId *peerId,
+int bitdht_ask_conn_msg(bdToken *tid, bdNodeId *id, bdNodeId *nodeId, bdId *peerId,
 		char *msg, int avail);
 int bitdht_reply_conn_msg(bdToken *tid, bdNodeId *id, bool started,
 		char *msg, int avail);

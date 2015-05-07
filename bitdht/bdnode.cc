@@ -1023,14 +1023,16 @@ void bdNode::msgout_broadcast_conn(const bdId *id, bdToken *tid, bdNodeId *nodeI
 	// #ifdef DEBUG_NODE_MSGOUT
 	std::ostringstream ss;
 	bdPrintTransId(ss, tid);
-	LOG.info("bdNode::msgout_broadcast_conn() TransId: %s To: %s",
-			ss.str().c_str(), mFns->bdPrintId(id).c_str());
+	LOG.info("bdNode::msgout_broadcast_conn() TransId: %s To: %s for %s and %s",
+			ss.str().c_str(), mFns->bdPrintId(id).c_str(),
+			mFns->bdPrintNodeId(nodeId).c_str(),
+			mFns->bdPrintNodeId(peerId).c_str());
 	// #endif
 
 	char msg[10240];
 	int avail = 10240;
 
-	int blen = bitdht_broadcast_conn_msg(tid, nodeId, peerId,
+	int blen = bitdht_broadcast_conn_msg(tid, &(mOwnId), nodeId, peerId,
 			msg, avail-1);
 	sendPkt(msg, blen, id->addr);
 }
@@ -1046,7 +1048,7 @@ void bdNode::msgout_ask_conn(const bdId *id, bdToken *tid, bdNodeId *nodeId, bdI
 	char msg[10240];
 	int avail = 10240;
 
-	int blen = bitdht_ask_conn_msg(tid, nodeId, peerId,
+	int blen = bitdht_ask_conn_msg(tid, &(mOwnId), nodeId, peerId,
 			msg, avail-1);
 	sendPkt(msg, blen, id->addr);
 }

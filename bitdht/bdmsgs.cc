@@ -559,7 +559,7 @@ bencoded = d1:rd2:id20:mnopqrstuvwxyz123456e1:t2:aa1:y1:re
 
 	A: I am id, I ask to connect peerId.
  */
-int bitdht_broadcast_conn_msg(bdToken *tid, bdNodeId *id, bdNodeId *peerId,
+int bitdht_broadcast_conn_msg(bdToken *tid, bdNodeId *id, bdNodeId *nodeId, bdNodeId *peerId,
 		char *msg, int avail)
 {
 #ifdef DEBUG_MSGS
@@ -575,9 +575,11 @@ int bitdht_broadcast_conn_msg(bdToken *tid, bdNodeId *id, bdNodeId *peerId,
 	be_node *ask = be_create_str("brconn");
 	be_node *qynode = be_create_str("q");
 
+	be_node *nidnode = be_create_str_wlen((char *) nodeId->data, BITDHT_KEY_LEN);
 	be_node *pidnode = be_create_str_wlen((char *) peerId->data, BITDHT_KEY_LEN);
 
 	be_add_keypair(iddict, "id", idnode);
+	be_add_keypair(iddict, "nid", nidnode);
 	be_add_keypair(iddict, "pid", pidnode);
 
 	be_add_keypair(dict, "a", iddict);
@@ -600,7 +602,7 @@ int bitdht_broadcast_conn_msg(bdToken *tid, bdNodeId *id, bdNodeId *peerId,
 /*
 B: Hi nodeId! peerId with IP want to connect you.
 */
-int bitdht_ask_conn_msg(bdToken *tid, bdNodeId *id, bdId *peerId,
+int bitdht_ask_conn_msg(bdToken *tid, bdNodeId *id, bdNodeId *nodeId, bdId *peerId,
 		char *msg, int avail)
 {
 #ifdef DEBUG_MSGS
@@ -616,9 +618,11 @@ int bitdht_ask_conn_msg(bdToken *tid, bdNodeId *id, bdId *peerId,
 	be_node *yqrnode = be_create_str("q");
 
 	be_node *ask = be_create_str("askconn");
+	be_node *nidnode = be_create_str_wlen((char *) nodeId->data, BITDHT_KEY_LEN);
 	be_node *pidnode = makeCompactBdIdString(*peerId);
 
 	be_add_keypair(iddict, "id", idnode);
+	be_add_keypair(iddict, "nid", nidnode);
 	be_add_keypair(iddict, "pid", pidnode);
 
 	be_add_keypair(dict, "a", iddict);
