@@ -1393,7 +1393,7 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 		be_node  *be_id = NULL;
 		be_node  *be_pid = NULL;
 
-		be_id = beMsgGetDictNode(be_data, "id");
+		be_id = beMsgGetDictNode(be_data, "nid");
 		if (!be_id)
 		{
 #ifdef DEBUG_NODE_PARSE
@@ -1448,7 +1448,7 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 			return;
 		}
 
-		be_id = beMsgGetDictNode(be_data, "id");
+		be_id = beMsgGetDictNode(be_data, "nid");
 		if (!be_id)
 		{
 #ifdef DEBUG_NODE_PARSE
