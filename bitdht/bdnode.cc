@@ -1413,7 +1413,7 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 			return;
 		}
 
-		if (!beMsgGetNodeId(be_pid, thisNodeId)) {
+		if (!beMsgGetNodeId(be_id, thisNodeId)) {
 #ifdef DEBUG_NODE_PARSE
 			LOG.info("bdTunnelNode::recvPkt() BITDHT_MSG_TYPE_BROADCAST_CONN decode id fail. Dropping Msg");
 #endif
@@ -1458,7 +1458,7 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 			return;
 		}
 
-		if (!beMsgGetNodeId(be_pid, thisNodeId2)) {
+		if (!beMsgGetNodeId(be_id, thisNodeId2)) {
 #ifdef DEBUG_NODE_PARSE
 			LOG.info("bdTunnelNode::recvPkt() ASK_CONN decode id fail. Dropping Msg");
 #endif
