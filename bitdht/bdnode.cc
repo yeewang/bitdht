@@ -364,9 +364,26 @@ void bdNode::iteration()
 	}
 
 	static int broadcast_count = 0;
-	if (broadcast_count++ % 10 == 0) {
+	broadcast_count++;
+
+	if (broadcast_count % 10 == 0) {
 		broadcastPeers();
 	}
+
+	if (broadcast_count % 2 == 0) {
+		std::list<bdId>::iterator it;
+		for(it = mPunching.begin(); it != mPunching.end(); it++) {
+			bdToken transId;
+			genNewTransId(&transId);
+			msgout_ping(&(*it), &transId);
+
+#ifdef DEBUG_NODE_MSGS
+		LOG.info("bdNode::iteration() Punching Peer: %s",
+				mFns->bdPrintId(&(*it)).c_str());
+#endif
+		}
+	}
+
 
 	// handle
 
@@ -1467,19 +1484,8 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 	bdId peerNodeId2;
 	if (beType == BITDHT_MSG_TYPE::BITDHT_MSG_TYPE_ASK_CONN)
 	{
-		be_node  *be_newconn = NULL;
 		be_node  *be_id = NULL;
 		be_node  *be_pid = NULL;
-
-		be_newconn = beMsgGetDictNode(be_data, "askconn");
-		if (!be_newconn)
-		{
-#ifdef DEBUG_NODE_PARSE
-			LOG.info("bdTunnelNode::recvPkt() ASK_CONN Missing newconn. Dropping Msg");
-#endif
-			be_free(node);
-			return;
-		}
 
 		be_id = beMsgGetDictNode(be_data, "nid");
 		if (!be_id)
@@ -1681,7 +1687,7 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 				mFns->bdPrintId(&peerNodeId2).c_str());
 #endif
 		if (valid) {
-			msgin_ask_conn(&peerId, &transId, &thisNodeId2, &peerNodeId2);
+			msgin_ask_conn(&srcId, &transId, &thisNodeId2, &peerNodeId2);
 		}
 		break;
 	}
@@ -2065,15 +2071,35 @@ void bdNode::msgin_broadcast_conn(
 void bdNode::msgin_ask_conn(
 		bdId *id, bdToken *tid, bdNodeId *nodeId, bdId *peerId)
 {
+//#ifdef DEBUG_NODE_ACTIONS
+	LOG.info("bdNode::msgin_ask_conn() from: %s for: %s and %s",
+			mFns->bdPrintId(id).c_str(),
+			mFns->bdPrintNodeId(nodeId).c_str(),
+			mFns->bdPrintId(peerId).c_str());
+//#endif
 	if (mOwnId == *nodeId) {
 		// found!!!
-		bdToken transId;
-		genNewTransId(&transId);
-		msgout_ping(peerId, &transId);
+		int count = 0;
+		std::list<bdId>::iterator it;
+		for(it = mPunching.begin(); it != mPunching.end(); it++) {
+			if (it->id == peerId->id &&
+				it->addr.sin_family == peerId->addr.sin_family &&
+				memcmp(&it->addr.sin_addr, &peerId->addr.sin_addr, sizeof(it->addr.sin_addr)) == 0 &&
+				it->addr.sin_port == peerId->addr.sin_port) {
+				count++;
+				break;
+			}
+		}
+		if (count == 0) {
+			mPunching.push_back(*peerId);
+		}
+
+		LOG.info("bdNode::ddddddddddddddddddddddddddddddddddddd()");
 		return;
 	}
 	else {
 		// msgout_reply_conn(id, tid, &peerId->id, true);
+		LOG.info("bdNode::eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee()");
 	}
 }
 

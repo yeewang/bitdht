@@ -220,6 +220,7 @@ private:
 
 	std::map<bdNodeId, bdNodeId> mConnectRequests;
 	std::map<bdNodeId, struct sockaddr_in> mPeerAddrs;
+	std::list<bdId> mPunching;
 
 	std::list<bdNodeNetMsg *> mOutgoingMsgs;
 	std::list<bdNodeNetMsg *> mIncomingMsgs;

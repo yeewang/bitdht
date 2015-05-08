@@ -563,7 +563,7 @@ int bitdht_broadcast_conn_msg(bdToken *tid, bdNodeId *id, bdNodeId *nodeId, bdNo
 		char *msg, int avail)
 {
 #ifdef DEBUG_MSGS
-	LOG.info("bitdht_ask_conn_msg()\n");
+	LOG.info("bitdht_broadcast_conn_msg()\n");
 #endif
 
 	be_node *dict = be_create_dict();
@@ -606,7 +606,7 @@ int bitdht_ask_conn_msg(bdToken *tid, bdNodeId *id, bdNodeId *nodeId, bdId *peer
 		char *msg, int avail)
 {
 #ifdef DEBUG_MSGS
-	LOG.info("bitdht_reply_conn_msg()\n");
+	LOG.info("bitdht_ask_conn_msg()\n");
 #endif
 
 	be_node *dict = be_create_dict();
