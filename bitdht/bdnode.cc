@@ -142,6 +142,12 @@ void bdNode::printQueries()
 	LOG.info(("bdNode::printQueries() for Peer: " +
 			mFns->bdPrintNodeId(&mOwnId)).c_str());
 
+	std::list<sockaddr_in>::iterator itp;
+	for (itp = mMyIPs.begin(); itp != mMyIPs.end(); itp++) {
+		LOG.info("bdNode::printQueries() my IP is %s:%d",
+				inet_ntoa(itp->sin_addr), htons(itp->sin_port));
+	}
+
 	int i = 0;
 	std::list<bdQuery *>::iterator it;
 	for(it = mLocalQueries.begin(); it != mLocalQueries.end(); it++, i++)
@@ -2005,7 +2011,19 @@ void bdNode::msgin_reply_ask_myip(bdId *tunnelId, bdToken *transId)
 	mPacketCallback->onRecvCallback(tunnelId, BITDHT_MSG_TYPE_REPLY_NEWCONN);
 
 	if (mOwnId == tunnelId->id) {
-		mLikelyOwnId = *tunnelId;
+		int count = 0;
+		std::list<sockaddr_in>::iterator itp;
+		for (itp = mMyIPs.begin(); itp != mMyIPs.end(); itp++) {
+			if (itp->sin_family == tunnelId->addr.sin_family &&
+				memcmp(&itp->sin_addr, &tunnelId->addr.sin_addr, sizeof(itp->sin_addr)) == 0 &&
+				itp->sin_port == tunnelId->addr.sin_port) {
+				count++;
+				break;
+			};
+		}
+		if (count == 0) {
+			mMyIPs.push_back(tunnelId->addr);
+		}
 	}
 
 	// my IP is here:tunnelId

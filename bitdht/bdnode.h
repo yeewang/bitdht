@@ -200,7 +200,7 @@ public:
 
 protected:
 	bdNodeId mOwnId;
-	bdId 	mLikelyOwnId; // Try to workout own id address.
+	std::list<sockaddr_in> mMyIPs;
 	bdSpace mNodeSpace;
 
 private:
