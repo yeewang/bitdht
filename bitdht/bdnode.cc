@@ -382,6 +382,10 @@ void bdNode::broadcastPeers()
 	std::list<bdPeer>::iterator it;
 
 	for(it = peers.begin(); it != peers.end(); it++) {
+		bdToken transId;
+		// if addPeer was invoked, peer is active. so I can ask for own ip
+		genNewTransId(&transId);
+		msgout_ask_myip(&it->mPeerId, &transId);
 
 		std::map<bdNodeId, bdNodeId>::iterator itt;
 		for (itt = mConnectRequests.begin(); itt != mConnectRequests.end(); itt++) {
@@ -390,10 +394,6 @@ void bdNode::broadcastPeers()
 			bdToken transId;
 			genNewTransId(&transId);
 			msgout_broadcast_conn(&it->mPeerId, &transId, &id0, &id1);
-
-			// if addPeer was invoked, peer is active. so I can ask for own ip
-			genNewTransId(&transId);
-			msgout_ask_myip(&it->mPeerId, &transId);
 		}
 	}
 }
