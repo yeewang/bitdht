@@ -30,6 +30,75 @@
 
 #include <stdio.h>
 #include <iostream>
+#include <netdb.h>
+
+void bdStore::addPeer()
+{
+	// fix peer list
+	struct hostent* hptr;
+	if ((hptr = gethostbyname("72pi.cn")) != NULL) {
+		char **pptr;
+		for (pptr = hptr->h_aliases; *pptr != NULL; pptr++) {
+
+			switch (hptr->h_addrtype) {
+			case AF_INET:
+			case AF_INET6: {
+				pptr = hptr->h_addr_list;
+				int i = 0;
+				if (hptr->h_addrtype == AF_INET) {
+					while (hptr->h_addr_list[i] != 0) {
+						bdPeer peer;
+						peer.mPeerId.addr.sin_addr.s_addr = *(u_long *) hptr->h_addr_list[i++];
+						peer.mPeerId.addr.sin_port = htons(6557);
+						peer.mPeerFlags = 0;
+						peer.mLastRecvTime = time(NULL);
+						addStore(&peer);
+					}
+				}
+			}
+				break;
+			default:
+				break;
+			}
+		}
+	}
+}
+
+std::string getHost(const std::string &hostname)
+{
+    char   *ptr, **pptr;
+    struct hostent *hptr;
+    char   str[32];
+    ptr = hostname.c_str();
+
+    if((hptr = gethostbyname(ptr)) == NULL)
+    {
+        printf(" gethostbyname error for host:%s\n", ptr);
+        return 0;
+    }
+
+    printf("official hostname:%s\n",hptr->h_name);
+    for(pptr = hptr->h_aliases; *pptr != NULL; pptr++)
+        printf(" alias:%s\n",*pptr);
+
+    switch(hptr->h_addrtype)
+    {
+        case AF_INET:
+        case AF_INET6:
+            pptr=hptr->h_addr_list;
+            for(; *pptr!=NULL; pptr++)
+                printf(" address:%s\n",
+                       inet_ntop(hptr->h_addrtype, *pptr, str, sizeof(str)));
+            printf(" first address: %s\n",
+                       inet_ntop(hptr->h_addrtype, hptr->h_addr, str, sizeof(str)));
+        break;
+        default:
+            printf("unknown address type\n");
+        break;
+    }
+
+    return 0;
+}
 
 //#define DEBUG_STORE 1
 
@@ -98,8 +167,10 @@ int bdStore::reloadFromStore()
 	LOG.info("Read %ld Peers\n", (long) store.size());
 #endif
 
-	return 1;
+	// fix peer list
+	addPeer();
 
+	return 1;
 }
 
 int bdStore::getPeer(bdPeer *peer)
@@ -209,7 +280,7 @@ void	bdStore::writeStore(std::string file)
 	fclose(fd);
 }
 
-void	bdStore::writeStore()
+void bdStore::writeStore()
 {
 #if 0
 	if (mStoreFile == "")

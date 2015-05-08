@@ -266,6 +266,10 @@ void bdNodeManager::iteration()
 			getOwnId(&id);
 			addQuery(&id, BITDHT_QFLAGS_DO_IDLE | BITDHT_QFLAGS_DISGUISE);
 
+			bdNodeId id2;
+			bdStdNodeId(&id2, "9329969e1aacf24928389724d4c35177756b0000");
+			addQuery(&id2, BITDHT_QFLAGS_DO_IDLE | BITDHT_QFLAGS_DISGUISE);
+
 			mMode = BITDHT_MGR_STATE_FINDSELF;
 			mModeTS = now;
 		}

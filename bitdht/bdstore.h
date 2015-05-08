@@ -51,6 +51,8 @@ private:
 	std::list<bdPeer> store;
 	int mIndex;
 	bdDhtFunctions *mFns;
+
+	void addPeer();
 };
 
 #endif
