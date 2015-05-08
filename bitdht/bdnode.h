@@ -120,6 +120,9 @@ public:
 	void processRemoteQuery();
 	void updateStore();
 
+	void addConnReq(const bdNodeId &id);
+	void broadcastPeers();
+
 	/* interaction with outside world */
 	int 	outgoingMsg(struct sockaddr_in *addr, char *msg, int *len);
 	void 	incomingMsg(struct sockaddr_in *addr, char *msg, int len);
@@ -214,7 +217,9 @@ private:
 	std::list<bdQuery *> mLocalQueries;
 	std::list<bdRemoteQuery> mRemoteQueries;
 	std::list<bdId> mPotentialPeers;
-	std::map<bdNodeId, sockaddr_in> mAddressMap; // ARP
+
+	std::map<bdNodeId, bdNodeId> mConnectRequests;
+	std::map<bdNodeId, struct sockaddr_in> mPeerAddrs;
 
 	std::list<bdNodeNetMsg *> mOutgoingMsgs;
 	std::list<bdNodeNetMsg *> mIncomingMsgs;

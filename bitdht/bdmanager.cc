@@ -128,7 +128,6 @@ uint32_t bdNodeManager::statsBDVersionSize()
 	return mBdNetworkSize;
 }
 
-
 void bdNodeManager::addFindNode(bdNodeId *id, uint32_t qflags)
 {
 #ifdef DEBUG_MGR
@@ -161,7 +160,7 @@ void bdNodeManager::addFindNode(bdNodeId *id, uint32_t qflags)
 	//addQuery(id, qflags | BITDHT_QFLAGS_DISGUISE);
 
 
-
+	bdNode::addConnReq(*id);
 	return;
 }
 

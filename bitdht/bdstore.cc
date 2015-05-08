@@ -34,7 +34,7 @@
 //#define DEBUG_STORE 1
 
 bdStore::bdStore(std::string file, bdDhtFunctions *fns)
-	:mFns(fns)
+:mFns(fns)
 {
 #ifdef DEBUG_STORE
 	LOG << log4cpp::Priority::INFO << "bdStore::bdStore(" << file << ")";
@@ -64,7 +64,7 @@ int bdStore::reloadFromStore()
 		LOG.info("Failed to Open File: %s ... No Peers\n", mStoreFile.c_str());
 		return 0;
 	}
-		
+
 
 	char line[10240];
 	char addr_str[10240];
@@ -102,7 +102,7 @@ int bdStore::reloadFromStore()
 
 }
 
-int 	bdStore::getPeer(bdPeer *peer)
+int bdStore::getPeer(bdPeer *peer)
 {
 #ifdef DEBUG_STORE
 	LOG.info("bdStore::getPeer() %ld Peers left\n", (long) store.size());
@@ -122,7 +122,7 @@ int 	bdStore::getPeer(bdPeer *peer)
 
 #define MAX_ENTRIES 1000
 
-	/* maintain a sorted list */
+/* maintain a sorted list */
 void	bdStore::addStore(bdPeer *peer)
 {
 #ifdef DEBUG_STORE
@@ -138,7 +138,7 @@ void	bdStore::addStore(bdPeer *peer)
 	for(it = store.begin(); it != store.end(); )
 	{
 		if ((it->mPeerId.addr.sin_addr.s_addr == peer->mPeerId.addr.sin_addr.s_addr) &&
-		    (it->mPeerId.addr.sin_port == peer->mPeerId.addr.sin_port))
+				(it->mPeerId.addr.sin_port == peer->mPeerId.addr.sin_port))
 		{
 			removed = true;
 #ifdef DEBUG_STORE
@@ -196,7 +196,7 @@ void	bdStore::writeStore(std::string file)
 		LOG.info("bdStore::writeStore() FAILED to Open File\n");
 		return;
 	}
-	
+
 	std::list<bdPeer>::iterator it;
 	for(it = store.begin(); it != store.end(); it++)
 	{
@@ -220,3 +220,7 @@ void	bdStore::writeStore()
 	return writeStore(mStoreFile);
 }
 
+const std::list<bdPeer> bdStore::getPeers()
+{
+	return store;
+}

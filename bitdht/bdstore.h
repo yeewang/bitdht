@@ -33,24 +33,24 @@
 
 class bdStore
 {
-	public:
+public:
 
 	bdStore(std::string file, bdDhtFunctions *fns);
 
-int 	reloadFromStore(); /* for restarts */
-int 	clear();
+	int 	reloadFromStore(); /* for restarts */
+	int 	clear();
 
-int 	getPeer(bdPeer *peer);
-void	addStore(bdPeer *peer);
-void	writeStore(std::string file);
-void	writeStore();
+	const std::list<bdPeer> getPeers();
+	int 	getPeer(bdPeer *peer);
+	void	addStore(bdPeer *peer);
+	void	writeStore(std::string file);
+	void	writeStore();
 
-	private:
-		std::string mStoreFile;
-		std::list<bdPeer> store;
-		int mIndex;
-		bdDhtFunctions *mFns;
+private:
+	std::string mStoreFile;
+	std::list<bdPeer> store;
+	int mIndex;
+	bdDhtFunctions *mFns;
 };
-
 
 #endif

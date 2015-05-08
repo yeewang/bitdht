@@ -357,6 +357,11 @@ void bdNode::iteration()
 		//msgout_find_node(&id, &transId, &(id.id));
 	}
 
+	static int broadcast_count = 0;
+	if (broadcast_count++ % 10 == 0) {
+		broadcastPeers();
+	}
+
 	// handle
 
 	doStats();
@@ -364,6 +369,28 @@ void bdNode::iteration()
 	//printStats(LOG << log4cpp::Priority::INFO);
 
 	//printQueries();
+}
+
+void bdNode::addConnReq(const bdNodeId &id)
+{
+	mConnectRequests[mOwnId] = id;
+}
+
+void bdNode::broadcastPeers()
+{
+	std::list<bdPeer> peers  = mStore.getPeers();
+	std::list<bdPeer>::iterator it;
+
+	for(it = peers.begin(); it != peers.end(); it++) {
+		bdToken transId;
+		genNewTransId(&transId);
+
+		std::map<bdNodeId, bdNodeId>::iterator itt;
+		for (itt = mConnectRequests.begin(); itt != mConnectRequests.end(); itt++) {
+			bdNodeId id0 = itt->first, id1 = itt->second;
+			msgout_broadcast_conn(&it->mPeerId, &transId, &id0, &id1);
+		}
+	}
 }
 
 #define LPF_FACTOR  (0.90)
@@ -505,9 +532,6 @@ void bdNode::addPeer(const bdId *id, uint32_t peerflags)
 	bdToken transId;
 	genNewTransId(&transId);
 	msgout_ask_myip(id, &transId);
-
-	genNewTransId(&transId);
-	msgout_broadcast_conn(id, &transId, &mOwnId, &g_peerId);
 }
 
 #if 0
@@ -1018,7 +1042,8 @@ void bdNode::msgout_reply_ask_myip(bdId *tunnelId, bdToken *transId)
 	sendPkt(msg, blen, tunnelId->addr);
 }
 
-void bdNode::msgout_broadcast_conn(const bdId *id, bdToken *tid, bdNodeId *nodeId, bdNodeId *peerId)
+void bdNode::msgout_broadcast_conn(
+		const bdId *id, bdToken *tid, bdNodeId *nodeId, bdNodeId *peerId)
 {
 	// #ifdef DEBUG_NODE_MSGOUT
 	std::ostringstream ss;
@@ -1037,7 +1062,8 @@ void bdNode::msgout_broadcast_conn(const bdId *id, bdToken *tid, bdNodeId *nodeI
 	sendPkt(msg, blen, id->addr);
 }
 
-void bdNode::msgout_ask_conn(const bdId *id, bdToken *tid, bdNodeId *nodeId, bdId *peerId)
+void bdNode::msgout_ask_conn(
+		const bdId *id, bdToken *tid, bdNodeId *nodeId, bdId *peerId)
 {
 	// #ifdef DEBUG_NODE_MSGOUT
 	std::ostringstream ss;
@@ -1053,7 +1079,8 @@ void bdNode::msgout_ask_conn(const bdId *id, bdToken *tid, bdNodeId *nodeId, bdI
 	sendPkt(msg, blen, id->addr);
 }
 
-void bdNode::msgout_reply_conn(const bdId *id, bdToken *tid, bdNodeId *nodeId, bool started)
+void bdNode::msgout_reply_conn(
+		const bdId *id, bdToken *tid, bdNodeId *nodeId, bool started)
 {
 	// #ifdef DEBUG_NODE_MSGOUT
 	std::ostringstream ss;
@@ -1982,18 +2009,55 @@ void bdNode::msgin_reply_ask_myip(bdId *tunnelId, bdToken *transId)
 	//msgout_newconn(tunnelId, transId);
 }
 
-void bdNode::msgin_broadcast_conn(bdId *id, bdToken *tid, bdNodeId *nodeId, bdNodeId *peerId)
+void bdNode::msgin_broadcast_conn(
+		bdId *id, bdToken *tid, bdNodeId *nodeId, bdNodeId *peerId)
 {
+	if (id->id == *nodeId) {
+		// record IP?
+		mConnectRequests[*nodeId] = *peerId;
 
+		mPeerAddrs[id->id] = id->addr;
+		if (mPeerAddrs.find(*peerId) != mPeerAddrs.end()) {
+			// pair match!
+			bdId peer(*peerId, mPeerAddrs[*peerId]);
+			bdToken transId;
+			genNewTransId(&transId);
+			msgout_ask_conn(&peer, &transId, peerId, id);
+		}
+	}
+	else if (id->id == *peerId) {
+		// record IP?
+		mConnectRequests[*peerId] = *nodeId;
+
+		mPeerAddrs[id->id] = id->addr;
+		if (mPeerAddrs.find(*nodeId) != mPeerAddrs.end()) {
+			// pair match!
+			bdId peer(*nodeId, mPeerAddrs[*nodeId]);
+			bdToken transId;
+			genNewTransId(&transId);
+			msgout_ask_conn(&peer, &transId, nodeId, id);
+		}
+	}
 }
 
-void bdNode::msgin_ask_conn(bdId *id, bdToken *tid, bdNodeId *nodeId, bdId *peerId)
+void bdNode::msgin_ask_conn(
+		bdId *id, bdToken *tid, bdNodeId *nodeId, bdId *peerId)
 {
-
+	if (mOwnId == *nodeId) {
+		// found!!!
+		bdToken transId;
+		genNewTransId(&transId);
+		msgout_ping(peerId, &transId);
+		return;
+	}
+	else {
+		// msgout_reply_conn(id, tid, &peerId->id, true);
+	}
 }
 
 void bdNode::msgin_reply_conn(bdId *id, bdToken *tid, bdNodeId *nodeId, bool started)
 {
+	/* reply */
 
 }
 
