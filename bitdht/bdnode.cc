@@ -382,13 +382,18 @@ void bdNode::broadcastPeers()
 	std::list<bdPeer>::iterator it;
 
 	for(it = peers.begin(); it != peers.end(); it++) {
-		bdToken transId;
-		genNewTransId(&transId);
 
 		std::map<bdNodeId, bdNodeId>::iterator itt;
 		for (itt = mConnectRequests.begin(); itt != mConnectRequests.end(); itt++) {
 			bdNodeId id0 = itt->first, id1 = itt->second;
+
+			bdToken transId;
+			genNewTransId(&transId);
 			msgout_broadcast_conn(&it->mPeerId, &transId, &id0, &id1);
+
+			// if addPeer was invoked, peer is active. so I can ask for own ip
+			genNewTransId(&transId);
+			msgout_ask_myip(&it->mPeerId, &transId);
 		}
 	}
 }
@@ -527,11 +532,6 @@ void bdNode::addPeer(const bdId *id, uint32_t peerflags)
 	peer.mPeerFlags = peerflags;
 	peer.mLastRecvTime = time(NULL);
 	mStore.addStore(&peer);
-
-	// if addPeer was invoked, peer is active. so I can ask for own ip
-	bdToken transId;
-	genNewTransId(&transId);
-	msgout_ask_myip(id, &transId);
 }
 
 #if 0
@@ -2003,6 +2003,10 @@ void bdNode::msgin_ask_myip(bdId *tunnelId, bdToken *transId)
 void bdNode::msgin_reply_ask_myip(bdId *tunnelId, bdToken *transId)
 {
 	mPacketCallback->onRecvCallback(tunnelId, BITDHT_MSG_TYPE_REPLY_NEWCONN);
+
+	if (mOwnId == tunnelId->id) {
+		mLikelyOwnId = *tunnelId;
+	}
 
 	// my IP is here:tunnelId
 	//msgout_ping(tunnelId, transId);
