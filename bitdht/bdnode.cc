@@ -1051,14 +1051,14 @@ void bdNode::msgout_reply_ask_myip(bdId *tunnelId, bdToken *transId)
 void bdNode::msgout_broadcast_conn(
 		const bdId *id, bdToken *tid, bdNodeId *nodeId, bdNodeId *peerId)
 {
-	// #ifdef DEBUG_NODE_MSGOUT
+#ifdef DEBUG_NODE_MSGOUT
 	std::ostringstream ss;
 	bdPrintTransId(ss, tid);
 	LOG.info("bdNode::msgout_broadcast_conn() TransId: %s To: %s for %s and %s",
 			ss.str().c_str(), mFns->bdPrintId(id).c_str(),
 			mFns->bdPrintNodeId(nodeId).c_str(),
 			mFns->bdPrintNodeId(peerId).c_str());
-	// #endif
+#endif
 
 	char msg[10240];
 	int avail = 10240;
