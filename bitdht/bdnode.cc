@@ -2005,7 +2005,7 @@ void bdNode::msgin_reply_ask_myip(bdId *tunnelId, bdToken *transId)
 	mPacketCallback->onRecvCallback(tunnelId, BITDHT_MSG_TYPE_REPLY_NEWCONN);
 
 	// my IP is here:tunnelId
-	msgout_ping(tunnelId, transId);
+	//msgout_ping(tunnelId, transId);
 	//msgout_newconn(tunnelId, transId);
 }
 
