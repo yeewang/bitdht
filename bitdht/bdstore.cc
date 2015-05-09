@@ -32,46 +32,10 @@
 #include <iostream>
 #include <netdb.h>
 
-std::string getHost(const std::string &hostname)
-{
-    char  **pptr;
-    struct hostent *hptr;
-    char   str[32];
-    const char *ptr = hostname.c_str();
-
-    if((hptr = gethostbyname(ptr)) == NULL)
-    {
-        printf(" gethostbyname error for host:%s\n", ptr);
-        return 0;
-    }
-
-    printf("official hostname:%s\n",hptr->h_name);
-    for(pptr = hptr->h_aliases; *pptr != NULL; pptr++)
-        printf(" alias:%s\n",*pptr);
-
-    switch(hptr->h_addrtype)
-    {
-        case AF_INET:
-        case AF_INET6:
-            pptr=hptr->h_addr_list;
-            for(; *pptr!=NULL; pptr++)
-                printf(" address:%s\n",
-                       inet_ntop(hptr->h_addrtype, *pptr, str, sizeof(str)));
-            printf(" first address: %s\n",
-                       inet_ntop(hptr->h_addrtype, hptr->h_addr, str, sizeof(str)));
-        break;
-        default:
-            printf("unknown address type\n");
-        break;
-    }
-
-    return 0;
-}
-
 //#define DEBUG_STORE 1
 
 bdStore::bdStore(std::string file, bdDhtFunctions *fns) :
-		mFns(fns)
+	mFns(fns)
 {
 #ifdef DEBUG_STORE
 	LOG << log4cpp::Priority::INFO << "bdStore::bdStore(" << file << ")";
@@ -80,6 +44,7 @@ bdStore::bdStore(std::string file, bdDhtFunctions *fns) :
 
 	/* read data from file */
 	mStoreFile = file;
+	mIndex = store.begin();
 
 	reloadFromStore();
 }
