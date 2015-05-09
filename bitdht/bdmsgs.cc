@@ -50,7 +50,7 @@ bencoded = d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:y1:qe
  * #define DEBUG_MSGS 		1
  ****/
 
-uint32_t bitdht_ecrypt(char *msg, int size, int avail)
+uint32_t bitdht_ecrypt(char *msg, int size, int avail, uint32_t token)
 {
 	union {
 		uint32_t sum;
@@ -65,19 +65,30 @@ uint32_t bitdht_ecrypt(char *msg, int size, int avail)
 	for (int j = 0; j < 4 && i + j < avail; i++, j++) {
 		msg[i] = c.byte[j];
 	}
+
+	c.sum = token;
+	for (int j = 0; j < 4 && i + j < avail; i++, j++) {
+		msg[i] = c.byte[j];
+	}
 	return i;
 }
 
-bool bitdht_decrypt(char *msg, int size)
+bool bitdht_decrypt(char *msg, int size, uint32_t *token)
 {
 	union {
 		uint32_t sum;
 		uint8_t byte[4];
 	} c;
 
+	*token = 0;
+	for (int j = size - 4; j < size; j++) {
+		c.byte[j] = msg[j];
+	}
+	*token = c.sum;
+
 	uint32_t sum = 0;
 	int i = 0;
-	for (; i < size - 4; i++) {
+	for (; i < size - 8; i++) {
 		sum += msg[i];
 	}
 	sum += i;

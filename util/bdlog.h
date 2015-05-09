@@ -8,23 +8,14 @@
 #ifndef UTIL_BDLOG_H_
 #define UTIL_BDLOG_H_
 
-#include <iostream>
+#include <sstream>
 #include <syslog.h>
-
-#include "log4cpp/Category.hh"
-#include "log4cpp/Appender.hh"
-#include "log4cpp/FileAppender.hh"
-#include "log4cpp/OstreamAppender.hh"
-#include "log4cpp/Layout.hh"
-#include "log4cpp/BasicLayout.hh"
-#include "log4cpp/Priority.hh"
 
 class TDLog {
 public:
 	TDLog();
 	virtual ~TDLog();
 
-	log4cpp::Category& log();
 	void info(const char *str, ...);
 
 private:
@@ -34,8 +25,6 @@ private:
 
 	FILE * fp;
 };
-
-// #define LOG TDLog().log()
 
 extern TDLog LOG;
 

@@ -66,8 +66,8 @@ enum BITDHT_MSG_TYPE {
 #define BITDHT_VID_UT	2
 
 
-uint32_t bitdht_ecrypt(char *msg, int size, int avail);
-bool bitdht_decrypt(char *msg, int size);
+uint32_t bitdht_ecrypt(char *msg, int size, int avail, uint32_t token);
+bool bitdht_decrypt(char *msg, int size, uint32_t *token);
 int bitdht_create_ping_msg(bdToken *tid, bdNodeId *id, char *msg, int avail);
 int bitdht_response_ping_msg(bdToken *tid, bdNodeId *id, bdToken *vid, char *msg, int avail); 
 int bitdht_find_node_msg(bdToken *tid, bdNodeId *id, bdNodeId *target, char *msg, int avail);

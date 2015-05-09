@@ -1,12 +1,10 @@
-
-LIBS = ../log4cpp/src/.libs/liblog4cpp.a
 	
 AM_CFLAGS = -Wall -lpthread 
-AM_CXXFLAGS = -Wall  -lpthread -I../log4cpp/include -std=c++11
+AM_CXXFLAGS = -Wall  -lpthread -std=c++11
 
 if DEBUG
-AM_CFLAGS += -g3 -O0 -D BE_DEBUG -D DEBUG_MGR
-AM_CXXFLAGS += -g3 -O0 -D BE_DEBUG -D DEBUG_MGR
+AM_CFLAGS += -g3 -O0 -D BE_DEBUG
+AM_CXXFLAGS += -g3 -O0 -D BE_DEBUG
 else
 AM_CFLAGS += -O2
 AM_CXXFLAGS += -O2

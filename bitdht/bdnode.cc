@@ -740,6 +740,28 @@ void bdNode::processRemoteQuery()
 	}
 }
 
+// It is a rough solution for to block fake nodes
+uint32_t bdNode::getRandomToken()
+{
+	srand((unsigned)time(NULL));
+	uint32_t num = rand();
+	mRandomTokenArray.push_back(num);
+	if (mRandomTokenArray.size() > 100) {
+		mRandomTokenArray.erase(mRandomTokenArray.begin());
+	}
+	return num;
+}
+
+bool bdNode::isUsedToken(uint32_t token)
+{
+	for (std::vector<uint32_t>::iterator it = mRandomTokenArray.begin(); it != mRandomTokenArray.end(); ++it) {
+		if (*it == token) {
+			return false;
+		}
+	}
+	return true;
+}
+
 /************************************ Message Buffering ****************************/
 
 /* interaction with outside world */
@@ -808,7 +830,6 @@ void bdNode::msgout_ping(bdId *id, bdToken *transId)
 	int blen = bitdht_create_ping_msg(transId, &(mOwnId), msg, avail-1);
 	sendPkt(msg, blen, id->addr);
 }
-
 
 void bdNode::msgout_pong(bdId *id, bdToken *transId)
 {
@@ -1042,7 +1063,7 @@ void bdNode::msgout_ask_myip(const bdId *dhtId, bdToken *transId)
 	int avail = 10240;
 
 	int blen = bitdht_ask_myip_msg(transId, &(mOwnId), msg, avail-1);
-	blen = bitdht_ecrypt(msg, blen, avail-1);
+	blen = bitdht_ecrypt(msg, blen, avail-1, getRandomToken());
 	sendPkt(msg, blen, dhtId->addr);
 }
 
@@ -1061,7 +1082,7 @@ void bdNode::msgout_reply_ask_myip(bdId *tunnelId, bdToken *transId)
 
 	int blen = bitdht_reply_myip_msg(transId, &(mOwnId), tunnelId,
 			msg, true, avail-1);
-	blen = bitdht_ecrypt(msg, blen, avail-1);
+	blen = bitdht_ecrypt(msg, blen, avail-1, getRandomToken());
 	sendPkt(msg, blen, tunnelId->addr);
 }
 
@@ -1628,31 +1649,48 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 		break;
 	}
 	case BITDHT_MSG_TYPE_NEWCONN: {
-		bool valid = bitdht_decrypt(msg, len);
-
+		uint32_t token;
+		bool valid = bitdht_decrypt(msg, len, &token);
+		if (isUsedToken(token)) {
 #ifdef DEBUG_NODE_MSGS
-		LOG.info("bdNode::recvPkt() NewConn from: %s is %s",
-				mFns->bdPrintId(&srcId).c_str(), valid ? "valid" : "invalid");
+			LOG.info("bdNode::recvPkt() NewConn from: %s is fake",
+					mFns->bdPrintId(&srcId).c_str());
+#endif
+			break;
+		}
+		else {
+#ifdef DEBUG_NODE_MSGS
+			LOG.info("bdNode::recvPkt() NewConn from: %s is %s",
+					mFns->bdPrintId(&srcId).c_str(), valid ? "valid" : "invalid");
 #endif
 
-		// it have not a dhtId!!!
-		if (valid) {
-			msgin_ask_myip(&srcId, &transId);
-		}
-		/*
-		std::list<bdPeer> list;
-		if (getIdFromQuery(&id, list)) {
-			std::list<bdPeer>::iterator it;
-			for(it = list.begin(); it != list.end(); it++) {
-				msgin_newconn(&srcId, &it->mPeerId, &transId);
+			// it have not a dhtId!!!
+			if (valid) {
+				msgin_ask_myip(&srcId, &transId);
 			}
+			/*
+			std::list<bdPeer> list;
+			if (getIdFromQuery(&id, list)) {
+				std::list<bdPeer>::iterator it;
+				for(it = list.begin(); it != list.end(); it++) {
+					msgin_newconn(&srcId, &it->mPeerId, &transId);
+				}
+			}
+			 */
 		}
-		*/
 		break;
 	}
 
 	case BITDHT_MSG_TYPE_REPLY_NEWCONN: {
-		bool valid = bitdht_decrypt(msg, len);
+		uint32_t token;
+		bool valid = bitdht_decrypt(msg, len, &token);
+		if (isUsedToken(token)) {
+#ifdef DEBUG_NODE_MSGS
+			LOG.info("bdNode::recvPkt() Reply NewConn from: %s for: %s is fake",
+					mFns->bdPrintId(&srcId).c_str(), mFns->bdPrintId(&peerId).c_str());
+#endif
+			break;
+		}
 #ifdef DEBUG_NODE_MSGS
 		LOG.info("bdNode::recvPkt() Reply NewConn from: %s for: %s is %s",
 				mFns->bdPrintId(&srcId).c_str(), mFns->bdPrintId(&peerId).c_str(),
@@ -2227,8 +2265,6 @@ void bdNode::cleanupTransIdRegister()
 {
 	return;
 }
-
-
 
 /*************** Internal Msg Storage *****************/
 

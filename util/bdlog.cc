@@ -10,8 +10,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#include <log4cpp/PropertyConfigurator.hh>
-
 #include "bdlog.h"
 
 TDLog LOG;
@@ -24,7 +22,6 @@ TDLog::TDLog()
 
 TDLog::~TDLog()
 {
-	log4cpp::Category::shutdown();
 }
 
 void TDLog::init()
@@ -51,12 +48,6 @@ void TDLog::setProperties()
 	std::string initFileName = "log4cpp.properties";
 	log4cpp::PropertyConfigurator::configure(initFileName);
 #endif
-}
-
-log4cpp::Category& TDLog::log()
-{
-	log4cpp::Category& root = log4cpp::Category::getRoot();
-	return root;
 }
 
 void TDLog::info(const char *str, ...)
@@ -91,4 +82,3 @@ const std::string TDLog::time()
 
 	return outstr;
 }
-

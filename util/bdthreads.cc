@@ -24,7 +24,6 @@
  */
 
 
-
 #include "bdthreads.h"
 #include <unistd.h>    /* for usleep() */
 #include "util/bdlog.h"

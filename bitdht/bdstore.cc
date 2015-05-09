@@ -66,10 +66,10 @@ void bdStore::addPeer()
 
 std::string getHost(const std::string &hostname)
 {
-    char   *ptr, **pptr;
+    char  **pptr;
     struct hostent *hptr;
     char   str[32];
-    ptr = hostname.c_str();
+    const char *ptr = hostname.c_str();
 
     if((hptr = gethostbyname(ptr)) == NULL)
     {

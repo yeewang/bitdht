@@ -204,6 +204,10 @@ protected:
 	bdSpace mNodeSpace;
 
 private:
+	uint32_t getRandomToken();
+	bool isUsedToken(uint32_t);
+
+private:
 	bdStore mStore;
 	std::string mDhtVersion;
 
@@ -225,7 +229,7 @@ private:
 	std::list<bdNodeNetMsg *> mOutgoingMsgs;
 	std::list<bdNodeNetMsg *> mIncomingMsgs;
 
-	bdToken mSecureToken;
+	std::vector<uint32_t> mRandomTokenArray;
 
 	// Statistics.
 	double mCounterOutOfDatePing;
