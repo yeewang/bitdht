@@ -57,9 +57,12 @@
  ***/
 
 
-bdNodeManager::bdNodeManager(bdNodeId *id, std::string dhtVersion,
-		std::string bootfile, bdDhtFunctions *fns, PacketCallback *packetCallback) :
-		bdNode(id, dhtVersion, bootfile, fns, packetCallback)
+bdNodeManager::bdNodeManager(bdNodeId *id,
+		const std::string &dhtVersion,
+		const std::string &bootfile,
+		const std::string &whitelist,
+		bdDhtFunctions *fns, PacketCallback *packetCallback) :
+		bdNode(id, dhtVersion, bootfile, whitelist, fns, packetCallback)
 {
 	mMode = BITDHT_MGR_STATE_OFF;
 	mFns = fns;

@@ -50,8 +50,12 @@ class UdpBitDht: public UdpSubReceiver, public bdThread, public BitDhtInterface
 {
 public:
 
-	UdpBitDht(UdpPublisher *pub, bdNodeId *id, std::string dhtVersion,
-			std::string bootstrapfile, bdDhtFunctions *fns,
+	UdpBitDht(UdpPublisher *pub,
+			bdNodeId *id,
+			const std::string &dhtVersion,
+			const std::string &bootstrapfile,
+			const std::string &whitelist,
+			bdDhtFunctions *fns,
 			PacketCallback *packetCallback);
 	virtual ~UdpBitDht();
 

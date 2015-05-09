@@ -62,13 +62,18 @@
 
 
 bdNode::bdNode(bdNodeId *ownId,
-		const std::string dhtVersion,
-		const std::string bootfile,
+		const std::string &dhtVersion,
+		const std::string &bootfile,
+		const std::string &whitelist,
 		bdDhtFunctions *fns,
 		PacketCallback *packetCallback) :
-		mOwnId(*ownId), mNodeSpace(ownId, fns), mStore(bootfile, fns),
+		mOwnId(*ownId), mNodeSpace(ownId, fns),
+		mStore(bootfile, fns),
+		mWhiteNodes(whitelist, fns),
 		mDhtVersion(dhtVersion), mFns(fns), mPacketCallback(packetCallback)
 {
+	srand(time(NULL));
+
 	resetStats();
 }
 
@@ -83,10 +88,16 @@ void bdNode::restartNode()
 	resetStats();
 
 	mStore.reloadFromStore();
+	mWhiteNodes.reloadFromStore();
 
 	/* setup */
 	bdPeer peer;
-	while(mStore.getPeer(&peer))
+	while(mStore.nextPeer(&peer))
+	{
+		addPotentialPeer(&(peer.mPeerId));
+	}
+
+	while(mWhiteNodes.nextPeer(&peer))
 	{
 		addPotentialPeer(&(peer.mPeerId));
 	}
@@ -121,6 +132,8 @@ void bdNode::shutdownNode()
 void bdNode::updateStore()
 {
 	mStore.writeStore();
+
+	mWhiteNodes.writeStore();
 }
 
 void bdNode::printState()
@@ -401,14 +414,12 @@ void bdNode::addConnReq(const bdNodeId &id)
 
 void bdNode::broadcastPeers()
 {
-	std::list<bdPeer> peers  = mStore.getPeers();
-	std::list<bdPeer>::iterator it;
-
-	for(it = peers.begin(); it != peers.end(); it++) {
+	bdPeer peer;
+	while(mWhiteNodes.nextPeer(&peer))
+	{
 		bdToken transId;
-		// if addPeer was invoked, peer is active. so I can ask for own ip
 		genNewTransId(&transId);
-		msgout_ask_myip(&it->mPeerId, &transId);
+		msgout_ask_myip(&peer.mPeerId, &transId);
 
 		std::map<bdNodeId, bdNodeId>::iterator itt;
 		for (itt = mConnectRequests.begin(); itt != mConnectRequests.end(); itt++) {
@@ -416,7 +427,23 @@ void bdNode::broadcastPeers()
 
 			bdToken transId;
 			genNewTransId(&transId);
-			msgout_broadcast_conn(&it->mPeerId, &transId, &id0, &id1);
+			msgout_broadcast_conn(&peer.mPeerId, &transId, &id0, &id1);
+		}
+	}
+
+	while(mStore.nextPeer(&peer))
+	{
+		bdToken transId;
+		genNewTransId(&transId);
+		msgout_ask_myip(&peer.mPeerId, &transId);
+
+		std::map<bdNodeId, bdNodeId>::iterator itt;
+		for (itt = mConnectRequests.begin(); itt != mConnectRequests.end(); itt++) {
+			bdNodeId id0 = itt->first, id1 = itt->second;
+
+			bdToken transId;
+			genNewTransId(&transId);
+			msgout_broadcast_conn(&peer.mPeerId, &transId, &id0, &id1);
 		}
 	}
 }
@@ -524,6 +551,8 @@ void bdNode::checkPotentialPeer(bdId *id)
 	{
 		addPotentialPeer(id);
 	}
+
+
 }
 
 void bdNode::addPotentialPeer(bdId *id)
@@ -743,7 +772,6 @@ void bdNode::processRemoteQuery()
 // It is a rough solution for to block fake nodes
 uint32_t bdNode::getRandomToken()
 {
-	srand((unsigned)time(NULL));
 	uint32_t num = rand();
 	mRandomTokenArray.push_back(num);
 	if (mRandomTokenArray.size() > 100) {
@@ -1161,6 +1189,9 @@ void bdNode::sendPkt(char *msg, int len, struct sockaddr_in addr)
 
 void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 {
+	if (isMemberOfBlackList(addr))
+		return;
+
 #ifdef DEBUG_NODE_PARSE
 	std::ostringstream ss;
 	char buf[100];
@@ -1656,6 +1687,7 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 			LOG.info("bdNode::recvPkt() NewConn from: %s is fake",
 					mFns->bdPrintId(&srcId).c_str());
 #endif
+			addBlackList(srcId.addr);
 			break;
 		}
 		else {
@@ -1689,6 +1721,7 @@ void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 			LOG.info("bdNode::recvPkt() Reply NewConn from: %s for: %s is fake",
 					mFns->bdPrintId(&srcId).c_str(), mFns->bdPrintId(&peerId).c_str());
 #endif
+			addBlackList(srcId.addr);
 			break;
 		}
 #ifdef DEBUG_NODE_MSGS
@@ -2286,4 +2319,42 @@ void bdNodeNetMsg::print(std::ostream &out)
 bdNodeNetMsg::~bdNodeNetMsg()
 {
 	free(data);
+}
+
+bool bdNode::isMemberOfBlackList(sockaddr_in &blackAddr)
+{
+	for (std::list<sockaddr_in>::iterator it = mBlackNodes.begin();
+			it != mBlackNodes.end(); ++it) {
+		if ((it->sin_addr.s_addr == blackAddr.sin_addr.s_addr) &&
+				(it->sin_port == blackAddr.sin_port)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void bdNode::addBlackList(sockaddr_in &blackAddr)
+{
+	for (std::list<sockaddr_in>::iterator it = mBlackNodes.begin();
+			it != mBlackNodes.end(); ++it) {
+		if ((it->sin_addr.s_addr == blackAddr.sin_addr.s_addr) &&
+				(it->sin_port == blackAddr.sin_port)) {
+			return;
+		}
+	}
+	mBlackNodes.push_back(blackAddr);
+}
+
+void bdNode::removeBlackList(sockaddr_in &blackAddr)
+{
+	for (std::list<sockaddr_in>::iterator it = mBlackNodes.begin();
+			it != mBlackNodes.end();) {
+		if ((it->sin_addr.s_addr == blackAddr.sin_addr.s_addr) &&
+				(it->sin_port == blackAddr.sin_port)) {
+			it = mBlackNodes.erase(it);
+		}
+		else {
+			++it;
+		}
+	}
 }

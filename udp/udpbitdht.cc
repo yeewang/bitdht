@@ -52,8 +52,12 @@
 //#define BITDHT_VERSION_IDENTIFER	1
 /*************************************/
 
-UdpBitDht::UdpBitDht(UdpPublisher *pub, bdNodeId *id, std::string appVersion,
-		std::string bootstrapfile, bdDhtFunctions *fns, PacketCallback *packetCallback) :
+UdpBitDht::UdpBitDht(UdpPublisher *pub,
+		bdNodeId *id,
+		const std::string &appVersion,
+		const std::string &bootstrapfile,
+		const std::string &whitelist,
+		bdDhtFunctions *fns, PacketCallback *packetCallback) :
 		UdpSubReceiver(pub), mFns(fns)
 {
 	std::string usedVersion;
@@ -68,7 +72,8 @@ UdpBitDht::UdpBitDht(UdpPublisher *pub, bdNodeId *id, std::string appVersion,
 #endif
 
 	/* setup nodeManager */
-	mBitDhtManager = new bdNodeManager(id, usedVersion, bootstrapfile, fns, packetCallback);
+	mBitDhtManager = new bdNodeManager(
+			id, usedVersion, bootstrapfile, whitelist, fns, packetCallback);
 }
 
 

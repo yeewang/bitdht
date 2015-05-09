@@ -96,7 +96,10 @@ public:
 class bdNodeManager: public bdNode, public BitDhtInterface
 {
 public:
-	bdNodeManager(bdNodeId *id, std::string dhtVersion, std::string bootfile,
+	bdNodeManager(bdNodeId *id,
+			const std::string &dhtVersion,
+			const std::string &bootfile,
+			const std::string &whitelist,
 			bdDhtFunctions *fns, PacketCallback *packetCallback);
 
 	void iteration();

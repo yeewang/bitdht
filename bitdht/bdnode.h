@@ -94,9 +94,11 @@ class bdNode
 {
 public:
 	bdNode(bdNodeId *id,
-			const std::string dhtVersion,
-			const std::string bootfile,
-			bdDhtFunctions *fns, PacketCallback *packetCallback);
+			const std::string &dhtVersion,
+			const std::string &bootfile,
+			const std::string &whitelist,
+			bdDhtFunctions *fns,
+			PacketCallback *packetCallback);
 
 	/* startup / shutdown node */
 	void restartNode();
@@ -199,6 +201,11 @@ public:
 	void resetStats();
 
 protected:
+	bool isMemberOfBlackList(sockaddr_in &blackAddr);
+	void addBlackList(sockaddr_in &blackAddr);
+	void removeBlackList(sockaddr_in &blackAddr);
+
+protected:
 	bdNodeId mOwnId;
 	std::list<sockaddr_in> mMyIPs;
 	bdSpace mNodeSpace;
@@ -209,6 +216,8 @@ private:
 
 private:
 	bdStore mStore;
+	bdStore mWhiteNodes;
+	std::list<sockaddr_in> mBlackNodes;
 	std::string mDhtVersion;
 
 	bdDhtFunctions *mFns;

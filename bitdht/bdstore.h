@@ -40,19 +40,17 @@ public:
 	int 	reloadFromStore(); /* for restarts */
 	int 	clear();
 
-	const std::list<bdPeer> getPeers();
-	int 	getPeer(bdPeer *peer);
+	bool nextPeer(bdPeer *peer);
 	void	addStore(bdPeer *peer);
+	void	removeStore(bdPeer *peer);
 	void	writeStore(std::string file);
 	void	writeStore();
 
 private:
 	std::string mStoreFile;
 	std::list<bdPeer> store;
-	int mIndex;
+	std::list<bdPeer>::iterator mIndex;
 	bdDhtFunctions *mFns;
-
-	void addPeer();
 };
 
 #endif

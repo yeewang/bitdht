@@ -52,8 +52,6 @@ void bdStdRandomId(bdId *id)
 
 void bdStdRandomNodeId(bdNodeId *id)
 {
-	srand(time(NULL));
-
 	uint32_t *a_data = (uint32_t *) id->data;
 	for(int i = 0; i < BITDHT_KEY_INTLEN; i++)
 	{

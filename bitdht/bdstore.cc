@@ -32,38 +32,6 @@
 #include <iostream>
 #include <netdb.h>
 
-void bdStore::addPeer()
-{
-	// fix peer list
-	struct hostent* hptr;
-	if ((hptr = gethostbyname("72pi.cn")) != NULL) {
-		char **pptr;
-		for (pptr = hptr->h_aliases; *pptr != NULL; pptr++) {
-
-			switch (hptr->h_addrtype) {
-			case AF_INET:
-			case AF_INET6: {
-				pptr = hptr->h_addr_list;
-				int i = 0;
-				if (hptr->h_addrtype == AF_INET) {
-					while (hptr->h_addr_list[i] != 0) {
-						bdPeer peer;
-						peer.mPeerId.addr.sin_addr.s_addr = *(u_long *) hptr->h_addr_list[i++];
-						peer.mPeerId.addr.sin_port = htons(6557);
-						peer.mPeerFlags = 0;
-						peer.mLastRecvTime = time(NULL);
-						addStore(&peer);
-					}
-				}
-			}
-				break;
-			default:
-				break;
-			}
-		}
-	}
-}
-
 std::string getHost(const std::string &hostname)
 {
     char  **pptr;
@@ -102,8 +70,8 @@ std::string getHost(const std::string &hostname)
 
 //#define DEBUG_STORE 1
 
-bdStore::bdStore(std::string file, bdDhtFunctions *fns)
-:mFns(fns)
+bdStore::bdStore(std::string file, bdDhtFunctions *fns) :
+		mFns(fns)
 {
 #ifdef DEBUG_STORE
 	LOG << log4cpp::Priority::INFO << "bdStore::bdStore(" << file << ")";
@@ -118,7 +86,7 @@ bdStore::bdStore(std::string file, bdDhtFunctions *fns)
 
 int bdStore::clear()
 {
-	mIndex = 0;
+	mIndex = store.begin();
 	store.clear();
 	return 1;
 }
@@ -133,7 +101,6 @@ int bdStore::reloadFromStore()
 		LOG.info("Failed to Open File: %s ... No Peers\n", mStoreFile.c_str());
 		return 0;
 	}
-
 
 	char line[10240];
 	char addr_str[10240];
@@ -167,34 +134,48 @@ int bdStore::reloadFromStore()
 	LOG.info("Read %ld Peers\n", (long) store.size());
 #endif
 
-	// fix peer list
-	addPeer();
-
 	return 1;
 }
 
-int bdStore::getPeer(bdPeer *peer)
+bool bdStore::nextPeer(bdPeer *peer)
 {
 #ifdef DEBUG_STORE
 	LOG.info("bdStore::getPeer() %ld Peers left\n", (long) store.size());
 #endif
 
-	std::list<bdPeer>::iterator it;
-	int i = 0;
-	for(it = store.begin(); (it != store.end()) && (i < mIndex); it++, i++) ; /* empty loop */
-	if (it != store.end())
-	{
-		*peer = *it;
+	if (mIndex != store.end()) {
+		*peer = *mIndex;
 		mIndex++;
-		return 1;
+		return true;
 	}
-	return 0;
+	mIndex = store.begin();
+	return false;
 }
 
 #define MAX_ENTRIES 1000
 
 /* maintain a sorted list */
-void	bdStore::addStore(bdPeer *peer)
+void bdStore::addStore(bdPeer *peer)
+{
+	removeStore(peer);
+
+#ifdef DEBUG_STORE
+	LOG << log4cpp::Priority::INFO << "bdStore::addStore() Push_back";
+	LOG << log4cpp::Priority::INFO << std::endl;
+#endif
+	store.push_back(*peer);
+
+	while(store.size() > MAX_ENTRIES)
+	{
+#ifdef DEBUG_STORE
+		LOG << log4cpp::Priority::INFO << "bdStore::addStore() pop_front()";
+		LOG << log4cpp::Priority::INFO << std::endl;
+#endif
+		store.pop_back();
+	}
+}
+
+void bdStore::removeStore(bdPeer *peer)
 {
 #ifdef DEBUG_STORE
 	LOG << log4cpp::Priority::INFO << "bdStore::addStore() ";
@@ -224,24 +205,9 @@ void	bdStore::addStore(bdPeer *peer)
 			it++;
 		}
 	}
-
-#ifdef DEBUG_STORE
-	LOG << log4cpp::Priority::INFO << "bdStore::addStore() Push_back";
-	LOG << log4cpp::Priority::INFO << std::endl;
-#endif
-	store.push_back(*peer);
-
-	while(store.size() > MAX_ENTRIES)
-	{
-#ifdef DEBUG_STORE
-		LOG << log4cpp::Priority::INFO << "bdStore::addStore() pop_front()";
-		LOG << log4cpp::Priority::INFO << std::endl;
-#endif
-		store.pop_front();
-	}
 }
 
-void	bdStore::writeStore(std::string file)
+void bdStore::writeStore(std::string file)
 {
 	/* write out store */
 #ifdef DEBUG_STORE
@@ -289,9 +255,4 @@ void bdStore::writeStore()
 	}
 #endif
 	return writeStore(mStoreFile);
-}
-
-const std::list<bdPeer> bdStore::getPeers()
-{
-	return store;
 }
