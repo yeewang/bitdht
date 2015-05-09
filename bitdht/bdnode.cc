@@ -33,6 +33,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 #include <iostream>
 #include <iomanip>
@@ -72,17 +73,18 @@ bdNode::bdNode(bdNodeId *ownId,
 		mWhiteNodes(whitelist, fns),
 		mDhtVersion(dhtVersion), mFns(fns), mPacketCallback(packetCallback)
 {
-
 	timeval t1;
 	gettimeofday(&t1, NULL);
 	unsigned int seed =  t1.tv_usec * t1.tv_sec;
-	unsigned int seed2;
+	unsigned int seed2 = 1;
 	FILE* urandom = fopen("/dev/urandom", "r");
 	if (urandom != NULL) {
-		fread(&seed2, sizeof(int), 1, urandom);
+		if (fread(&seed2, sizeof(int), 1, urandom) == 0) {
+			seed2 = 1;
+		}
 		fclose(urandom);
 	}
-	srand((seed * seed2) % (unsigned int)-1);
+	srand((seed + seed2) % (unsigned int)-1);
 
 	resetStats();
 }
@@ -792,10 +794,10 @@ bool bdNode::isUsedToken(uint32_t token)
 {
 	for (std::vector<uint32_t>::iterator it = mRandomTokenArray.begin(); it != mRandomTokenArray.end(); ++it) {
 		if (*it == token) {
-			return false;
+			return true;
 		}
 	}
-	return true;
+	return false;
 }
 
 /************************************ Message Buffering ****************************/
@@ -1197,8 +1199,8 @@ void bdNode::sendPkt(char *msg, int len, struct sockaddr_in addr)
 
 void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 {
-	//if (isMemberOfBlackList(addr))
-	//	return;
+	if (isMemberOfBlackList(addr))
+		return;
 
 #ifdef DEBUG_NODE_PARSE
 	std::ostringstream ss;
