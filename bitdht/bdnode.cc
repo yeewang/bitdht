@@ -72,7 +72,17 @@ bdNode::bdNode(bdNodeId *ownId,
 		mWhiteNodes(whitelist, fns),
 		mDhtVersion(dhtVersion), mFns(fns), mPacketCallback(packetCallback)
 {
-	srand(time(NULL));
+
+	timeval t1;
+	gettimeofday(&t1, NULL);
+	unsigned int seed =  t1.tv_usec * t1.tv_sec;
+	unsigned int seed2;
+	FILE* urandom = fopen("/dev/urandom", "r");
+	if (urandom != NULL) {
+		fread(&seed2, sizeof(int), 1, urandom);
+		fclose(urandom);
+	}
+	srand((seed * seed2) % (unsigned int)-1);
 
 	resetStats();
 }
@@ -1187,8 +1197,8 @@ void bdNode::sendPkt(char *msg, int len, struct sockaddr_in addr)
 
 void bdNode::recvPkt(char *msg, int len, struct sockaddr_in addr)
 {
-	if (isMemberOfBlackList(addr))
-		return;
+	//if (isMemberOfBlackList(addr))
+	//	return;
 
 #ifdef DEBUG_NODE_PARSE
 	std::ostringstream ss;
