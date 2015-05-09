@@ -91,15 +91,14 @@ void bdNode::restartNode()
 	mWhiteNodes.reloadFromStore();
 
 	/* setup */
-	bdPeer peer;
-	while(mStore.nextPeer(&peer))
-	{
-		addPotentialPeer(&(peer.mPeerId));
+	std::list<bdPeer> list = mStore.getStore();
+	for (std::list<bdPeer>::iterator it = list.begin(); it != list.end(); ++it) {
+		addPotentialPeer(&(it->mPeerId));
 	}
 
-	while(mWhiteNodes.nextPeer(&peer))
-	{
-		addPotentialPeer(&(peer.mPeerId));
+	list = mWhiteNodes.getStore();
+	for (std::list<bdPeer>::iterator it = list.begin(); it != list.end(); ++it) {
+		addPotentialPeer(&(it->mPeerId));
 	}
 }
 
@@ -414,12 +413,11 @@ void bdNode::addConnReq(const bdNodeId &id)
 
 void bdNode::broadcastPeers()
 {
-	bdPeer peer;
-	while(mWhiteNodes.nextPeer(&peer))
-	{
+	std::list<bdPeer> list = mWhiteNodes.getStore();
+	for (std::list<bdPeer>::iterator it = list.begin(); it != list.end(); ++it) {
 		bdToken transId;
 		genNewTransId(&transId);
-		msgout_ask_myip(&peer.mPeerId, &transId);
+		msgout_ask_myip(&it->mPeerId, &transId);
 
 		std::map<bdNodeId, bdNodeId>::iterator itt;
 		for (itt = mConnectRequests.begin(); itt != mConnectRequests.end(); itt++) {
@@ -427,15 +425,15 @@ void bdNode::broadcastPeers()
 
 			bdToken transId;
 			genNewTransId(&transId);
-			msgout_broadcast_conn(&peer.mPeerId, &transId, &id0, &id1);
+			msgout_broadcast_conn(&it->mPeerId, &transId, &id0, &id1);
 		}
 	}
 
-	while(mStore.nextPeer(&peer))
-	{
+	list = mStore.getStore();
+	for (std::list<bdPeer>::iterator it = list.begin(); it != list.end(); ++it) {
 		bdToken transId;
 		genNewTransId(&transId);
-		msgout_ask_myip(&peer.mPeerId, &transId);
+		msgout_ask_myip(&it->mPeerId, &transId);
 
 		std::map<bdNodeId, bdNodeId>::iterator itt;
 		for (itt = mConnectRequests.begin(); itt != mConnectRequests.end(); itt++) {
@@ -443,7 +441,7 @@ void bdNode::broadcastPeers()
 
 			bdToken transId;
 			genNewTransId(&transId);
-			msgout_broadcast_conn(&peer.mPeerId, &transId, &id0, &id1);
+			msgout_broadcast_conn(&it->mPeerId, &transId, &id0, &id1);
 		}
 	}
 }

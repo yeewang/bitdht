@@ -26,7 +26,7 @@
  *
  */
 
-
+#include <array>
 #include <string>
 #include "bitdht/bdiface.h"
 #include "bitdht/bdpeer.h"
@@ -34,22 +34,20 @@
 class bdStore
 {
 public:
-
 	bdStore(std::string file, bdDhtFunctions *fns);
 
 	int 	reloadFromStore(); /* for restarts */
 	int 	clear();
 
-	bool nextPeer(bdPeer *peer);
 	void	addStore(bdPeer *peer);
 	void	removeStore(bdPeer *peer);
 	void	writeStore(std::string file);
 	void	writeStore();
+	const std::list<bdPeer>& getStore() const;
 
 private:
 	std::string mStoreFile;
-	std::list<bdPeer> store;
-	std::list<bdPeer>::iterator mIndex;
+	std::list<bdPeer> mStore;
 	bdDhtFunctions *mFns;
 };
 

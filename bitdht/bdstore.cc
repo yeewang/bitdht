@@ -44,15 +44,13 @@ bdStore::bdStore(std::string file, bdDhtFunctions *fns) :
 
 	/* read data from file */
 	mStoreFile = file;
-	mIndex = store.begin();
 
 	reloadFromStore();
 }
 
 int bdStore::clear()
 {
-	mIndex = store.begin();
-	store.clear();
+	mStore.clear();
 	return 1;
 }
 
@@ -85,7 +83,7 @@ int bdStore::reloadFromStore()
 				peer.mPeerId.addr = addr;
 				peer.mLastSendTime = 0;
 				peer.mLastRecvTime = 0;
-				store.push_back(peer);
+				mStore.push_back(peer);
 #ifdef DEBUG_STORE
 				LOG.info("Read: %s %d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 #endif
@@ -96,25 +94,10 @@ int bdStore::reloadFromStore()
 	fclose(fd);
 
 #ifdef DEBUG_STORE
-	LOG.info("Read %ld Peers\n", (long) store.size());
+	LOG.info("Read %ld Peers\n", (long) mStore.size());
 #endif
 
 	return 1;
-}
-
-bool bdStore::nextPeer(bdPeer *peer)
-{
-#ifdef DEBUG_STORE
-	LOG.info("bdStore::getPeer() %ld Peers left\n", (long) store.size());
-#endif
-
-	if (mIndex != store.end()) {
-		*peer = *mIndex;
-		mIndex++;
-		return true;
-	}
-	mIndex = store.begin();
-	return false;
 }
 
 #define MAX_ENTRIES 1000
@@ -128,15 +111,15 @@ void bdStore::addStore(bdPeer *peer)
 	LOG << log4cpp::Priority::INFO << "bdStore::addStore() Push_back";
 	LOG << log4cpp::Priority::INFO << std::endl;
 #endif
-	store.push_back(*peer);
+	mStore.push_back(*peer);
 
-	while(store.size() > MAX_ENTRIES)
+	while(mStore.size() > MAX_ENTRIES)
 	{
 #ifdef DEBUG_STORE
 		LOG << log4cpp::Priority::INFO << "bdStore::addStore() pop_front()";
 		LOG << log4cpp::Priority::INFO << std::endl;
 #endif
-		store.pop_back();
+		mStore.pop_back();
 	}
 }
 
@@ -152,7 +135,7 @@ void bdStore::removeStore(bdPeer *peer)
 	bool removed = false;
 
 	std::list<bdPeer>::iterator it;
-	for(it = store.begin(); it != store.end(); )
+	for(it = mStore.begin(); it != mStore.end(); )
 	{
 		if ((it->mPeerId.addr.sin_addr.s_addr == peer->mPeerId.addr.sin_addr.s_addr) &&
 				(it->mPeerId.addr.sin_port == peer->mPeerId.addr.sin_port))
@@ -163,7 +146,7 @@ void bdStore::removeStore(bdPeer *peer)
 			mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &(it->mPeerId));
 			LOG << log4cpp::Priority::INFO << std::endl;
 #endif
-			it = store.erase(it);
+			it = mStore.erase(it);
 		}
 		else
 		{
@@ -176,10 +159,10 @@ void bdStore::writeStore(std::string file)
 {
 	/* write out store */
 #ifdef DEBUG_STORE
-	LOG.info("bdStore::writeStore(%s) =  %d entries\n", file.c_str(), store.size());
+	LOG.info("bdStore::writeStore(%s) =  %d entries\n", file.c_str(), mStore.size());
 #endif
 
-	if (store.size() < 0.9 * MAX_ENTRIES)
+	if (mStore.size() < 0.9 * MAX_ENTRIES)
 	{
 		/* don't save yet! */
 #ifdef DEBUG_STORE
@@ -200,7 +183,7 @@ void bdStore::writeStore(std::string file)
 	}
 
 	std::list<bdPeer>::iterator it;
-	for(it = store.begin(); it != store.end(); it++)
+	for(it = mStore.begin(); it != mStore.end(); it++)
 	{
 		fprintf(fd, "%s %d\n", inet_ntoa(it->mPeerId.addr.sin_addr), ntohs(it->mPeerId.addr.sin_port));
 #ifdef DEBUG_STORE
@@ -220,4 +203,9 @@ void bdStore::writeStore()
 	}
 #endif
 	return writeStore(mStoreFile);
+}
+
+const std::list<bdPeer>& bdStore::getStore() const
+{
+	return mStore;
 }
