@@ -213,6 +213,7 @@ protected:
 private:
 	uint32_t getRandomToken();
 	bool isUsedToken(uint32_t);
+	void punching(int times);
 
 private:
 	bdStore mStore;

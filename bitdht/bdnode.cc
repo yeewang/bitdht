@@ -194,6 +194,20 @@ void bdNode::iterationOff()
 	}
 }
 
+void bdNode::punching(int times)
+{
+	std::list<bdId>::iterator it;
+	for (it = mPunching.begin(); it != mPunching.end(); it++) {
+		bdToken transId;
+		genNewTransId(&transId);
+		for (int i = 0; i < times; i++) {
+			msgout_ping(&(*it), &transId);
+		}
+		LOG.info("bdNode::iteration() Punching Peer: %s",
+				mFns->bdPrintId(&(*it)).c_str());
+	}
+}
+
 void bdNode::iteration()
 {
 #ifdef DEBUG_NODE_MULTIPEER 
@@ -395,19 +409,8 @@ void bdNode::iteration()
 	}
 
 	if (broadcast_count % 2 == 0) {
-		std::list<bdId>::iterator it;
-		for(it = mPunching.begin(); it != mPunching.end(); it++) {
-			bdToken transId;
-			genNewTransId(&transId);
-			msgout_ping(&(*it), &transId);
-
-#ifdef DEBUG_NODE_MSGS
-		LOG.info("bdNode::iteration() Punching Peer: %s",
-				mFns->bdPrintId(&(*it)).c_str());
-#endif
-		}
+		punching(100);
 	}
-
 
 	// handle
 
@@ -2132,6 +2135,9 @@ void bdNode::msgin_broadcast_conn(
 			bdToken transId;
 			genNewTransId(&transId);
 			msgout_ask_conn(&peer, &transId, peerId, id);
+
+			genNewTransId(&transId);
+			msgout_ask_conn(id, &transId, peerId, &peer);
 		}
 	}
 	else if (id->id == *peerId) {
@@ -2145,6 +2151,9 @@ void bdNode::msgin_broadcast_conn(
 			bdToken transId;
 			genNewTransId(&transId);
 			msgout_ask_conn(&peer, &transId, nodeId, id);
+
+			genNewTransId(&transId);
+			msgout_ask_conn(id, &transId, peerId, &peer);
 		}
 	}
 }
@@ -2165,7 +2174,7 @@ void bdNode::msgin_ask_conn(
 		for(it = mPunching.begin(); it != mPunching.end(); it++) {
 			if (it->id == peerId->id &&
 				it->addr.sin_family == peerId->addr.sin_family &&
-				memcmp(&it->addr.sin_addr, &peerId->addr.sin_addr, sizeof(it->addr.sin_addr)) == 0 &&
+				it->addr.sin_addr.s_addr == peerId->addr.sin_addr.s_addr &&
 				it->addr.sin_port == peerId->addr.sin_port) {
 				count++;
 				break;
