@@ -314,7 +314,7 @@ void bdNode::iteration()
 			sentMsgs++;
 			sentPings++;
 
-#ifdef DEBUG_NODE_MSGS
+#if 0 // def DEBUG_NODE_MSGS
 			LOG.info("bdNode::iteration() Pinging Potential Peer : %s",
 					mFns->bdPrintId(&pid).c_str());
 #endif
@@ -1107,12 +1107,12 @@ void bdNode::msgout_ask_myip(const bdId *dhtId, bdToken *transId)
 
 void bdNode::msgout_reply_ask_myip(bdId *tunnelId, bdToken *transId)
 {
-	// #ifdef DEBUG_NODE_MSGOUT
+#ifdef DEBUG_NODE_MSGOUT
 	std::ostringstream ss;
 	bdPrintTransId(ss, transId);
 	LOG.info("bdNode::msgout_reply_ask_myip() TransId: %s To: %s",
 			ss.str().c_str(), mFns->bdPrintId(tunnelId).c_str());
-	// #endif
+#endif
 
 	/* create string */
 	char msg[10240];
@@ -2152,12 +2152,12 @@ void bdNode::msgin_broadcast_conn(
 void bdNode::msgin_ask_conn(
 		bdId *id, bdToken *tid, bdNodeId *nodeId, bdId *peerId)
 {
-//#ifdef DEBUG_NODE_ACTIONS
+#ifdef DEBUG_NODE_ACTIONS
 	LOG.info("bdNode::msgin_ask_conn() from: %s for: %s and %s",
 			mFns->bdPrintId(id).c_str(),
 			mFns->bdPrintNodeId(nodeId).c_str(),
 			mFns->bdPrintId(peerId).c_str());
-//#endif
+#endif
 	if (mOwnId == *nodeId) {
 		// found!!!
 		int count = 0;
@@ -2174,13 +2174,10 @@ void bdNode::msgin_ask_conn(
 		if (count == 0) {
 			mPunching.push_back(*peerId);
 		}
-
-		LOG.info("bdNode::ddddddddddddddddddddddddddddddddddddd()");
 		return;
 	}
 	else {
 		// msgout_reply_conn(id, tid, &peerId->id, true);
-		LOG.info("bdNode::eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee()");
 	}
 }
 

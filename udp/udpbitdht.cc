@@ -192,14 +192,22 @@ int UdpBitDht::recvPkt(void *data, int size, struct sockaddr_in &from)
 	/* pass onto bitdht */
 	bdStackMutex stack(dhtMtx); /********** MUTEX LOCKED *************/
 
+#ifdef DEBUG_UDP_BITDHT
 	LOG.info("UdpBitDht::recvPkt() ******************************* Address:%s:%d",
 			inet_ntoa(from.sin_addr), htons(from.sin_port));
+#endif
 
 	/* check packet suitability */
 	if (mBitDhtManager->isBitDhtPacket((char *) data, size, from))
 	{
 		mBitDhtManager->incomingMsg(&from, (char *) data, size);
 		return 1;
+	}
+	else {
+#ifdef DEBUG_UDP_BITDHT
+	LOG.info("UdpBitDht::recvPkt() NO-DHT ******************************* Address:%s:%d",
+			inet_ntoa(from.sin_addr), htons(from.sin_port));
+#endif
 	}
 
 	return 0;
