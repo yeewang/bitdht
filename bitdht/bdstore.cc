@@ -132,15 +132,12 @@ void bdStore::removeStore(bdPeer *peer)
 #endif
 
 	/* remove old entry */
-	bool removed = false;
-
 	std::list<bdPeer>::iterator it;
 	for(it = mStore.begin(); it != mStore.end(); )
 	{
 		if ((it->mPeerId.addr.sin_addr.s_addr == peer->mPeerId.addr.sin_addr.s_addr) &&
 				(it->mPeerId.addr.sin_port == peer->mPeerId.addr.sin_port))
 		{
-			removed = true;
 #ifdef DEBUG_STORE
 			LOG << log4cpp::Priority::INFO << "bdStore::addStore() Removed Existing Entry: ";
 			mFns->bdPrintId(LOG << log4cpp::Priority::INFO, &(it->mPeerId));

@@ -787,7 +787,7 @@ uint32_t bdNode::getRandomToken()
 {
 	uint32_t num = rand();
 	mRandomTokenArray.push_back(num);
-	if (mRandomTokenArray.size() > 100) {
+	if (mRandomTokenArray.size() > 1000) {
 		mRandomTokenArray.erase(mRandomTokenArray.begin());
 	}
 	return num;
